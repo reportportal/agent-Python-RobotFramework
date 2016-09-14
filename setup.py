@@ -11,4 +11,5 @@ setup(
     download_url='https://github.com/EPAMReportPortal/ReportPortal-RobotFramework-agent/tarball/2.5.0',
     keywords=['testing', 'reporting', 'robot framework', 'reportportal'],  # arbitrary keywords
     classifiers=[],
+    install_requires=["reportportal-client"]
 )
