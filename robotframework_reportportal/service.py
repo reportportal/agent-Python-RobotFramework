@@ -113,8 +113,12 @@ class RobotService(object):
                                  start_time=timestamp(),
                                  launch_id=RobotService.launch_id,
                                  type="STEP")
-        parent_item_id = RobotService.stack[-1][0]
-        if RobotService.stack[-1][1] == "SUITE":
+        try:
+            parent_item_id = RobotService.stack[-1][0]
+        except IndexError:
+            parent_item_id = None
+
+        if len(RobotService.stack) == 0 or RobotService.stack[-1][1] == "SUITE":
             if keyword.kwd_type == "Setup":
                 sta_rq.type = "BEFORE_SUITE"
             elif keyword.kwd_type == "Teardown":
