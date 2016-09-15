@@ -31,6 +31,6 @@ NOT REQUIRED:
 - --variable RP_LAUNCH_DOC:"some_documentation_for_launch"
 
 
-# Copyright Notice
+## Copyright Notice
 Licensed under the [GPLv3](https://www.gnu.org/licenses/quick-guide-gplv3.html)
 license (see the LICENSE.txt file).
