@@ -22,13 +22,13 @@ For reporting results to ReportPortal you need to pass some variables to pybot r
 
 REQUIRED:
 - --listener robotframework_reportportal.listener
-- --variable RP_UUID:<uuid>
-- --variable RP_ENDPOINT:<reportportal_url>
-- --variable RP_LAUNCH:<launch name>
-- --variable RP_PROJECT:<reportportal_project_name>
+- --variable RP_UUID:"your_user_uuid"
+- --variable RP_ENDPOINT:"your_reportportal_url"
+- --variable RP_LAUNCH:"launch_name"
+- --variable RP_PROJECT:"reportportal_project_name"
 
 NOT REQUIRED:
-- --variable RP_LAUNCH_DOC:<some_documentation_for_launch>
+- --variable RP_LAUNCH_DOC:"some_documentation_for_launch"
 
 
 # Copyright Notice
