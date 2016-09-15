@@ -7,9 +7,9 @@ setup(
     description='Listener for RobotFramework reporting to ReportPortal',
     author='Artsiom Tkachou',
     author_email='artsiom_tkachou@epam.com',
-    url='https://github.com/EPAMReportPortal/ReportPortal-RobotFramework-agent',    #ADD URL
-    download_url='https://github.com/EPAMReportPortal/ReportPortal-RobotFramework-agent/tarball/2.5.0',
-    keywords=['testing', 'reporting', 'robot framework', 'reportportal'],  # arbitrary keywords
+    url='https://github.com/reportportal/agent-Python-RobotFramework',
+    download_url='https://github.com/reportportal/agent-Python-RobotFramework/tarball/2.5.0',
+    keywords=['testing', 'reporting', 'robot framework', 'reportportal'],
     classifiers=[],
     install_requires=["reportportal-client"]
 )
