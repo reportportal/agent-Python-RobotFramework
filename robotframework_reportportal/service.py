@@ -46,6 +46,7 @@ class RobotService(object):
                               tags=None)
         r = RobotService.rp.start_launch(sl_rq)
         RobotService.launch_id = r.id
+        RobotService.stack.append((None, "SUITE"))
 
     @staticmethod
     def finish_launch(launch=None):
@@ -54,6 +55,7 @@ class RobotService(object):
             status=RobotService.status_mapping[launch.status])
         launch_id = RobotService.launch_id
         RobotService.rp.finish_launch(launch_id, fl_rq)
+        RobotService.stack.pop()
 
     @staticmethod
     def start_suite(name=None, suite=None):
@@ -62,10 +64,7 @@ class RobotService(object):
                                  start_time=timestamp(),
                                  launch_id=RobotService.launch_id,
                                  type="SUITE")
-        if len(suite.robot_id) == 5:
-            parent_item_id = None
-        else:
-            parent_item_id = RobotService.stack[-1][0]
+        parent_item_id = RobotService._get_top_id_from_stack()
         r = RobotService.rp.start_test_item(
             parent_item_id=parent_item_id, start_test_item_rq=sta_rq)
         RobotService.stack.append((r.id, "SUITE"))
@@ -76,7 +75,7 @@ class RobotService(object):
                                   status=RobotService.status_mapping[
                                       suite.status],
                                   issue=issue)
-        suite_id = RobotService.stack[-1][0]
+        suite_id = RobotService._get_top_id_from_stack()
         RobotService.rp.finish_test_item(
             item_id=suite_id,
             finish_test_item_rq=fta_rq)
@@ -89,7 +88,7 @@ class RobotService(object):
                                  start_time=timestamp(),
                                  launch_id=RobotService.launch_id,
                                  type="TEST")
-        parent_suite_id = RobotService.stack[-1][0]
+        parent_suite_id = RobotService._get_top_id_from_stack()
         r = RobotService.rp.start_test_item(
             parent_item_id=parent_suite_id, start_test_item_rq=sta_rq)
         RobotService.stack.append((r.id, "TEST"))
@@ -100,7 +99,7 @@ class RobotService(object):
                                   status=RobotService.status_mapping[
                                       test.status],
                                   issue=issue)
-        test_id = RobotService.stack[-1][0]
+        test_id = RobotService._get_top_id_from_stack()
         RobotService.rp.finish_test_item(
             item_id=test_id,
             finish_test_item_rq=fta_rq)
@@ -113,21 +112,8 @@ class RobotService(object):
                                  start_time=timestamp(),
                                  launch_id=RobotService.launch_id,
                                  type="STEP")
-        try:
-            parent_item_id = RobotService.stack[-1][0]
-        except IndexError:
-            parent_item_id = None
-
-        if len(RobotService.stack) == 0 or RobotService.stack[-1][1] == "SUITE":
-            if keyword.kwd_type == "Setup":
-                sta_rq.type = "BEFORE_SUITE"
-            elif keyword.kwd_type == "Teardown":
-                sta_rq.type = "AFTER_SUITE"
-        elif RobotService.stack[-1][1] == "TEST":
-            if keyword.kwd_type == "Setup":
-                sta_rq.type = "BEFORE_TEST"
-            elif keyword.kwd_type == "Teardown":
-                sta_rq.type = "AFTER_TEST"
+        parent_item_id = RobotService._get_top_id_from_stack()
+        RobotService._modify_request(keyword, sta_rq)
         r = RobotService.rp.start_test_item(
             parent_item_id=parent_item_id,
             start_test_item_rq=sta_rq)
@@ -139,24 +125,52 @@ class RobotService(object):
                                   status=RobotService.status_mapping[
                                       keyword.status],
                                   issue=issue)
+        RobotService._send_logs()
+        RobotService.rp.finish_test_item(
+            item_id=RobotService._get_top_id_from_stack(),
+            finish_test_item_rq=fta_rq)
+        RobotService.stack.pop()
 
+    @staticmethod
+    def log(message):
+        sl_rq = SaveLogRQ(item_id=RobotService._get_top_id_from_stack(),
+                          time=timestamp(), message=message.message,
+                          level=RobotService.log_level_mapping[message.level])
+        RobotService.logs.append(sl_rq)
+
+    @staticmethod
+    def _get_top_id_from_stack():
+        try:
+            return RobotService.stack[-1][0]
+        except IndexError:
+            return None
+
+    @staticmethod
+    def _get_top_item_type_from_stack():
+        try:
+            return RobotService.stack[-1][1]
+        except IndexError:
+            return "SUITE"
+
+    @staticmethod
+    def _modify_request(keyword, sta_rq):
+        parent_type = RobotService._get_top_item_type_from_stack()
+        if keyword.kwd_type == "Setup":
+            sta_rq.type = "BEFORE_{0}".format(parent_type)
+        elif keyword.kwd_type == "Teardown":
+            sta_rq.type = "AFTER_{0}".format(parent_type)
+        else:
+            sta_rq.type = "STEP"
+
+    @staticmethod
+    def _send_logs():
         def post_log(sl_rq):
             try:
                 RobotService.rp.log(sl_rq)
             except Exception:
                 pass
 
-        map(post_log, [sl_rq for sl_rq in RobotService.logs if
-                       sl_rq.item_id == RobotService.stack[-1][0]])
+        current_item_id = RobotService._get_top_id_from_stack()
+        map(post_log, filter(lambda x: x.item_id == current_item_id,
+                             RobotService.logs))
         RobotService.logs = []
-        RobotService.rp.finish_test_item(
-            item_id=RobotService.stack[-1][0],
-            finish_test_item_rq=fta_rq)
-        RobotService.stack.pop()
-
-    @staticmethod
-    def log(message):
-        sl_rq = SaveLogRQ(item_id=RobotService.stack[-1][0],
-                          time=timestamp(), message=message.message,
-                          level=RobotService.log_level_mapping[message.level])
-        RobotService.logs.append(sl_rq)

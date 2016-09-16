@@ -2,4 +2,4 @@
 .DS_Store
 dist
 MANIFEST
-reportportal_client.egg-info
+robotframework_reportportal.egg-info
