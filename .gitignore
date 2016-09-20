@@ -3,3 +3,4 @@
 dist
 MANIFEST
 robotframework_reportportal.egg-info
+*.pyc
