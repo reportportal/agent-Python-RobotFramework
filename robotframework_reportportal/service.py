@@ -159,6 +159,7 @@ class RobotService(object):
         r = RobotService.rp.start_test_item(
             parent_item_id=parent_item_id,
             start_test_item_rq=sta_rq)
+        logging.debug("ReportPortal - Response object: {0}".format(r.raw))
         RobotService.stack.append((r.id, "KEYWORD"))
         logging.debug(
             msg="ReportPortal - Stack: {0}".format(RobotService.stack))
@@ -174,9 +175,10 @@ class RobotService(object):
         logging.debug(msg="ReportPortal - Finish keyword: "
                          "request_body={0}, kwd_id={1}".format(fta_rq.data,
                                                                kwd_id))
-        RobotService.rp.finish_test_item(
+        r = RobotService.rp.finish_test_item(
             item_id=kwd_id,
             finish_test_item_rq=fta_rq)
+        logging.debug("ReportPortal - Response object: {0}".format(r.raw))
         RobotService.stack.pop()
         logging.debug(
             msg="ReportPortal - Stack: {0}".format(RobotService.stack))
