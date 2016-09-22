@@ -29,7 +29,10 @@ REQUIRED:
 
 NOT REQUIRED:
 - --variable RP_LAUNCH_DOC:"some_documentation_for_launch"
-
+- --variable RP_REPORT_LEVEL:"level_test_or_keyword"
+    - Default is "keyword", but if you want to report only tests you can use "test" value
+- --variable RP_REPORT_LOGS:"yes_or_no"
+    - Default is "yes", but if you don't want to report logs you can use "no" value
 
 ## Copyright Notice
 Licensed under the [GPLv3](https://www.gnu.org/licenses/quick-guide-gplv3.html)
