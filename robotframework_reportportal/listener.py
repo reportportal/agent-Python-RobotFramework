@@ -46,21 +46,24 @@ def end_test(name, attributes):
 
 
 def start_keyword(name, attributes):
-    kwd = Keyword(attributes=attributes)
-    logging.debug("ReportPortal - Start Keyword: {0}".format(attributes))
-    RobotService.start_keyword(keyword=kwd)
+    if Variables.report_level == "keyword":
+        kwd = Keyword(attributes=attributes)
+        logging.debug("ReportPortal - Start Keyword: {0}".format(attributes))
+        RobotService.start_keyword(keyword=kwd)
 
 
 def end_keyword(name, attributes):
-    kwd = Keyword(attributes=attributes)
-    logging.debug("ReportPortal - End Keyword: {0}".format(attributes))
-    RobotService.finish_keyword(keyword=kwd)
+    if Variables.report_level == "keyword":
+        kwd = Keyword(attributes=attributes)
+        logging.debug("ReportPortal - End Keyword: {0}".format(attributes))
+        RobotService.finish_keyword(keyword=kwd)
 
 
 def log_message(message):
-    msg = LogMessage(message)
-    logging.debug("ReportPortal - Log Message: {0}".format(message))
-    RobotService.log(message=msg)
+    if Variables.report_logs == "yes":
+        msg = LogMessage(message)
+        logging.debug("ReportPortal - Log Message: {0}".format(message))
+        RobotService.log(message=msg)
 
 
 def message(message):

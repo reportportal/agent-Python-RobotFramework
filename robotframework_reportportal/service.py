@@ -1,10 +1,10 @@
+import logging
 from time import time
 from reportportal_client import (ReportPortalService, FinishExecutionRQ,
                                  StartLaunchRQ, StartTestItemRQ,
                                  FinishTestItemRQ, SaveLogRQ)
+from .variables import Variables
 
-from robot.api import logger
-import logging
 
 def timestamp():
     return str(int(time() * 1000))
@@ -52,10 +52,10 @@ class RobotService(object):
                               mode=mode,
                               tags=None)
         logging.debug(msg="ReportPortal - Start launch: "
-                         "request_body={0}".format(sl_rq.data))
+                          "request_body={0}".format(sl_rq.data))
         r = RobotService.rp.start_launch(sl_rq)
         logging.debug(msg="ReportPortal - Launch started: "
-                         "response_body={0}".format(r.raw))
+                          "response_body={0}".format(r.raw))
         RobotService.launch_id = r.id
         RobotService.stack.append((None, "SUITE"))
         logging.debug(
@@ -68,8 +68,8 @@ class RobotService(object):
             status=RobotService.status_mapping[launch.status])
         launch_id = RobotService.launch_id
         logging.debug(msg="ReportPortal - Finish launch: "
-                         "request_body={0}, launch_id={1}".format(fl_rq.data,
-                                                                  launch_id))
+                          "request_body={0}, launch_id={1}".format(fl_rq.data,
+                                                                   launch_id))
         RobotService.rp.finish_launch(launch_id, fl_rq)
         RobotService.stack.pop()
         logging.debug(
@@ -84,7 +84,7 @@ class RobotService(object):
                                  type="SUITE")
         parent_item_id = RobotService._get_top_id_from_stack()
         logging.debug(msg="ReportPortal - Start suite: "
-                         "request_body={0}, parent_item={1}".format(
+                          "request_body={0}, parent_item={1}".format(
             sta_rq.data,
             parent_item_id))
         r = RobotService.rp.start_test_item(
@@ -101,8 +101,8 @@ class RobotService(object):
                                   issue=issue)
         suite_id = RobotService._get_top_id_from_stack()
         logging.debug(msg="ReportPortal - Finish suite: "
-                         "request_body={0}, suite_id={1}".format(fta_rq.data,
-                                                                 suite_id))
+                          "request_body={0}, suite_id={1}".format(fta_rq.data,
+                                                                  suite_id))
         RobotService.rp.finish_test_item(
             item_id=suite_id,
             finish_test_item_rq=fta_rq)
@@ -119,7 +119,7 @@ class RobotService(object):
                                  type="TEST")
         parent_item_id = RobotService._get_top_id_from_stack()
         logging.debug(msg="ReportPortal - Start test: "
-                         "request_body={0}, parent_item={1}".format(
+                          "request_body={0}, parent_item={1}".format(
             sta_rq.data, parent_item_id))
         r = RobotService.rp.start_test_item(
             parent_item_id=parent_item_id, start_test_item_rq=sta_rq)
@@ -133,10 +133,12 @@ class RobotService(object):
                                   status=RobotService.status_mapping[
                                       test.status],
                                   issue=issue)
+        if Variables.report_level == "test":
+            RobotService._send_logs()
         test_id = RobotService._get_top_id_from_stack()
         logging.debug(msg="ReportPortal - Finish test: "
-                         "request_body={0}, test_id={1}".format(fta_rq.data,
-                                                                test_id))
+                          "request_body={0}, test_id={1}".format(fta_rq.data,
+                                                                 test_id))
         RobotService.rp.finish_test_item(
             item_id=test_id,
             finish_test_item_rq=fta_rq)
@@ -154,7 +156,7 @@ class RobotService(object):
         parent_item_id = RobotService._get_top_id_from_stack()
         RobotService._modify_request(keyword, sta_rq)
         logging.debug(msg="ReportPortal - Start keyword: "
-                         "request_body={0}, parent_item={1}".format(
+                          "request_body={0}, parent_item={1}".format(
             sta_rq.data, parent_item_id))
         r = RobotService.rp.start_test_item(
             parent_item_id=parent_item_id,
@@ -173,8 +175,8 @@ class RobotService(object):
         RobotService._send_logs()
         kwd_id = RobotService._get_top_id_from_stack()
         logging.debug(msg="ReportPortal - Finish keyword: "
-                         "request_body={0}, kwd_id={1}".format(fta_rq.data,
-                                                               kwd_id))
+                          "request_body={0}, kwd_id={1}".format(fta_rq.data,
+                                                                kwd_id))
         r = RobotService.rp.finish_test_item(
             item_id=kwd_id,
             finish_test_item_rq=fta_rq)
@@ -219,7 +221,7 @@ class RobotService(object):
         def post_log(sl_rq):
             try:
                 logging.debug(msg="ReportPortal - Post log: "
-                                 "request_body={0}".format(sl_rq.data))
+                                  "request_body={0}".format(sl_rq.data))
                 RobotService.rp.log(sl_rq)
             except Exception:
                 pass
