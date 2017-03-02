@@ -15,6 +15,7 @@ class Variables(object):
     launch_doc = None
     report_level = None
     report_logs = None
+    launch_tags = None
 
     REPORT_LEVELS = ["test", "keyword"]
 
@@ -46,3 +47,4 @@ class Variables(object):
         if Variables.report_level not in Variables.REPORT_LEVELS:
             Variables.report_level = "keyword"
         Variables.report_logs = get_variable("RP_REPORT_LOGS", default="yes")
+        Variables.launch_tags = get_variable("RP_LAUNCH_TAGS", default='').split(':')
