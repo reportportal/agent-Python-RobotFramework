@@ -46,11 +46,12 @@ class RobotService(object):
 
     @staticmethod
     def start_launch(launch_name=None, mode=None, launch=None):
+        tags = Variables.launch_tags
         sl_rq = StartLaunchRQ(name=launch_name,
                               start_time=timestamp(),
                               description=launch.doc,
                               mode=mode,
-                              tags=None)
+                              tags=tags)
         logging.debug(msg="ReportPortal - Start launch: "
                           "request_body={0}".format(sl_rq.data))
         r = RobotService.rp.start_launch(sl_rq)
