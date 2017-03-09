@@ -10,4 +10,4 @@ python:
 install:
   - pip install robotframework
 script:
-  - setup.py
+  - python setup.py
