@@ -9,5 +9,6 @@ python:
   - "3.6"
 install:
   - pip install robotframework
+  - python setup-py -q install
 script:
-  - python setup.py
+  - pytest
