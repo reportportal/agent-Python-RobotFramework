@@ -7,8 +7,5 @@ python:
   - "3.4"
   - "3.5"
   - "3.6"
-install:
-  - pip install robotframework
+script
   - python setup.py -q install
-script:
-  - pytest
