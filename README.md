@@ -1,5 +1,6 @@
 #ReportPortal RobotFramework agent 
 
+[![Build Status](https://travis-ci.org/reportportal/agent-Python-RobotFramework.svg?branch=master)](https://travis-ci.org/reportportal/agent-Python-RobotFramework)
 [![PyPI](https://img.shields.io/pypi/v/robotframework-reportportal.svg?maxAge=2592000)](https://pypi.python.org/pypi/robotframework-reportportal)
 
 Listener for RobotFramework to report results to ReportPortal
