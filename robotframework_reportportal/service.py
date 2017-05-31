@@ -16,7 +16,6 @@ def timestamp():
 
 class RobotService(object):
     rp = None
-    launch_id = None
 
     status_mapping = {
         "PASS": "PASSED",
@@ -31,22 +30,19 @@ class RobotService(object):
         "DEBUG": "DEBUG"
     }
 
-    stack = []
-    logs = []
-
     @staticmethod
     def init_service(endpoint, project, uuid, log_batch_size):
         if RobotService.rp is None:
             logging.debug(
-                msg="ReportPortal - Init service: "
-                    "endpoint={0}, project={1}, uuid={2}".format(endpoint,
-                                                                 project,
-                                                                 uuid))
-            RobotService.rp = ReportPortalServiceAsync(endpoint=endpoint,
-                                                       project=project,
-                                                       token=uuid,
-                                                       error_handler=async_error_handler,
-                                                       log_batch_size=log_batch_size)
+                "ReportPortal - Init service: "
+                "endpoint=%s, project=%s, uuid=%s",
+                endpoint, project, uuid)
+            RobotService.rp = ReportPortalServiceAsync(
+                endpoint=endpoint,
+                project=project,
+                token=uuid,
+                error_handler=async_error_handler,
+                log_batch_size=log_batch_size)
         else:
             raise Exception("RobotFrameworkService is already initialized")
 
@@ -66,9 +62,7 @@ class RobotService(object):
         }
         logging.debug("ReportPortal - Start launch: "
                       "request_body=%s", sl_pt)
-        req_data = RobotService.rp.start_launch(**sl_pt)
-        logging.debug("ReportPortal - Launch started: "
-                      "response_body=%s", req_data)
+        RobotService.rp.start_launch(**sl_pt)
 
     @staticmethod
     def finish_launch(launch=None):
@@ -85,7 +79,7 @@ class RobotService(object):
         start_rq = {
             "name": name,
             "description": suite.doc,
-            "tags": None,
+            "tags": [],
             "start_time": timestamp(),
             "item_type": "SUITE"
         }
@@ -127,8 +121,6 @@ class RobotService(object):
             "status": RobotService.status_mapping[test.status],
             "issue": issue
         }
-#        if Variables.report_level == "test":
-#            RobotService._send_logs()
         logging.debug(
             "ReportPortal - Finish test:"
             " request_body=%s", fta_rq)
@@ -137,13 +129,12 @@ class RobotService(object):
     @staticmethod
     def start_keyword(keyword=None):
         start_rq = {
-            "name": keyword.get_kwd(),
+            "name": keyword.get_name(),
             "description": keyword.doc,
             "tags": keyword.tags,
             "start_time": timestamp(),
-            "item_type": "STEP"
+            "item_type": keyword.get_type()
         }
-#        RobotService._modify_request(keyword, start_rq)
         logging.debug(
             "ReportPortal - Start keyword: "
             "request_body=%s", start_rq)
@@ -156,8 +147,6 @@ class RobotService(object):
             "status": RobotService.status_mapping[keyword.status],
             "issue": issue
         }
-#        if Variables.report_level == "keyword":
-#            RobotService._send_logs()
         logging.debug(
             "ReportPortal - Finish keyword:"
             " request_body=%s", fta_rq)
@@ -172,35 +161,3 @@ class RobotService(object):
             "attachment": attachment,
         }
         RobotService.rp.log(**sl_rq)
-
-#    @staticmethod
-#    def _get_top_item_type_from_stack():
-#        try:
-#            return RobotService.stack[-1][1]
-#        except IndexError:
-#            return "SUITE"
-#
-#    @staticmethod
-#    def _modify_request(keyword, start_rq):
-#        parent_type = RobotService._get_top_item_type_from_stack()
-#        if keyword.kwd_type == "Setup":
-#            sta_rq.type = "BEFORE_{0}".format(parent_type)
-#        elif keyword.kwd_type == "Teardown":
-#            sta_rq.type = "AFTER_{0}".format(parent_type)
-#        else:
-#            sta_rq.type = "STEP"
-
-#    @staticmethod
-#    def _send_logs():
-#        def post_log(sl_rq):
-#            try:
-#                logging.debug(msg="ReportPortal - Post log: "
-#                                  "request_body={0}".format(sl_rq.data))
-#                RobotService.rp.log(sl_rq)
-#            except Exception:
-#                pass
-#
-#        current_item_id = RobotService._get_top_id_from_stack()
-#        map(post_log, filter(lambda x: x.item_id == current_item_id,
-#                             RobotService.logs))
-#        RobotService.logs = []
