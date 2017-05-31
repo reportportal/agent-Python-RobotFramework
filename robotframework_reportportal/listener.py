@@ -12,15 +12,14 @@ def start_suite(name, attributes):
     if attributes["id"] == "s1":
         Variables.check_variables()
         RobotService.init_service(Variables.endpoint, Variables.project,
-                                  Variables.uuid)
+                                  Variables.uuid, Variables.log_batch_size)
         suite.doc = Variables.launch_doc
         logging.debug("ReportPortal - Start Launch: {0}".format(attributes))
         RobotService.start_launch(launch_name=Variables.launch_name,
                                   launch=suite)
     else:
         logging.debug("ReportPortal - Start Suite: {0}".format(attributes))
-        RobotService.start_suite(
-            name=name, suite=suite)
+        RobotService.start_suite(name=name, suite=suite)
 
 
 def end_suite(name, attributes):
@@ -28,6 +27,7 @@ def end_suite(name, attributes):
     if attributes["id"] == "s1":
         logging.debug(msg="ReportPortal - End Launch: {0}".format(attributes))
         RobotService.finish_launch(launch=suite)
+        RobotService.terminate_service()
     else:
         logging.debug("ReportPortal - End Suite: {0}".format(attributes))
         RobotService.finish_suite(suite=suite)

@@ -36,6 +36,8 @@ NOT REQUIRED:
     - Default is "keyword", but if you want to report only tests you can use "test" value
 --variable RP_REPORT_LOGS:"yes_or_no"
     - Default is "yes", but if you don't want to report logs you can use "no" value
+--variable RP_LOG_BATCH_SIZE:"10"
+    - Default value is "20", affects size of batch log request
 ```
 
 ## Copyright Notice
