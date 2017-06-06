@@ -68,8 +68,9 @@ class Keyword(object):
             return "STEP"
 
 
-class LogMessage(object):
-    def __init__(self, message):
-        super(LogMessage, self).__init__()
-        self.message = message["message"]
-        self.level = message["level"]
+class LogMessage(unicode):
+    def __init__(self, *args, **kwargs):
+        super(LogMessage, self).__init__(*args, **kwargs)
+        self.message = self
+        self.level = "INFO"
+        self.attachment = None

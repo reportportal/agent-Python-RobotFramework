@@ -39,6 +39,29 @@ NOT REQUIRED:
     - Default value is "20", affects size of async batch log requests
 ```
 
+Custom logger which supports attachments can be used in Python keywords.
+Usage of this logger is similar to the standard robot.api.logger with addition
+of an extra kwarg "attachment":
+
+.. code-block:: python
+
+    import subprocess
+    from robotframework_reportportal import logger
+
+    def log_free_memory():
+        logger.debug("Collecting free memory statistics!")
+
+        free_memory = subprocess.check_output("free -h".split())
+        logger.debug(
+            "Memory consumption report",
+            attachment={
+                "name": "free_memory.txt",
+                "data": free_memory,
+                "mime": "application/octet-stream",
+            },
+        )
+
+
 ## Copyright Notice
 Licensed under the [GPLv3](https://www.gnu.org/licenses/quick-guide-gplv3.html)
 license (see the LICENSE.txt file).

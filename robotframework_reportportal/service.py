@@ -153,11 +153,11 @@ class RobotService(object):
         RobotService.rp.finish_test_item(**fta_rq)
 
     @staticmethod
-    def log(message, attachment=None):
+    def log(message):
         sl_rq = {
             "time": timestamp(),
             "message": message.message,
             "level": RobotService.log_level_mapping[message.level],
-            "attachment": attachment,
+            "attachment": message.attachment,
         }
         RobotService.rp.log(**sl_rq)

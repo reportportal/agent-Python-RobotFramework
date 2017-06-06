@@ -84,7 +84,13 @@ def end_keyword(name, attributes):
 
 
 def log_message(message):
-    msg = LogMessage(message)
+    # Check if message comes from our custom logger or not
+    if isinstance(message["message"], LogMessage):
+        msg = message["message"]
+    else:
+        msg = LogMessage(message["message"])
+        msg.level = message["level"]
+
     logging.debug("ReportPortal - Log Message: {0}".format(message))
     RobotService.log(message=msg)
 
