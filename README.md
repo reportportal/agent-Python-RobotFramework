@@ -47,18 +47,18 @@ of an extra kwarg "attachment":
     import subprocess
     from robotframework_reportportal import logger
 
-    def log_free_memory():
-        logger.debug("Collecting free memory statistics!")
+    class MyLibrary(object):
 
-        free_memory = subprocess.check_output("free -h".split())
-        logger.debug(
-            "Memory consumption report",
-            attachment={
-                "name": "free_memory.txt",
-                "data": free_memory,
-                "mime": "application/octet-stream",
-            },
-        )
+        def log_free_memory(self):
+            logger.debug("Collecting free memory statistics!")
+            logger.debug(
+                "Memory consumption report",
+                attachment={
+                    "name": "free_memory.txt",
+                    "data": subprocess.check_output("free -h".split()),
+                    "mime": "application/octet-stream",
+                },
+            )
 ```
 
 
