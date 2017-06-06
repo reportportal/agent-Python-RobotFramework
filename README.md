@@ -44,21 +44,21 @@ Usage of this logger is similar to the standard robot.api.logger with addition
 of an extra kwarg "attachment":
 
 ```python
-    import subprocess
-    from robotframework_reportportal import logger
+import subprocess
+from robotframework_reportportal import logger
 
-    class MyLibrary(object):
+class MyLibrary(object):
 
-        def log_free_memory(self):
-            logger.debug("Collecting free memory statistics!")
-            logger.debug(
-                "Memory consumption report",
-                attachment={
-                    "name": "free_memory.txt",
-                    "data": subprocess.check_output("free -h".split()),
-                    "mime": "application/octet-stream",
-                },
-            )
+    def log_free_memory(self):
+        logger.debug("Collecting free memory statistics!")
+        logger.debug(
+            "Memory consumption report",
+            attachment={
+                "name": "free_memory.txt",
+                "data": subprocess.check_output("free -h".split()),
+                "mime": "application/octet-stream",
+            },
+        )
 ```
 
 
