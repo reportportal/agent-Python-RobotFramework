@@ -43,8 +43,7 @@ Custom logger which supports attachments can be used in Python keywords.
 Usage of this logger is similar to the standard robot.api.logger with addition
 of an extra kwarg "attachment":
 
-.. code-block:: python
-
+```python
     import subprocess
     from robotframework_reportportal import logger
 
@@ -60,6 +59,7 @@ of an extra kwarg "attachment":
                 "mime": "application/octet-stream",
             },
         )
+```
 
 
 ## Copyright Notice
