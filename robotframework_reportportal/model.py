@@ -54,10 +54,10 @@ class Keyword(object):
             self.status = attributes["status"]
 
     def get_name(self):
-        return "{0}{1} ({2})".format(
-            "{0} = ".format(", ".join(self.assign)) if self.assign else "",
-            self.name,
-            ", ".join(self.args))
+        assignment = "{0} = ".format(", ".join(self.assign)) if self.assign else ""
+        arguments = ", ".join(self.args)
+        full_name = "{0}{1} ({2})".format(assignment, self.name, arguments)
+        return full_name
 
     def get_type(self):
         if self.keyword_type == "Setup":

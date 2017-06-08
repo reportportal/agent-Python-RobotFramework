@@ -35,8 +35,8 @@ class RobotService(object):
         if RobotService.rp is None:
             logging.debug(
                 "ReportPortal - Init service: "
-                "endpoint=%s, project=%s, uuid=%s",
-                endpoint, project, uuid)
+                "endpoint={0}, project={1}, uuid={2}"
+                .format(endpoint, project, uuid))
             RobotService.rp = ReportPortalServiceAsync(
                 endpoint=endpoint,
                 project=project,
@@ -61,7 +61,7 @@ class RobotService(object):
             "tags": Variables.launch_tags
         }
         logging.debug("ReportPortal - Start launch: "
-                      "request_body=%s", sl_pt)
+                      "request_body={0}".format(sl_pt))
         RobotService.rp.start_launch(**sl_pt)
 
     @staticmethod
@@ -71,7 +71,7 @@ class RobotService(object):
             "status": RobotService.status_mapping[launch.status]
         }
         logging.debug("ReportPortal - Finish launch: "
-                      "request_body=%s", fl_rq)
+                      "request_body={0}".format(fl_rq))
         RobotService.rp.finish_launch(**fl_rq)
 
     @staticmethod
@@ -85,7 +85,7 @@ class RobotService(object):
         }
         logging.debug(
             "ReportPortal - Start suite: "
-            "request_body=%s", start_rq)
+            "request_body={0}".format(start_rq))
         RobotService.rp.start_test_item(**start_rq)
 
     @staticmethod
@@ -97,7 +97,7 @@ class RobotService(object):
         }
         logging.debug(
             "ReportPortal - Finish suite:"
-            " request_body=%s", fta_rq)
+            " request_body={0}".format(fta_rq))
         RobotService.rp.finish_test_item(**fta_rq)
 
     @staticmethod
@@ -111,7 +111,7 @@ class RobotService(object):
         }
         logging.debug(
             "ReportPortal - Start test: "
-            "request_body=%s", start_rq)
+            "request_body={0}".format(start_rq))
         RobotService.rp.start_test_item(**start_rq)
 
     @staticmethod
@@ -123,7 +123,7 @@ class RobotService(object):
         }
         logging.debug(
             "ReportPortal - Finish test:"
-            " request_body=%s", fta_rq)
+            " request_body={0}".format(fta_rq))
         RobotService.rp.finish_test_item(**fta_rq)
 
     @staticmethod
@@ -137,7 +137,7 @@ class RobotService(object):
         }
         logging.debug(
             "ReportPortal - Start keyword: "
-            "request_body=%s", start_rq)
+            "request_body={0}".format(start_rq))
         RobotService.rp.start_test_item(**start_rq)
 
     @staticmethod
@@ -149,7 +149,7 @@ class RobotService(object):
         }
         logging.debug(
             "ReportPortal - Finish keyword:"
-            " request_body=%s", fta_rq)
+            " request_body={0}".format(fta_rq))
         RobotService.rp.finish_test_item(**fta_rq)
 
     @staticmethod
