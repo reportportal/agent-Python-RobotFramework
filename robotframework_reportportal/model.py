@@ -1,6 +1,3 @@
-from .utils import get_list_as_str
-
-
 class Suite(object):
     def __init__(self, attributes):
         super(Suite, self).__init__()
@@ -42,33 +39,38 @@ class Test(object):
 
 
 class Keyword(object):
-    def __init__(self, attributes=None):
+    def __init__(self, name=None, parent_type="SUITE", attributes=None):
         super(Keyword, self).__init__()
+        self.name = name
         self.libname = attributes["libname"]
         self.keyword_name = attributes["kwname"]
         self.doc = attributes["doc"]
         self.tags = attributes["tags"]
         self.args = attributes["args"]
         self.assign = attributes["assign"]
-        self.kwd_type = attributes["type"]
+        self.keyword_type = attributes["type"]
+        self.parent_type = parent_type
         if "status" in attributes.keys():
             self.status = attributes["status"]
 
-    def get_kwd(self):
-        if self.assign:
-            return "{0}{1}.{2}{3}".format(
-                "{0} = ".format(get_list_as_str(self.assign)),
-                self.libname, self.keyword_name,
-                "({0})".format(
-                    get_list_as_str(self.args)))
+    def get_name(self):
+        assignment = "{0} = ".format(", ".join(self.assign)) if self.assign else ""
+        arguments = ", ".join(self.args)
+        full_name = "{0}{1} ({2})".format(assignment, self.name, arguments)
+        return full_name
+
+    def get_type(self):
+        if self.keyword_type == "Setup":
+            return "BEFORE_{0}".format(self.parent_type)
+        elif self.keyword_type == "Teardown":
+            return "AFTER_{0}".format(self.parent_type)
         else:
-            return "{0}.{1}{2}".format(self.libname, self.keyword_name,
-                                       "({0})".format(
-                                           get_list_as_str(self.args)))
+            return "STEP"
 
 
-class LogMessage(object):
-    def __init__(self, message):
-        super(LogMessage, self).__init__()
-        self.message = message["message"]
-        self.level = message["level"]
+class LogMessage(unicode):
+    def __init__(self, *args, **kwargs):
+        super(LogMessage, self).__init__(*args, **kwargs)
+        self.message = self
+        self.level = "INFO"
+        self.attachment = None

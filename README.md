@@ -1,4 +1,4 @@
-# ReportPortal RobotFramework agent 
+# ReportPortal RobotFramework agent
 
 [![Build Status](https://travis-ci.org/reportportal/agent-Python-RobotFramework.svg?branch=master)](https://travis-ci.org/reportportal/agent-Python-RobotFramework)
 [![PyPI](https://img.shields.io/pypi/v/robotframework-reportportal.svg?maxAge=2592000)](https://pypi.python.org/pypi/robotframework-reportportal)
@@ -32,11 +32,35 @@ REQUIRED:
 NOT REQUIRED:
 ```
 --variable RP_LAUNCH_DOC:"some_documentation_for_launch"
---variable RP_REPORT_LEVEL:"level_test_or_keyword"
-    - Default is "keyword", but if you want to report only tests you can use "test" value
---variable RP_REPORT_LOGS:"yes_or_no"
-    - Default is "yes", but if you don't want to report logs you can use "no" value
+    - Description for the launch
+--variable RP_LAUNCH_TAGS:"RF Smoke"
+    - Space-separated list of tags for the launch
+--variable RP_LOG_BATCH_SIZE:"10"
+    - Default value is "20", affects size of async batch log requests
 ```
+
+Custom logger which supports attachments can be used in Python keywords.
+Usage of this logger is similar to the standard robot.api.logger with addition
+of an extra kwarg "attachment":
+
+```python
+import subprocess
+from robotframework_reportportal import logger
+
+class MyLibrary(object):
+
+    def log_free_memory(self):
+        logger.debug("Collecting free memory statistics!")
+        logger.debug(
+            "Memory consumption report",
+            attachment={
+                "name": "free_memory.txt",
+                "data": subprocess.check_output("free -h".split()),
+                "mime": "application/octet-stream",
+            },
+        )
+```
+
 
 ## Copyright Notice
 Licensed under the [GPLv3](https://www.gnu.org/licenses/quick-guide-gplv3.html)
