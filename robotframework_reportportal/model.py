@@ -57,7 +57,7 @@ class Keyword(object):
         assignment = "{0} = ".format(", ".join(self.assign)) if self.assign else ""
         arguments = ", ".join(self.args)
         full_name = "{0}{1} ({2})".format(assignment, self.name, arguments)
-        return full_name
+        return full_name[:256]
 
     def get_type(self):
         if self.keyword_type == "Setup":
