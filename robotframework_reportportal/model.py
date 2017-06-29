@@ -62,7 +62,7 @@ class Keyword(object):
             self.name.encode("utf8"),
             arguments.encode("utf8")
         )
-        return full_name
+        return full_name[:256]
 
     def get_type(self):
         if self.keyword_type == "Setup":
