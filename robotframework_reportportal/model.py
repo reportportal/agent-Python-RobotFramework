@@ -1,3 +1,6 @@
+from six import text_type
+
+
 class Suite(object):
     def __init__(self, attributes):
         super(Suite, self).__init__()
@@ -73,7 +76,7 @@ class Keyword(object):
             return "STEP"
 
 
-class LogMessage(unicode):
+class LogMessage(text_type):
     def __init__(self, *args, **kwargs):
         super(LogMessage, self).__init__(*args, **kwargs)
         self.message = self
