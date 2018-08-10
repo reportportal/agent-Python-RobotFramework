@@ -15,7 +15,7 @@ The latest stable version of library is available on PyPI:
 
     pip install robotframework-reportportal
 
-[reportportal-client](https://github.com/reportportal/client-Python) will be installed as a dependency
+[reportportal-client](https://github.com/reportportal/client-Python) and [six](https://pypi.org/project/six/) will be installed as dependencies
 
 ## Usage
 
