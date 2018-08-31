@@ -1,3 +1,7 @@
+stages:
+- test
+- name: deploy
+  if: tag IS present
 language: python
 python:
   - "2.6"
@@ -7,3 +11,18 @@ python:
   - "3.6"
 script:
   - python setup.py -q install
+
+jobs:
+  include:
+  - stage: deploy
+    python: '3.6'
+    script: skip
+    deploy:
+      stage: deploy
+      provider: pypi
+      on:
+        tags: true
+      distributions: sdist bdist_wheel
+      user: reportportal
+      password:
+        secure: <PyPI password encrypted using "gem install travis && travis encrypt --add deploy.password">
