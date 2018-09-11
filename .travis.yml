@@ -25,4 +25,4 @@ jobs:
       distributions: sdist bdist_wheel
       user: reportportal
       password:
-        secure: <PyPI password encrypted using "gem install travis && travis encrypt --add deploy.password">
+        secure: SoDmQUMXEGJM5GH49qvIsMcUQ1NgEWsDJxrz9K+w9PHYfPdyNGlKax7irGPZB/ZAwfI/hFHY5fTlmCF6vOJ9Xn35e3WuwTkSUl4KgYRy3Taq9xihFiV9JEUyIzzvMkG3RGVAMg9q9W8e1Q18IULjS3Sb4PrRwDUarG+qGYq4qVB1pAQTlnkkCSvOajPMDrli3CwxYqF4tuSrWnnp87JkhKXr4et/ZZba4cKdsJU51gnSmh9MZQHWCCSU0zgXP9Wwrkaon39owenwVqaNT4Mdh2arsimi9349tZ288KT3A/kxg1hYDKv7BYJ8E5LiBoZDRQIqRWV5zT5lt9aUD+ZWafYdCzHK1gzsGUNAFDE8X97+4VMkd2Af1u7BYuKn2mP00WrLbRhip69FEZMUxB9YoXj4xal1b5dmGEvalNPOd5ey7uZn4IZuq6MdhhoHvei3qkN0ETwIfBAQ4E77IUEgcZl59a3HfbmrmEAqqyAVW3JGNsc8xIn4yfm+lYp/r4+zD425Mv7wgRkKuumJYCyZ91cven5AIQ3lhxsqD5M8MbCdFE2h83Us3EMygAHEj1K20B0623JZ/+dujTUd7jas3pYpetvgbilNyBbJN8RLXRQAT6e3wxOPuDBFv53V3ttOUl+xvnRE+KQ2IB7Nyi9nJBJ/Cfk3Y9xO9X6yzc72m20=
