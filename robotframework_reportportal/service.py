@@ -27,7 +27,10 @@ class RobotService(object):
         "INFO": "INFO",
         "FAIL": "ERROR",
         "TRACE": "TRACE",
-        "DEBUG": "DEBUG"
+        "DEBUG": "DEBUG",
+        "HTML": "INFO",
+        "WARN": "WARN",
+        "ERROR": "ERROR"
     }
 
     @staticmethod
