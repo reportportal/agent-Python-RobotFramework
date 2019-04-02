@@ -61,6 +61,11 @@ class MyLibrary(object):
         )
 ```
 
+Send attachement (screenshots)
+----------------
+
+https://github.com/reportportal/client-Python/blob/master/README.md#send-attachement-screenshots
+
 
 ## Copyright Notice
 Licensed under the [GPLv3](https://www.gnu.org/licenses/quick-guide-gplv3.html)
