@@ -5,6 +5,11 @@
 
 Listener for RobotFramework to report results to ReportPortal
 
+* [Installation](https://github.com/reportportal/agent-Python-RobotFramework#installation)
+* [Usage](https://github.com/reportportal/agent-Python-RobotFramework#usage)
+* [Send attachement (screenshots)](https://github.com/reportportal/agent-Python-RobotFramework#send-attachement-screenshots)
+* [Copyright Notice](https://github.com/reportportal/agent-Python-RobotFramework#copyright-notice)
+
 ## Installation
 
 First you need to install RobotFramework:
@@ -61,8 +66,7 @@ class MyLibrary(object):
         )
 ```
 
-Send attachement (screenshots)
-----------------
+## Send attachement (screenshots)
 
 https://github.com/reportportal/client-Python#send-attachement-screenshots
 
