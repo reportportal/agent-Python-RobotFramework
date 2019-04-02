@@ -64,7 +64,7 @@ class MyLibrary(object):
 Send attachement (screenshots)
 ----------------
 
-https://github.com/reportportal/client-Python/blob/master/README.md#send-attachement-screenshots
+https://github.com/reportportal/client-Python#send-attachement-screenshots
 
 
 ## Copyright Notice
