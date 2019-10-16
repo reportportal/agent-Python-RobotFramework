@@ -40,4 +40,4 @@ class Variables(object):
                 "You should pass -v RP_PROJECT:<project_name_value>")
         Variables.launch_doc = get_variable("RP_LAUNCH_DOC", default=None)
         Variables.launch_tags = get_variable("RP_LAUNCH_TAGS", default="").split(" ")
-        Variables.log_batch_size = get_variable("RP_LOG_BATCH_SIZE", default="20")
+        Variables.log_batch_size = int(get_variable("RP_LOG_BATCH_SIZE", default="20"))
