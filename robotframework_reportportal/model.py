@@ -78,7 +78,7 @@ class Keyword(object):
 
 class LogMessage(text_type):
     def __init__(self, *args, **kwargs):
-        super(LogMessage, self).__init__(*args, **kwargs)
+        super(LogMessage, self).__init__()
         self.message = self
         self.level = "INFO"
         self.attachment = None
