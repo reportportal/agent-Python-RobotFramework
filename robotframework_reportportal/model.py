@@ -42,7 +42,7 @@ class Test(object):
 
 
 class Keyword(object):
-    def __init__(self, name=None, parent_type="SUITE", attributes=None):
+    def __init__(self, name=None, parent_type="TEST", attributes=None):
         super(Keyword, self).__init__()
         self.name = name
         self.libname = attributes["libname"]
