@@ -1,10 +1,10 @@
 from setuptools import setup, find_packages
 
 
-__version__ = '3.1.0'
+__version__ = '3.1.1'
 
 requirements = [
-    "reportportal-client>=3.0.0",
+    "reportportal-client~=3.0",
     "six",
 ]
 
