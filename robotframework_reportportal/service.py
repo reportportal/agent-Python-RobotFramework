@@ -1,8 +1,7 @@
 import logging
 import traceback
 from time import time
-from reportportal_client import ReportPortalServiceAsync
-from .variables import Variables
+from reportportal_client import ReportPortalService
 
 
 def async_error_handler(exc_info):
@@ -34,18 +33,16 @@ class RobotService(object):
     }
 
     @staticmethod
-    def init_service(endpoint, project, uuid, log_batch_size):
+    def init_service(endpoint, project, uuid):
         if RobotService.rp is None:
             logging.debug(
                 "ReportPortal - Init service: "
                 "endpoint={0}, project={1}, uuid={2}"
                 .format(endpoint, project, uuid))
-            RobotService.rp = ReportPortalServiceAsync(
+            RobotService.rp = ReportPortalService(
                 endpoint=endpoint,
                 project=project,
-                token=uuid,
-                error_handler=async_error_handler,
-                log_batch_size=log_batch_size)
+                token=uuid)
         else:
             raise Exception("RobotFrameworkService is already initialized")
 
@@ -60,12 +57,11 @@ class RobotService(object):
             "name": launch_name,
             "start_time": timestamp(),
             "description": launch.doc,
-            "mode": mode,
-            "tags": Variables.launch_tags
+            "mode": mode
         }
         logging.debug("ReportPortal - Start launch: "
                       "request_body={0}".format(sl_pt))
-        RobotService.rp.start_launch(**sl_pt)
+        return RobotService.rp.start_launch(**sl_pt)
 
     @staticmethod
     def finish_launch(launch=None):
@@ -78,25 +74,26 @@ class RobotService(object):
         RobotService.rp.finish_launch(**fl_rq)
 
     @staticmethod
-    def start_suite(name=None, suite=None):
+    def start_suite(name=None, suite=None, parent_item_id=None):
         start_rq = {
             "name": name,
             "description": suite.doc,
-            "tags": [],
             "start_time": timestamp(),
-            "item_type": "SUITE"
+            "item_type": "SUITE",
+            "parent_item_id": parent_item_id
         }
         logging.debug(
             "ReportPortal - Start suite: "
             "request_body={0}".format(start_rq))
-        RobotService.rp.start_test_item(**start_rq)
+        return RobotService.rp.start_test_item(**start_rq)
 
     @staticmethod
-    def finish_suite(issue=None, suite=None):
+    def finish_suite(item_id, issue=None, suite=None):
         fta_rq = {
             "end_time": timestamp(),
             "status": RobotService.status_mapping[suite.status],
-            "issue": issue
+            "issue": issue,
+            "item_id": item_id
         }
         logging.debug(
             "ReportPortal - Finish suite:"
@@ -104,25 +101,26 @@ class RobotService(object):
         RobotService.rp.finish_test_item(**fta_rq)
 
     @staticmethod
-    def start_test(test=None):
+    def start_test(test=None, parent_item_id=None):
         start_rq = {
             "name": test.name,
             "description": test.doc,
-            "tags": test.tags,
             "start_time": timestamp(),
-            "item_type": "TEST"
+            "item_type": "TEST",
+            "parent_item_id": parent_item_id
         }
         logging.debug(
             "ReportPortal - Start test: "
             "request_body={0}".format(start_rq))
-        RobotService.rp.start_test_item(**start_rq)
+        return RobotService.rp.start_test_item(**start_rq)
 
     @staticmethod
-    def finish_test(issue=None, test=None):
+    def finish_test(item_id, issue=None, test=None):
         fta_rq = {
             "end_time": timestamp(),
             "status": RobotService.status_mapping[test.status],
-            "issue": issue
+            "issue": issue,
+            "item_id": item_id
         }
         logging.debug(
             "ReportPortal - Finish test:"
@@ -130,25 +128,27 @@ class RobotService(object):
         RobotService.rp.finish_test_item(**fta_rq)
 
     @staticmethod
-    def start_keyword(keyword=None):
+    def start_keyword(keyword=None, parent_item_id=None, has_stats=True):
         start_rq = {
             "name": keyword.get_name(),
             "description": keyword.doc,
-            "tags": keyword.tags,
             "start_time": timestamp(),
-            "item_type": keyword.get_type()
+            "item_type": keyword.get_type(),
+            "parent_item_id": parent_item_id,
+            "has_stats": has_stats
         }
         logging.debug(
             "ReportPortal - Start keyword: "
             "request_body={0}".format(start_rq))
-        RobotService.rp.start_test_item(**start_rq)
+        return RobotService.rp.start_test_item(**start_rq)
 
     @staticmethod
-    def finish_keyword(issue=None, keyword=None):
+    def finish_keyword(item_id, issue=None, keyword=None):
         fta_rq = {
             "end_time": timestamp(),
             "status": RobotService.status_mapping[keyword.status],
-            "issue": issue
+            "issue": issue,
+            "item_id": item_id
         }
         logging.debug(
             "ReportPortal - Finish keyword:"
