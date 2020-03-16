@@ -86,6 +86,7 @@ def log_message(message):
         msg = LogMessage(message["message"])
         msg.level = message["level"]
 
+    msg.item_id = items[-1][0]
     logging.debug("ReportPortal - Log Message: {0}".format(message))
     RobotService.log(message=msg)
 
