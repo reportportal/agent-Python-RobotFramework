@@ -162,5 +162,6 @@ class RobotService(object):
             "message": message.message,
             "level": RobotService.log_level_mapping[message.level],
             "attachment": message.attachment,
+            "item_id": message.item_id
         }
         RobotService.rp.log(**sl_rq)
