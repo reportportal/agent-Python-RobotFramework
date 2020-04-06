@@ -87,5 +87,5 @@ https://github.com/reportportal/client-Python#send-attachement-screenshots
 
 
 ## Copyright Notice
-Licensed under the [GPLv3](https://www.gnu.org/licenses/quick-guide-gplv3.html)
+Licensed under the [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)
 license (see the LICENSE.txt file).
