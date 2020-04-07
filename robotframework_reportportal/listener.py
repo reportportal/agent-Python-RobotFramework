@@ -6,7 +6,6 @@ from .service import RobotService
 
 ROBOT_LISTENER_API_VERSION = 2
 
-
 items = []
 
 
@@ -63,11 +62,10 @@ def start_keyword(name, attributes):
     parent_type = 'SUITE' if not items else 'TEST'
     parent_item_id = items[-1][0]
     kwd = Keyword(name=name, parent_type=parent_type, attributes=attributes)
-    has_stats = False if kwd.get_type() == "STEP" else True
     logging.debug("ReportPortal - Start Keyword: {0}".format(attributes))
     items.append((
         RobotService.start_keyword(keyword=kwd, parent_item_id=parent_item_id,
-                                   has_stats=has_stats),
+                                   has_stats=False),
         parent_item_id))
 
 
