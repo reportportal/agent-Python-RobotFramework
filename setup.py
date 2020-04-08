@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 
-__version__ = '5.0.1'
+__version__ = '5.0.2'
 
 requirements = [
     "reportportal-client>=5.0.0",

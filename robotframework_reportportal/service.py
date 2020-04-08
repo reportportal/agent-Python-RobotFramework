@@ -102,11 +102,13 @@ class RobotService(object):
 
     @staticmethod
     def start_test(test=None, parent_item_id=None):
+        # Item type should be sent as "STEP" until we upgrade to RPv6.
+        # Details at: https://github.com/reportportal/agent-Python-RobotFramework/issues/56
         start_rq = {
             "name": test.name,
             "description": test.doc,
             "start_time": timestamp(),
-            "item_type": "TEST",
+            "item_type": "STEP",
             "parent_item_id": parent_item_id
         }
         logging.debug(
