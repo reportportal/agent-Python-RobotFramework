@@ -1,5 +1,7 @@
 from six import text_type
 
+from reportportal_client.service import _convert_string
+
 
 class Suite(object):
     def __init__(self, attributes):
@@ -57,13 +59,13 @@ class Keyword(object):
             self.status = attributes["status"]
 
     def get_name(self):
-        assign = ", ".join(self.assign).encode("utf8")
+        assign = _convert_string(", ".join(self.assign))
         assignment = "{0} = ".format(assign) if self.assign else ""
         arguments = ", ".join(self.args)
         full_name = "{0}{1} ({2})".format(
             assignment,
-            self.name.encode("utf8"),
-            arguments.encode("utf8")
+            _convert_string(self.name),
+            _convert_string(arguments)
         )
         return full_name[:256]
 
