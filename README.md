@@ -51,6 +51,8 @@ REQUIRED:
 ```
 NOT REQUIRED:
 ```
+--variable RP_LAUNCH_UUID:"id_of_existing_rp_launch"
+    - ID of existing Report Portal launch
 --variable RP_LAUNCH_DOC:"some_documentation_for_launch"
     - Description for the launch
 --variable RP_LAUNCH_TAGS:"RF Smoke"

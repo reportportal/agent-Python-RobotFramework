@@ -9,16 +9,25 @@ ROBOT_LISTENER_API_VERSION = 2
 items = []
 
 
+def start_launch(launch):
+    """Start a new launch at the Report Portal."""
+    if not Variables.launch_id:
+        launch.doc = Variables.launch_doc
+        logging.debug("ReportPortal - Start Launch: {0}".format(
+            launch.attributes))
+        RobotService.start_launch(launch_name=Variables.launch_name,
+                                  launch=launch)
+    else:
+        RobotService.rp.launch_id = Variables.launch_id
+
+
 def start_suite(name, attributes):
     suite = Suite(attributes=attributes)
     if suite.robot_id == "s1":
         Variables.check_variables()
         RobotService.init_service(Variables.endpoint, Variables.project,
                                   Variables.uuid)
-        suite.doc = Variables.launch_doc
-        logging.debug("ReportPortal - Start Launch: {0}".format(attributes))
-        RobotService.start_launch(launch_name=Variables.launch_name,
-                                  launch=suite)
+        start_launch(suite)
         if not suite.suites:
             attributes['id'] = "s1-s1"
             start_suite(name, attributes)

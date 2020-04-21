@@ -15,6 +15,7 @@ class Variables(object):
     launch_doc = None
     log_batch_size = None
     launch_tags = None
+    launch_id = None
 
     @staticmethod
     def check_variables():
@@ -38,6 +39,7 @@ class Variables(object):
             raise RobotServiceException(
                 "Missing parameter RP_PROJECT for robot run\n"
                 "You should pass -v RP_PROJECT:<project_name_value>")
+        Variables.launch_id = get_variable("RP_LAUNCH_UUID", default=None)
         Variables.launch_doc = get_variable("RP_LAUNCH_DOC", default=None)
         Variables.launch_tags = get_variable("RP_LAUNCH_TAGS", default="").split(" ")
         Variables.log_batch_size = int(get_variable("RP_LOG_BATCH_SIZE", default="20"))
