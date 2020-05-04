@@ -6,6 +6,7 @@ from reportportal_client.service import _convert_string
 class Suite(object):
     def __init__(self, attributes):
         super(Suite, self).__init__()
+        self.attributes = attributes
         self.suites = attributes["suites"]
         self.tests = attributes["tests"]
         self.doc = attributes["doc"]
