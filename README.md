@@ -55,8 +55,10 @@ NOT REQUIRED:
     - ID of existing Report Portal launch
 --variable RP_LAUNCH_DOC:"some_documentation_for_launch"
     - Description for the launch
---variable RP_LAUNCH_TAGS:"RF Smoke"
-    - Space-separated list of tags for the launch
+--variable RP_LAUNCH_ATTRIBUTES:"RF tag_name:tag_value"
+    - Space-separated list of tags/attributes for the launch
+--variable RP_TEST_ATTRIBUTES:"Long"
+    - Space-separated list of tags/attributes for the tests
 --variable RP_LOG_BATCH_SIZE:"10"
     - Default value is "20", affects size of async batch log requests
 ```

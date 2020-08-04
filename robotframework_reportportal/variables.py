@@ -8,14 +8,16 @@ def get_variable(name, default=None):
 
 
 class Variables(object):
+    agent_name = 'robotframework-reportportal'
     uuid = None
     endpoint = None
     launch_name = None
     project = None
     launch_doc = None
     log_batch_size = None
-    launch_tags = None
+    launch_attributes = None
     launch_id = None
+    test_attributes = None
 
     @staticmethod
     def check_variables():
@@ -39,7 +41,8 @@ class Variables(object):
             raise RobotServiceException(
                 "Missing parameter RP_PROJECT for robot run\n"
                 "You should pass -v RP_PROJECT:<project_name_value>")
+        Variables.launch_attributes = get_variable("RP_LAUNCH_ATTRIBUTES", default="").split()
         Variables.launch_id = get_variable("RP_LAUNCH_UUID", default=None)
         Variables.launch_doc = get_variable("RP_LAUNCH_DOC", default=None)
-        Variables.launch_tags = get_variable("RP_LAUNCH_TAGS", default="").split(" ")
         Variables.log_batch_size = int(get_variable("RP_LOG_BATCH_SIZE", default="20"))
+        Variables.test_attributes = get_variable("RP_TEST_ATTRIBUTES", default="").split()

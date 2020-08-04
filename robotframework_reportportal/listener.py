@@ -1,5 +1,7 @@
 import logging
 
+from reportportal_client.helpers import gen_attributes
+
 from .variables import Variables
 from .model import Keyword, Test, Suite, LogMessage
 from .service import RobotService
@@ -15,8 +17,10 @@ def start_launch(launch):
         launch.doc = Variables.launch_doc
         logging.debug("ReportPortal - Start Launch: {0}".format(
             launch.attributes))
-        RobotService.start_launch(launch_name=Variables.launch_name,
-                                  launch=launch)
+        RobotService.start_launch(
+            launch_name=Variables.launch_name,
+            attributes=gen_attributes(Variables.launch_attributes),
+            description=launch.doc)
     else:
         RobotService.rp.launch_id = Variables.launch_id
 
@@ -35,8 +39,10 @@ def start_suite(name, attributes):
     else:
         logging.debug("ReportPortal - Start Suite: {0}".format(attributes))
         parent_id = items[-1][0] if items else None
-        item_id = RobotService.start_suite(name=name, suite=suite,
-                                           parent_item_id=parent_id)
+        item_id = RobotService.start_suite(
+            name=name,
+            suite=suite,
+            parent_item_id=parent_id)
         items.append((item_id, parent_id))
 
 
@@ -56,7 +62,11 @@ def start_test(name, attributes):
     logging.debug("ReportPortal - Start Test: {0}".format(attributes))
     parent_item_id = items[-1][0]
     items.append((
-        RobotService.start_test(test=test, parent_item_id=parent_item_id),
+        RobotService.start_test(
+            test=test,
+            parent_item_id=parent_item_id,
+            attributes=gen_attributes(Variables.test_attributes + test.tags),
+        ),
         parent_item_id))
 
 
