@@ -1,7 +1,12 @@
 import logging
 import traceback
 from time import time
-from reportportal_client import ReportPortalService
+from reportportal_client.service import (
+    _dict_to_payload,
+    ReportPortalService
+)
+
+from .variables import Variables
 
 
 def async_error_handler(exc_info):
@@ -33,6 +38,19 @@ class RobotService(object):
     }
 
     @staticmethod
+    def _get_launch_attributes(cmd_attrs):
+        """Generate launch attributes including both system and user ones.
+
+        :param list cmd_attrs: List for attributes from the pytest.ini file
+        """
+        attributes = cmd_attrs or []
+        system_info = RobotService.rp.get_system_information(
+            Variables.agent_name)
+        system_info['system'] = True
+        system_attributes = _dict_to_payload(system_info)
+        return attributes + system_attributes
+
+    @staticmethod
     def init_service(endpoint, project, uuid):
         if RobotService.rp is None:
             logging.debug(
@@ -52,11 +70,20 @@ class RobotService(object):
             RobotService.rp.terminate()
 
     @staticmethod
-    def start_launch(launch_name, mode=None, launch=None):
+    def start_launch(launch_name, attributes=None, description=None, mode=None):
+        """Call start_launch method of the common client.
+
+        :param launch_name: Launch name
+        :param attributes:  Launch attributes
+        :param description: Launch description
+        :param mode:        Launch mode
+        :return:            launch UUID
+        """
         sl_pt = {
+            "attributes": RobotService._get_launch_attributes(attributes),
             "name": launch_name,
             "start_time": timestamp(),
-            "description": launch.doc,
+            "description": description,
             "mode": mode
         }
         logging.debug("ReportPortal - Start launch: "
@@ -74,9 +101,10 @@ class RobotService(object):
         RobotService.rp.finish_launch(**fl_rq)
 
     @staticmethod
-    def start_suite(name=None, suite=None, parent_item_id=None):
+    def start_suite(name=None, suite=None, parent_item_id=None, attributes=None):
         start_rq = {
             "name": name,
+            "attributes": attributes,
             "description": suite.doc,
             "start_time": timestamp(),
             "item_type": "SUITE",
@@ -101,11 +129,12 @@ class RobotService(object):
         RobotService.rp.finish_test_item(**fta_rq)
 
     @staticmethod
-    def start_test(test=None, parent_item_id=None):
+    def start_test(test=None, parent_item_id=None, attributes=None):
         # Item type should be sent as "STEP" until we upgrade to RPv6.
         # Details at: https://github.com/reportportal/agent-Python-RobotFramework/issues/56
         start_rq = {
             "name": test.name,
+            "attributes": attributes,
             "description": test.doc,
             "start_time": timestamp(),
             "item_type": "STEP",
