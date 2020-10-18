@@ -16,9 +16,9 @@ First you need to install RobotFramework:
 
     pip install robotframework
 
-The latest stable version of library is available on PyPI:
+The latest stable version of library can be installed directly from github:
 
-    pip install robotframework-reportportal
+    pip install git+https://github.com/egibbm/agent-Python-RobotFramework.git@post-report
 
 [reportportal-client](https://github.com/reportportal/client-Python) and [six](https://pypi.org/project/six/) will be installed as dependencies
 

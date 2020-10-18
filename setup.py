@@ -1,10 +1,11 @@
 from setuptools import setup, find_packages
 
 
-__version__ = '5.0.3'
+__version__ = '5.0.3-postreport'
 
 requirements = [
     "reportportal-client>=5.0.5",
+    "robotframework",
     "six",
 ]
 
@@ -20,5 +21,10 @@ setup(
         'tarball/{version}'.format(version=__version__)),
     keywords=['testing', 'reporting', 'robot framework', 'reportportal'],
     classifiers=[],
-    install_requires=requirements
+    install_requires=requirements,
+    entry_points={
+        'console_scripts': [
+            'post_report=robotframework_reportportal.post_report:main'
+        ]
+    }
 )
