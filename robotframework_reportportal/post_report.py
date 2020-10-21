@@ -46,12 +46,12 @@ def main():
         arguments, values = getopt.getopt(argument_list, short_options,
                                           long_options)
     except getopt.error as err:
-        sys.exit(251)
+        sys.exit(1)
 
     for current_argument, current_value in arguments:
         if current_argument in ("-h", "--help"):
             print(__doc__)
-            sys.exit(252)
+            sys.exit(0)
         elif current_argument in ("-v", "--variable"):
             k, v = str(current_value).split(":", 1)
             _variables[k] = v
@@ -60,7 +60,7 @@ def main():
         rc = process(*values)
     except TypeError:
         print(__doc__)
-        sys.exit(253)
+        sys.exit(1)
     sys.exit(rc)
 
 

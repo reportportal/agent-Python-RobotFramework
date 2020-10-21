@@ -124,9 +124,12 @@ def log_message_with_image(message, image):
                 'data': fh.read(),
                 'mime': guess_type(image)[0] or "application/octet-stream"
             }
-    finally:
+    except Exception:
+        logging.debug("ReportPortal - Log Message: {0}".format(message))
+    else:
         logging.debug("ReportPortal - Log Message with Image: {0} {1}"
                       .format(message, image))
+    finally:
         RobotService.log(message=msg)
 
 

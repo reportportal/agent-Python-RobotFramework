@@ -18,9 +18,6 @@ class RobotResultsVisitor(ResultVisitor):
         if ("RP_LAUNCH_DOC" not in _variables):
             _variables["RP_LAUNCH_DOC"] = result.suite.doc
 
-    def end_result(self, result):
-        pass
-
     def start_suite(self, suite: TestSuite):
         attrs = {
             'id': suite.id,
@@ -127,42 +124,3 @@ class RobotResultsVisitor(ResultVisitor):
                 listener.log_message_with_image(message, m.group(1))
             else:
                 listener.log_message(message)
-
-    def end_message(self, msg):
-        pass
-
-    def start_statistics(self, stats):
-        pass
-
-    def end_statistics(self, stats):
-        pass
-
-    def start_total_statistics(self, stats):
-        pass
-
-    def end_total_statistics(self, stats):
-        pass
-
-    def start_tag_statistics(self, stats):
-        pass
-
-    def end_tag_statistics(self, stats):
-        pass
-
-    def start_suite_statistics(self, stats):
-        pass
-
-    def end_suite_statistics(self, stats):
-        pass
-
-    def start_stat(self, stat):
-        pass
-
-    def end_stat(self, stat):
-        pass
-
-    def start_errors(self, errors):
-        pass
-
-    def end_errors(self, errors):
-        pass

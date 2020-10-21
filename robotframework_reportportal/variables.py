@@ -9,10 +9,7 @@ def get_variable(name, default=None):
     try:
         return BuiltIn().get_variable_value("${" + name + "}", default=default)
     except RobotNotRunningError:
-        try:
-            return _variables[name]
-        except KeyError:
-            return default
+        return _variables.get(name, default)
 
 
 class Variables(object):
