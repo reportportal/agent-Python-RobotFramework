@@ -16,7 +16,7 @@ First you need to install RobotFramework:
 
     pip install robotframework
 
-The latest stable version of library can be installed directly from github:
+The latest stable version of library is available on PyPI:
 
     pip install robotframework-reportportal
 

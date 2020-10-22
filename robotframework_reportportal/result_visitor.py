@@ -12,13 +12,13 @@ class RobotResultsVisitor(ResultVisitor):
 
     _link_pattern = re.compile("src=[\"\']([^\"\']+)[\"\']")
 
-    def start_result(self, result: Result):
+    def start_result(self, result):
         if ("RP_LAUNCH" not in _variables):
             _variables["RP_LAUNCH"] = result.suite.name
         if ("RP_LAUNCH_DOC" not in _variables):
             _variables["RP_LAUNCH_DOC"] = result.suite.doc
 
-    def start_suite(self, suite: TestSuite):
+    def start_suite(self, suite):
         attrs = {
             'id': suite.id,
             'longname': suite.longname,
@@ -32,7 +32,7 @@ class RobotResultsVisitor(ResultVisitor):
         }
         listener.start_suite(suite.name, attrs)
 
-    def end_suite(self, suite: TestSuite):
+    def end_suite(self, suite):
         attrs = {
             'id': suite.id,
             'longname': suite.longname,
@@ -51,7 +51,7 @@ class RobotResultsVisitor(ResultVisitor):
         }
         listener.end_suite(None, attrs)
 
-    def start_test(self, test: TestCase):
+    def start_test(self, test):
         attrs = {
             'id': test.id,
             'longname': test.longname,
@@ -65,7 +65,7 @@ class RobotResultsVisitor(ResultVisitor):
         }
         listener.start_test(test.name, attrs)
 
-    def end_test(self, test: TestCase):
+    def end_test(self, test):
         attrs = {
             'id': test.id,
             'longname': test.longname,
@@ -83,7 +83,7 @@ class RobotResultsVisitor(ResultVisitor):
         }
         listener.end_test(test.name, attrs)
 
-    def start_keyword(self, kw: Keyword):
+    def start_keyword(self, kw):
         attrs = {
             'type': string.capwords(kw.type),
             'kwname': kw.kwname,
@@ -96,7 +96,7 @@ class RobotResultsVisitor(ResultVisitor):
         }
         listener.start_keyword(kw.name, attrs)
 
-    def end_keyword(self, kw: Keyword):
+    def end_keyword(self, kw):
         attrs = {
             'type': string.capwords(kw.type),
             'kwname': kw.kwname,
@@ -112,7 +112,7 @@ class RobotResultsVisitor(ResultVisitor):
         }
         listener.end_keyword(kw.name, attrs)
 
-    def start_message(self, msg: Message):
+    def start_message(self, msg):
         if (msg.message != ''):
             message = {
                 'message': msg.message,
