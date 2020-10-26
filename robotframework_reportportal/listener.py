@@ -1,5 +1,7 @@
 import logging
+import os
 
+from mimetypes import guess_type
 from reportportal_client.helpers import gen_attributes
 
 from .variables import Variables
@@ -95,7 +97,7 @@ def end_keyword(name, attributes):
     RobotService.finish_keyword(item_id=item_id, keyword=kwd)
 
 
-def log_message(message):
+def _build_msg_struct(message):
     # Check if message comes from our custom logger or not
     if isinstance(message["message"], LogMessage):
         msg = message["message"]
@@ -104,8 +106,31 @@ def log_message(message):
         msg.level = message["level"]
 
     msg.item_id = items[-1][0]
+    return msg
+
+
+def log_message(message):
+    msg = _build_msg_struct(message)
     logging.debug("ReportPortal - Log Message: {0}".format(message))
     RobotService.log(message=msg)
+
+
+def log_message_with_image(message, image):
+    msg = _build_msg_struct(message)
+    try:
+        with open(image, "rb") as fh:
+            msg.attachment = {
+                'name': os.path.basename(image),
+                'data': fh.read(),
+                'mime': guess_type(image)[0] or "application/octet-stream"
+            }
+    except Exception:
+        logging.debug("ReportPortal - Log Message: {0}".format(message))
+    else:
+        logging.debug("ReportPortal - Log Message with Image: {0} {1}"
+                      .format(message, image))
+    finally:
+        RobotService.log(message=msg)
 
 
 def message(message):

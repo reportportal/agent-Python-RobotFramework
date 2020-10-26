@@ -1,10 +1,15 @@
-from robot.libraries.BuiltIn import BuiltIn
+from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
 
 from .exception import RobotServiceException
 
+_variables = {}
+
 
 def get_variable(name, default=None):
-    return BuiltIn().get_variable_value("${" + name + "}", default=default)
+    try:
+        return BuiltIn().get_variable_value("${" + name + "}", default=default)
+    except RobotNotRunningError:
+        return _variables.get(name, default)
 
 
 class Variables(object):
