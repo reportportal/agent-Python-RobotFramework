@@ -27,7 +27,7 @@ class RobotResultsVisitor(ResultVisitor):
             'source': suite.source,
             'suites': suite.suites,
             'tests': suite.tests,
-            'totaltests': suite.statistics.all.total,
+            'totaltests': getattr(suite.statistics, 'all', suite.statistics).total,
             'starttime': suite.starttime
         }
         listener.start_suite(suite.name, attrs)
@@ -41,7 +41,7 @@ class RobotResultsVisitor(ResultVisitor):
             'source': suite.source,
             'suites': suite.suites,
             'tests': suite.tests,
-            'totaltests': suite.statistics.all.total,
+            'totaltests': getattr(suite.statistics, 'all', suite.statistics).total,
             'starttime': suite.starttime,
             'endtime': suite.endtime,
             'elapsedtime': suite.elapsedtime,
@@ -58,7 +58,7 @@ class RobotResultsVisitor(ResultVisitor):
             # 'originalname': test.originalname,
             'doc': test.doc,
             'tags': list(test.tags),
-            'critical': test.critical,
+            'critical': getattr(test, 'critical', ''),
             'template': '',
             # 'lineno': test.lineno,
             'starttime': test.starttime,
@@ -72,7 +72,7 @@ class RobotResultsVisitor(ResultVisitor):
             # 'originalname': test.originalname,
             'doc': test.doc,
             'tags': list(test.tags),
-            'critical': test.critical,
+            'critical': getattr(test, 'critical', ''),
             'template': '',
             # 'lineno': test.lineno,
             'starttime': test.starttime,
