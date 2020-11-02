@@ -27,10 +27,7 @@ class RobotResultsVisitor(ResultVisitor):
             'source': suite.source,
             'suites': suite.suites,
             'tests': suite.tests,
-            try:
-                'totaltests': suite.statistics.all.total,
-            except:
-                'totaltests': suite.statistics.total,
+            'totaltests': suite.statistics.all.total if hasattr(suite.statistics.all.total, 'total') else suite.statistics.total,
             'starttime': suite.starttime
         }
         listener.start_suite(suite.name, attrs)
@@ -44,10 +41,7 @@ class RobotResultsVisitor(ResultVisitor):
             'source': suite.source,
             'suites': suite.suites,
             'tests': suite.tests,
-            try:
-                'totaltests': suite.statistics.all.total,
-            except:
-                'totaltests': suite.statistics.total,
+            'totaltests': suite.statistics.all.total if hasattr(suite.statistics.all.total, 'total') else suite.statistics.total,
             'starttime': suite.starttime,
             'endtime': suite.endtime,
             'elapsedtime': suite.elapsedtime,
@@ -64,10 +58,7 @@ class RobotResultsVisitor(ResultVisitor):
             # 'originalname': test.originalname,
             'doc': test.doc,
             'tags': list(test.tags),
-            try:
-                'critical': test.critical,
-            except:
-                'critical': '',
+            'critical': test.critical if hasattr (test.critical, 'critical') else '',
             'template': '',
             # 'lineno': test.lineno,
             'starttime': test.starttime,
@@ -81,10 +72,7 @@ class RobotResultsVisitor(ResultVisitor):
             # 'originalname': test.originalname,
             'doc': test.doc,
             'tags': list(test.tags),
-            try:
-                'critical': test.critical,
-            except:
-                'critical': '',
+            'critical': test.critical if hasattr (test.critical, 'critical') else '',
             'template': '',
             # 'lineno': test.lineno,
             'starttime': test.starttime,
