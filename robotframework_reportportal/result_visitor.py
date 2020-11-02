@@ -27,7 +27,7 @@ class RobotResultsVisitor(ResultVisitor):
             'source': suite.source,
             'suites': suite.suites,
             'tests': suite.tests,
-            'totaltests': suite.statistics.all.total if hasattr(suite.statistics.all.total, 'total') else suite.statistics.total,
+            'totaltests': suite.statistics.all.total if hasattr(suite.statistics, 'all') else suite.statistics.total,
             'starttime': suite.starttime
         }
         listener.start_suite(suite.name, attrs)
@@ -41,7 +41,7 @@ class RobotResultsVisitor(ResultVisitor):
             'source': suite.source,
             'suites': suite.suites,
             'tests': suite.tests,
-            'totaltests': suite.statistics.all.total if hasattr(suite.statistics.all.total, 'total') else suite.statistics.total,
+            'totaltests': suite.statistics.all.total if hasattr(suite.statistics, 'all') else suite.statistics.total,
             'starttime': suite.starttime,
             'endtime': suite.endtime,
             'elapsedtime': suite.elapsedtime,
@@ -58,7 +58,7 @@ class RobotResultsVisitor(ResultVisitor):
             # 'originalname': test.originalname,
             'doc': test.doc,
             'tags': list(test.tags),
-            'critical': test.critical if hasattr (test.critical, 'critical') else '',
+            'critical': test.critical if hasattr(test, 'critical') else '',
             'template': '',
             # 'lineno': test.lineno,
             'starttime': test.starttime,
@@ -72,7 +72,7 @@ class RobotResultsVisitor(ResultVisitor):
             # 'originalname': test.originalname,
             'doc': test.doc,
             'tags': list(test.tags),
-            'critical': test.critical if hasattr (test.critical, 'critical') else '',
+            'critical': test.critical if hasattr(test, 'critical') else '',
             'template': '',
             # 'lineno': test.lineno,
             'starttime': test.starttime,
