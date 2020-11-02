@@ -97,50 +97,50 @@ def end_keyword(name, attributes):
     RobotService.finish_keyword(item_id=item_id, keyword=kwd)
 
 
-def _build_msg_struct(msg):
+def _build_msg_struct(message):
     # Check if message comes from our custom logger or not
-    if isinstance(msg["message"], LogMessage):
-        msg = msg["message"]
+    if isinstance(message["message"], LogMessage):
+        msg = message["message"]
     else:
-        msg = LogMessage(msg["message"])
-        msg.level = msg["level"]
+        msg = LogMessage(message["message"])
+        msg.level = message["level"]
 
     msg.item_id = items[-1][0]
     return msg
 
 
-def log_message(msg):
-    msg = _build_msg_struct(msg)
-    logging.debug("ReportPortal - Log Message: {0}".format(msg))
+def log_message(message):
+    msg = _build_msg_struct(message)
+    logging.debug("ReportPortal - Log Message: {0}".format(message))
     RobotService.log(message=msg)
 
 
 def log_message_with_image(msg, image):
-    msg = _build_msg_struct(msg)
+    m = _build_msg_struct(msg)
     with open(image, "rb") as fh:
-        msg.attachment = {
+        m.attachment = {
             'name': os.path.basename(image),
             'data': fh.read(),
             'mime': guess_type(image)[0] or "application/octet-stream"
         }
     logging.debug("ReportPortal - Log Message with Image: {0} {1}"
-                  .format(msg, image))
-    RobotService.log(message=msg)
+                  .format(m, image))
+    RobotService.log(message=m)
 
 
-def message(msg):
-    logging.debug("ReportPortal - Message: {0}".format(msg))
+def message(message):
+    logging.debug("ReportPortal - Message: {0}".format(message))
 
 
-def library_import(_, attributes):
+def library_import(name, attributes):
     logging.debug("ReportPortal - Library Import: {0}".format(attributes))
 
 
-def resource_import(_, attributes):
+def resource_import(name, attributes):
     logging.debug("ReportPortal - Resource Import: {0}".format(attributes))
 
 
-def variables_import(_, attributes):
+def variables_import(name, attributes):
     logging.debug("ReportPortal - Variables Import: {0}".format(attributes))
 
 
