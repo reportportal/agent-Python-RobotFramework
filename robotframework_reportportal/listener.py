@@ -81,7 +81,7 @@ def end_test(name, attributes):
 
 def start_keyword(name, attributes):
     parent_type = 'SUITE' if not items else 'TEST'
-    parent_item_id = items[-1][0]
+    parent_item_id = items[-1][0] if items else None
     kwd = Keyword(name=name, parent_type=parent_type, attributes=attributes)
     logging.debug("ReportPortal - Start Keyword: {0}".format(attributes))
     items.append((
