@@ -8,6 +8,7 @@ Listener for RobotFramework to report results to ReportPortal
 * [Installation](https://github.com/reportportal/agent-Python-RobotFramework#installation)
 * [Usage](https://github.com/reportportal/agent-Python-RobotFramework#usage)
 * [Send attachement (screenshots)](https://github.com/reportportal/agent-Python-RobotFramework#send-attachement-screenshots)
+* [Integration with GA](https://github.com/reportportal/agent-Python-RobotFramework#integration-with-ga)
 * [Copyright Notice](https://github.com/reportportal/agent-Python-RobotFramework#copyright-notice)
 
 ## Installation
@@ -89,6 +90,17 @@ class MyLibrary(object):
 
 https://github.com/reportportal/client-Python#send-attachement-screenshots
 
+
+## Integration with GA
+
+ReportPortal is now supporting integrations with more than 15 test frameworks simultaneously. In order to define the most popular agents and plan the team workload accordingly, we are using Google analytics.
+
+ReportPortal collects information about agent name and its version only. This information is sent to Google analytics on the launch start. Please help us to make our work effective.
+If you still want to switch Off Google analytics, please change env variable the way below.
+
+```bash
+export ALLURE_NO_ANALYTICS=1
+```
 
 ## Copyright Notice
 Licensed under the [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0)
