@@ -3,14 +3,12 @@ import string
 import urllib.parse
 
 from robot.api import ResultVisitor
-from robot.result import Result, TestSuite, TestCase, Keyword, Message
 
 from . import listener
 from .variables import _variables
 
 
 class RobotResultsVisitor(ResultVisitor):
-
     _link_pattern = re.compile("src=[\"\']([^\"\']+)[\"\']")
 
     def start_result(self, result):
@@ -120,11 +118,15 @@ class RobotResultsVisitor(ResultVisitor):
                 'level': msg.level,
             }
             try:
-                m = self.parse_message(msg.message)
+                m = self.parse_message(message['message'])
                 message["message"] = m[0]
                 listener.log_message_with_image(message, m[1])
             except (AttributeError, IOError):
-                listener.log_message(message)
+                # noinspection PyBroadException
+                try:
+                    listener.log_message(message)
+                except Exception:
+                    pass
 
     def parse_message(self, msg):
         m = self._link_pattern.search(msg)
