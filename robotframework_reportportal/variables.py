@@ -1,3 +1,5 @@
+from os import getenv
+
 from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
 
 from .exception import RobotServiceException
@@ -13,7 +15,6 @@ def get_variable(name, default=None):
 
 
 class Variables(object):
-    agent_name = 'robotframework-reportportal'
     uuid = None
     endpoint = None
     launch_name = None
@@ -22,6 +23,7 @@ class Variables(object):
     log_batch_size = None
     launch_attributes = None
     launch_id = None
+    skip_analytics = getenv('ALLURE_NO_ANALYTICS')
     test_attributes = None
 
     @staticmethod

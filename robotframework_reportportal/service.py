@@ -1,6 +1,12 @@
 import logging
 import traceback
 from time import time
+
+from reportportal_client.external.google_analytics import send_event
+from reportportal_client.helpers import (
+    get_launch_sys_attrs,
+    get_package_version
+)
 from reportportal_client.service import (
     _dict_to_payload,
     ReportPortalService
@@ -19,6 +25,8 @@ def timestamp():
 
 
 class RobotService(object):
+    agent_name = "robotframework-reportportal"
+    agent_version = get_package_version(agent_name)
     rp = None
 
     status_mapping = {
@@ -41,14 +49,14 @@ class RobotService(object):
     def _get_launch_attributes(cmd_attrs):
         """Generate launch attributes including both system and user ones.
 
-        :param list cmd_attrs: List for attributes from the pytest.ini file
+        :param list cmd_attrs: List for attributes from the command line
         """
         attributes = cmd_attrs or []
-        system_info = RobotService.rp.get_system_information(
-            Variables.agent_name)
-        system_info['system'] = True
-        system_attributes = _dict_to_payload(system_info)
-        return attributes + system_attributes
+        system_attributes = get_launch_sys_attrs()
+        system_attributes['agent'] = (
+            '{}-{}'.format(RobotService.agent_name,
+                           RobotService.agent_version))
+        return attributes + _dict_to_payload(system_attributes)
 
     @staticmethod
     def init_service(endpoint, project, uuid):
@@ -70,7 +78,8 @@ class RobotService(object):
             RobotService.rp.terminate()
 
     @staticmethod
-    def start_launch(launch_name, attributes=None, description=None, mode=None):
+    def start_launch(launch_name, attributes=None,
+                     description=None, mode=None):
         """Call start_launch method of the common client.
 
         :param launch_name: Launch name
@@ -88,6 +97,8 @@ class RobotService(object):
         }
         logging.debug("ReportPortal - Start launch: "
                       "request_body={0}".format(sl_pt))
+        if not Variables.skip_analytics:
+            send_event(RobotService.agent_name, RobotService.agent_version)
         return RobotService.rp.start_launch(**sl_pt)
 
     @staticmethod
