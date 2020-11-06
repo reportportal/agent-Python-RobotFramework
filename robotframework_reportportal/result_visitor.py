@@ -1,8 +1,8 @@
 import re
 import string
-import urllib.parse
 
 from robot.api import ResultVisitor
+from six.moves.urllib.parse import unquote
 
 from . import listener
 from .variables import _variables
@@ -130,4 +130,4 @@ class RobotResultsVisitor(ResultVisitor):
 
     def parse_message(self, msg):
         m = self._link_pattern.search(msg)
-        return [m.group(), urllib.parse.unquote(m.group(1))]
+        return [m.group(), unquote(m.group(1))]
