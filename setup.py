@@ -9,6 +9,10 @@ requirements = [
     "six>=1.15.0",
 ]
 
+test_requirements = [
+    "pytest",
+]
+
 setup(
     name='robotframework-reportportal',
     packages=find_packages(),
@@ -22,6 +26,7 @@ setup(
     keywords=['testing', 'reporting', 'robot framework', 'reportportal'],
     classifiers=[],
     install_requires=requirements,
+    tests_requires=test_requirements,
     entry_points={
         'console_scripts': [
             'post_report=robotframework_reportportal.post_report:main'

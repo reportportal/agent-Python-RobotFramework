@@ -1,21 +1,20 @@
 import re
 import string
+import urllib.parse
 
 from robot.api import ResultVisitor
-from robot.result import Result, TestSuite, TestCase, Keyword, Message
 
 from . import listener
 from .variables import _variables
 
 
 class RobotResultsVisitor(ResultVisitor):
-
     _link_pattern = re.compile("src=[\"\']([^\"\']+)[\"\']")
 
     def start_result(self, result):
-        if ("RP_LAUNCH" not in _variables):
+        if "RP_LAUNCH" not in _variables:
             _variables["RP_LAUNCH"] = result.suite.name
-        if ("RP_LAUNCH_DOC" not in _variables):
+        if "RP_LAUNCH_DOC" not in _variables:
             _variables["RP_LAUNCH_DOC"] = result.suite.doc
 
     def start_suite(self, suite):
@@ -113,14 +112,22 @@ class RobotResultsVisitor(ResultVisitor):
         listener.end_keyword(kw.name, attrs)
 
     def start_message(self, msg):
-        if (msg.message != ''):
+        if msg.message:
             message = {
                 'message': msg.message,
                 'level': msg.level,
             }
-            m = self._link_pattern.search(msg.message)
-            if m:
-                message["message"] = m.group()
-                listener.log_message_with_image(message, m.group(1))
-            else:
-                listener.log_message(message)
+            try:
+                m = self.parse_message(message['message'])
+                message["message"] = m[0]
+                listener.log_message_with_image(message, m[1])
+            except (AttributeError, IOError):
+                # noinspection PyBroadException
+                try:
+                    listener.log_message(message)
+                except Exception:
+                    pass
+
+    def parse_message(self, msg):
+        m = self._link_pattern.search(msg)
+        return [m.group(), urllib.parse.unquote(m.group(1))]
