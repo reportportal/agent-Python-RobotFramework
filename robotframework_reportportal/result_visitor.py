@@ -112,7 +112,7 @@ class RobotResultsVisitor(ResultVisitor):
         listener.end_keyword(kw.name, attrs)
 
     def start_message(self, msg):
-        if msg.message != '':
+        if msg.message:
             message = {
                 'message': msg.message,
                 'level': msg.level,
