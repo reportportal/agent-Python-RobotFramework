@@ -27,7 +27,7 @@ setup(
         'tarball/{version}'.format(version=__version__)),
     keywords=['testing', 'reporting', 'robot framework', 'reportportal'],
     classifiers=[
-        'Framework :: RobotFramework',
+        'Framework :: Robot Framework',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
