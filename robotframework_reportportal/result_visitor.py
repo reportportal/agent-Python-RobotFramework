@@ -107,7 +107,7 @@ class RobotResultsVisitor(ResultVisitor):
             'starttime': kw.starttime,
             'endtime': kw.endtime,
             'elapsedtime': kw.elapsedtime,
-            'status': kw.status,
+            'status': 'PASS' if kw.assign else kw.status,
         }
         listener.end_keyword(kw.name, attrs)
 
