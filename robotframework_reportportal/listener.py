@@ -32,7 +32,7 @@ def start_suite(name, attributes):
     if suite.robot_id == "s1":
         Variables.check_variables()
         RobotService.init_service(Variables.endpoint, Variables.project,
-                                  Variables.uuid)
+                                  Variables.uuid, Variables.log_batch_size, Variables.pool_size)
         start_launch(suite)
         if not suite.suites:
             attributes['id'] = "s1-s1"

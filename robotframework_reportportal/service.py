@@ -59,7 +59,7 @@ class RobotService(object):
         return attributes + _dict_to_payload(system_attributes)
 
     @staticmethod
-    def init_service(endpoint, project, uuid):
+    def init_service(endpoint, project, uuid, log_batch_size, pool_size):
         if RobotService.rp is None:
             logging.debug(
                 "ReportPortal - Init service: "
@@ -68,7 +68,9 @@ class RobotService(object):
             RobotService.rp = ReportPortalService(
                 endpoint=endpoint,
                 project=project,
-                token=uuid)
+                token=uuid,
+                log_batch_size=log_batch_size,
+                max_pool_size=pool_size)
         else:
             raise Exception("RobotFrameworkService is already initialized")
 

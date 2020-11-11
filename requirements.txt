@@ -1,3 +1,3 @@
-reportportal-client>=5.0.6
+reportportal-client @ git+https://github.com/egibbm/client-Python.git@113-max_pool_size
 robotframework
 six>=1.15.0

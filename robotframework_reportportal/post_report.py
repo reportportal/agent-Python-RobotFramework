@@ -17,6 +17,7 @@ Command-line usage:
                 [--variable RP_LAUNCH_ATTRIBUTES:"RF tag_name:tag_value"]
                 [--variable RP_TEST_ATTRIBUTES:"Long"]
                 [--variable RP_LOG_BATCH_SIZE:"10"]
+                [--variable RP_MAX_POOL_SIZE:"50"]
                 [output.xml]
 
 This script needs to be run within the same directory as the report xml file.
