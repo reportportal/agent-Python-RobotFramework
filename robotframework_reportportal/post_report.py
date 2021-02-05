@@ -25,12 +25,13 @@ Attachments mentioned in the log messages will be referred relative to
 current dir.
 """
 
-import sys
 import getopt
+import sys
 
 from robot.api import ExecutionResult
+
 from robotframework_reportportal.result_visitor import RobotResultsVisitor
-from robotframework_reportportal.variables import _variables, Variables
+from robotframework_reportportal.variables import _variables
 
 
 def process(infile="output.xml"):
@@ -46,7 +47,7 @@ def main():
     try:
         arguments, values = getopt.getopt(argument_list, short_options,
                                           long_options)
-    except getopt.error as err:
+    except getopt.error:
         sys.exit(1)
 
     for current_argument, current_value in arguments:
@@ -58,11 +59,11 @@ def main():
             _variables[k] = v
 
     try:
-        rc = process(*values)
+        process(*values)
     except TypeError:
         print(__doc__)
         sys.exit(1)
-    sys.exit(rc)
+    sys.exit(0)
 
 
 if __name__ == "__main__":

@@ -4,3 +4,6 @@ dist
 MANIFEST
 robotframework_reportportal.egg-info
 *.pyc
+build/
+robot-plugin/
+.vscode/

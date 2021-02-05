@@ -81,7 +81,7 @@ class RobotService(object):
 
     @staticmethod
     def start_launch(launch_name, attributes=None,
-                     description=None, mode=None):
+                     description=None, mode=None, ts=None):
         """Call start_launch method of the common client.
 
         :param launch_name: Launch name
@@ -93,7 +93,7 @@ class RobotService(object):
         sl_pt = {
             "attributes": RobotService._get_launch_attributes(attributes),
             "name": launch_name,
-            "start_time": timestamp(),
+            "start_time": ts or timestamp(),
             "description": description,
             "mode": mode
         }
@@ -104,9 +104,9 @@ class RobotService(object):
         return RobotService.rp.start_launch(**sl_pt)
 
     @staticmethod
-    def finish_launch(launch=None):
+    def finish_launch(launch=None, ts=None):
         fl_rq = {
-            "end_time": timestamp(),
+            "end_time": ts or timestamp(),
             "status": RobotService.status_mapping[launch.status]
         }
         logging.debug("ReportPortal - Finish launch: "
@@ -114,12 +114,12 @@ class RobotService(object):
         RobotService.rp.finish_launch(**fl_rq)
 
     @staticmethod
-    def start_suite(name=None, suite=None, parent_item_id=None, attributes=None):
+    def start_suite(name=None, suite=None, parent_item_id=None, attributes=None, ts=None):
         start_rq = {
             "name": name,
             "attributes": attributes,
             "description": suite.doc,
-            "start_time": timestamp(),
+            "start_time": ts or timestamp(),
             "item_type": "SUITE",
             "parent_item_id": parent_item_id
         }
@@ -129,9 +129,9 @@ class RobotService(object):
         return RobotService.rp.start_test_item(**start_rq)
 
     @staticmethod
-    def finish_suite(item_id, issue=None, suite=None):
+    def finish_suite(item_id, issue=None, suite=None, ts=None):
         fta_rq = {
-            "end_time": timestamp(),
+            "end_time": ts or timestamp(),
             "status": RobotService.status_mapping[suite.status],
             "issue": issue,
             "item_id": item_id
@@ -142,14 +142,14 @@ class RobotService(object):
         RobotService.rp.finish_test_item(**fta_rq)
 
     @staticmethod
-    def start_test(test=None, parent_item_id=None, attributes=None):
+    def start_test(test=None, parent_item_id=None, attributes=None, ts=None):
         # Item type should be sent as "STEP" until we upgrade to RPv6.
         # Details at: https://github.com/reportportal/agent-Python-RobotFramework/issues/56
         start_rq = {
             "name": test.name,
             "attributes": attributes,
             "description": test.doc,
-            "start_time": timestamp(),
+            "start_time": ts or timestamp(),
             "item_type": "STEP",
             "parent_item_id": parent_item_id
         }
@@ -159,9 +159,9 @@ class RobotService(object):
         return RobotService.rp.start_test_item(**start_rq)
 
     @staticmethod
-    def finish_test(item_id, issue=None, test=None):
+    def finish_test(item_id, issue=None, test=None, ts=None):
         fta_rq = {
-            "end_time": timestamp(),
+            "end_time": ts or timestamp(),
             "status": RobotService.status_mapping[test.status],
             "issue": issue,
             "item_id": item_id
@@ -172,11 +172,11 @@ class RobotService(object):
         RobotService.rp.finish_test_item(**fta_rq)
 
     @staticmethod
-    def start_keyword(keyword=None, parent_item_id=None, has_stats=True):
+    def start_keyword(keyword=None, parent_item_id=None, has_stats=True, ts=None):
         start_rq = {
             "name": keyword.get_name(),
             "description": keyword.doc,
-            "start_time": timestamp(),
+            "start_time": ts or timestamp(),
             "item_type": keyword.get_type(),
             "parent_item_id": parent_item_id,
             "has_stats": has_stats
@@ -187,9 +187,9 @@ class RobotService(object):
         return RobotService.rp.start_test_item(**start_rq)
 
     @staticmethod
-    def finish_keyword(item_id, issue=None, keyword=None):
+    def finish_keyword(item_id, issue=None, keyword=None, ts=None):
         fta_rq = {
-            "end_time": timestamp(),
+            "end_time": ts or timestamp(),
             "status": RobotService.status_mapping[keyword.status],
             "issue": issue,
             "item_id": item_id
@@ -200,9 +200,9 @@ class RobotService(object):
         RobotService.rp.finish_test_item(**fta_rq)
 
     @staticmethod
-    def log(message):
+    def log(message, ts=None):
         sl_rq = {
-            "time": timestamp(),
+            "time": ts or timestamp(),
             "message": message.message,
             "level": RobotService.log_level_mapping[message.level],
             "attachment": message.attachment,
