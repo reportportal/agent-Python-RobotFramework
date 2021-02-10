@@ -32,15 +32,17 @@ import sys
 from robot.api import ExecutionResult
 
 from robotframework_reportportal.result_visitor import RobotResultsVisitor
+from robotframework_reportportal.time_visitor import TimeVisitor, corrections
 from robotframework_reportportal.variables import _variables
-from robotframework_reportportal.time_visitor import TimeVisitor
 
 
 def process(infile="output.xml"):
-    # visitor = RobotResultsVisitor()
-    visitor = TimeVisitor()
     test_run = ExecutionResult(infile)
-    test_run.visit(visitor)
+    test_run.visit(TimeVisitor())
+    if corrections:
+        logging.debug("{0} is missing some of its starttime/endtime. "
+                      "This might cause inconsistencies in your duration report.".format(infile))
+    test_run.visit(RobotResultsVisitor())
 
 
 def main():
