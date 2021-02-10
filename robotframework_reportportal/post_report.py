@@ -26,16 +26,19 @@ current dir.
 """
 
 import getopt
+import logging
 import sys
 
 from robot.api import ExecutionResult
 
 from robotframework_reportportal.result_visitor import RobotResultsVisitor
 from robotframework_reportportal.variables import _variables
+from robotframework_reportportal.time_visitor import TimeVisitor
 
 
 def process(infile="output.xml"):
-    visitor = RobotResultsVisitor()
+    # visitor = RobotResultsVisitor()
+    visitor = TimeVisitor()
     test_run = ExecutionResult(infile)
     test_run.visit(visitor)
 
@@ -57,6 +60,11 @@ def main():
         elif current_argument in ("-v", "--variable"):
             k, v = str(current_value).split(":", 1)
             _variables[k] = v
+
+    numeric_level = getattr(logging, "debug".upper(), None)
+    # if not isinstance(numeric_level, int):
+    #     raise ValueError('Invalid log level: %s' % loglevel)
+    logging.basicConfig(level=numeric_level)
 
     try:
         process(*values)
