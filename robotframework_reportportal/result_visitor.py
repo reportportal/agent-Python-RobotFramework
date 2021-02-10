@@ -36,7 +36,8 @@ class RobotResultsVisitor(ResultVisitor):
             'source': suite.source,
             'suites': suite.suites,
             'tests': suite.tests,
-            'totaltests': suite.test_count
+            'totaltests': getattr(suite.statistics, 'all', suite.statistics).total,
+            'starttime': ts
         }
         listener.start_suite(suite.name, attrs, ts)
 
@@ -50,7 +51,7 @@ class RobotResultsVisitor(ResultVisitor):
             'source': suite.source,
             'suites': suite.suites,
             'tests': suite.tests,
-            'totaltests': suite.test_count,
+            'totaltests': getattr(suite.statistics, 'all', suite.statistics).total,
             'endtime': ts,
             'elapsedtime': suite.elapsedtime,
             'status': suite.status,

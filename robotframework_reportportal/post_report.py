@@ -18,6 +18,7 @@ Command-line usage:
                 [--variable RP_TEST_ATTRIBUTES:"Long"]
                 [--variable RP_LOG_BATCH_SIZE:"10"]
                 [--variable RP_MAX_POOL_SIZE:"50"]
+                [--loglevel CRITICAL|ERROR|WARNING|INFO|DEBUG]
                 [output.xml]
 
 This script needs to be run within the same directory as the report xml file.
@@ -40,15 +41,15 @@ def process(infile="output.xml"):
     test_run = ExecutionResult(infile)
     test_run.visit(TimeVisitor())
     if corrections:
-        logging.debug("{0} is missing some of its starttime/endtime. "
-                      "This might cause inconsistencies in your duration report.".format(infile))
+        logging.warning("{0} is missing some of its starttime/endtime. "
+                        "This might cause inconsistencies with your duration report.".format(infile))
     test_run.visit(RobotResultsVisitor())
 
 
 def main():
     argument_list = sys.argv[1:]
     short_options = "hv:"
-    long_options = ["help", "variable="]
+    long_options = ["help", "variable=", "loglevel="]
     try:
         arguments, values = getopt.getopt(argument_list, short_options,
                                           long_options)
@@ -62,11 +63,9 @@ def main():
         elif current_argument in ("-v", "--variable"):
             k, v = str(current_value).split(":", 1)
             _variables[k] = v
-
-    numeric_level = getattr(logging, "debug".upper(), None)
-    # if not isinstance(numeric_level, int):
-    #     raise ValueError('Invalid log level: %s' % loglevel)
-    logging.basicConfig(level=numeric_level)
+        elif current_argument == "--loglevel":
+            numeric_level = getattr(logging, current_value.upper(), None)
+            logging.basicConfig(level=numeric_level)
 
     try:
         process(*values)
