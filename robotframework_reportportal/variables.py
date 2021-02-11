@@ -26,6 +26,7 @@ class Variables(object):
     launch_id = None
     skip_analytics = getenv('ALLURE_NO_ANALYTICS')
     test_attributes = None
+    mode = None
 
     @staticmethod
     def check_variables():
@@ -52,6 +53,7 @@ class Variables(object):
         Variables.launch_attributes = get_variable("RP_LAUNCH_ATTRIBUTES", default="").split()
         Variables.launch_id = get_variable("RP_LAUNCH_UUID", default=None)
         Variables.launch_doc = get_variable("RP_LAUNCH_DOC", default=None)
+        Variables.mode = get_variable("RP_MODE", default=None)
         Variables.log_batch_size = int(get_variable("RP_LOG_BATCH_SIZE", default="20"))
         Variables.pool_size = int(get_variable("RP_MAX_POOL_SIZE", default="50"))
         Variables.test_attributes = get_variable("RP_TEST_ATTRIBUTES", default="").split()

@@ -18,6 +18,7 @@ Command-line usage:
                 [--variable RP_TEST_ATTRIBUTES:"Long"]
                 [--variable RP_LOG_BATCH_SIZE:"10"]
                 [--variable RP_MAX_POOL_SIZE:"50"]
+                [--variable RP_MODE:"DEBUG"]
                 [--loglevel CRITICAL|ERROR|WARNING|INFO|DEBUG]
                 [output.xml]
 

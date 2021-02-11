@@ -23,6 +23,7 @@ def start_launch(launch, ts=None):
             launch_name=Variables.launch_name,
             attributes=gen_attributes(Variables.launch_attributes),
             description=launch.doc,
+            mode=Variables.mode,
             ts=ts)
     else:
         RobotService.rp.launch_id = Variables.launch_id

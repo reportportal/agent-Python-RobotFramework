@@ -88,6 +88,7 @@ class RobotService(object):
         :param attributes:  Launch attributes
         :param description: Launch description
         :param mode:        Launch mode
+        :param ts:          start time
         :return:            launch UUID
         """
         sl_pt = {
