@@ -23,7 +23,6 @@ class TimeVisitor(ResultVisitor):
             if corrected:
                 logging.debug(
                     "Correcting parents' starttime to {0} based on {2}={1}".format(o.starttime, o.id, node_class))
-            return
         else:
             _stack.append(o.id)
             corrections[o.id] = [None, None]
@@ -43,7 +42,6 @@ class TimeVisitor(ResultVisitor):
             if corrected:
                 logging.debug(
                     "Correcting parents' endtime to {0} based on {2}={1}".format(o.endtime, o.id, node_class))
-            return
         if o.id == _stack[-1]:
             _stack.pop()
 
