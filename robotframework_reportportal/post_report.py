@@ -18,6 +18,8 @@ Command-line usage:
                 [--variable RP_TEST_ATTRIBUTES:"Long"]
                 [--variable RP_LOG_BATCH_SIZE:"10"]
                 [--variable RP_MAX_POOL_SIZE:"50"]
+                [--variable RP_MODE:"DEBUG"]
+                [--loglevel CRITICAL|ERROR|WARNING|INFO|DEBUG]
                 [output.xml]
 
 This script needs to be run within the same directory as the report xml file.
@@ -25,28 +27,34 @@ Attachments mentioned in the log messages will be referred relative to
 current dir.
 """
 
-import sys
 import getopt
+import logging
+import sys
 
 from robot.api import ExecutionResult
+
 from robotframework_reportportal.result_visitor import RobotResultsVisitor
-from robotframework_reportportal.variables import _variables, Variables
+from robotframework_reportportal.time_visitor import TimeVisitor, corrections
+from robotframework_reportportal.variables import _variables
 
 
 def process(infile="output.xml"):
-    visitor = RobotResultsVisitor()
     test_run = ExecutionResult(infile)
-    test_run.visit(visitor)
+    test_run.visit(TimeVisitor())
+    if corrections:
+        logging.warning("{0} is missing some of its starttime/endtime. "
+                        "This might cause inconsistencies with your duration report.".format(infile))
+    test_run.visit(RobotResultsVisitor())
 
 
 def main():
     argument_list = sys.argv[1:]
     short_options = "hv:"
-    long_options = ["help", "variable="]
+    long_options = ["help", "variable=", "loglevel="]
     try:
         arguments, values = getopt.getopt(argument_list, short_options,
                                           long_options)
-    except getopt.error as err:
+    except getopt.error:
         sys.exit(1)
 
     for current_argument, current_value in arguments:
@@ -56,13 +64,16 @@ def main():
         elif current_argument in ("-v", "--variable"):
             k, v = str(current_value).split(":", 1)
             _variables[k] = v
+        elif current_argument == "--loglevel":
+            numeric_level = getattr(logging, current_value.upper(), None)
+            logging.basicConfig(level=numeric_level)
 
     try:
-        rc = process(*values)
+        process(*values)
     except TypeError:
         print(__doc__)
         sys.exit(1)
-    sys.exit(rc)
+    sys.exit(0)
 
 
 if __name__ == "__main__":

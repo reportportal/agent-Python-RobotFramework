@@ -1,11 +1,20 @@
 import re
 import string
+from datetime import datetime
 
 from robot.api import ResultVisitor
 from six.moves.urllib.parse import unquote
 
 from . import listener
+from .time_visitor import corrections
 from .variables import _variables
+
+
+def to_timestamp(time_str):
+    if time_str:
+        dt = datetime.strptime(time_str, '%Y%m%d %H:%M:%S.%f')
+        return str(int(dt.timestamp() * 1000))
+    return None
 
 
 class RobotResultsVisitor(ResultVisitor):
@@ -18,6 +27,7 @@ class RobotResultsVisitor(ResultVisitor):
             _variables["RP_LAUNCH_DOC"] = result.suite.doc
 
     def start_suite(self, suite):
+        ts = to_timestamp(suite.starttime if suite.id not in corrections else corrections[suite.id][0])
         attrs = {
             'id': suite.id,
             'longname': suite.longname,
@@ -27,11 +37,12 @@ class RobotResultsVisitor(ResultVisitor):
             'suites': suite.suites,
             'tests': suite.tests,
             'totaltests': getattr(suite.statistics, 'all', suite.statistics).total,
-            'starttime': suite.starttime
+            'starttime': ts
         }
-        listener.start_suite(suite.name, attrs)
+        listener.start_suite(suite.name, attrs, ts)
 
     def end_suite(self, suite):
+        ts = to_timestamp(suite.endtime if suite.id not in corrections else corrections[suite.id][1])
         attrs = {
             'id': suite.id,
             'longname': suite.longname,
@@ -41,16 +52,16 @@ class RobotResultsVisitor(ResultVisitor):
             'suites': suite.suites,
             'tests': suite.tests,
             'totaltests': getattr(suite.statistics, 'all', suite.statistics).total,
-            'starttime': suite.starttime,
-            'endtime': suite.endtime,
+            'endtime': ts,
             'elapsedtime': suite.elapsedtime,
             'status': suite.status,
             'statistics': suite.statistics,
             'message': suite.message,
         }
-        listener.end_suite(None, attrs)
+        listener.end_suite(None, attrs, ts)
 
     def start_test(self, test):
+        ts = to_timestamp(test.starttime if test.id not in corrections else corrections[test.id][0])
         attrs = {
             'id': test.id,
             'longname': test.longname,
@@ -60,11 +71,12 @@ class RobotResultsVisitor(ResultVisitor):
             'critical': getattr(test, 'critical', ''),
             'template': '',
             # 'lineno': test.lineno,
-            'starttime': test.starttime,
+            'starttime': ts,
         }
-        listener.start_test(test.name, attrs)
+        listener.start_test(test.name, attrs, ts)
 
     def end_test(self, test):
+        ts = to_timestamp(test.endtime if test.id not in corrections else corrections[test.id][1])
         attrs = {
             'id': test.id,
             'longname': test.longname,
@@ -74,15 +86,15 @@ class RobotResultsVisitor(ResultVisitor):
             'critical': getattr(test, 'critical', ''),
             'template': '',
             # 'lineno': test.lineno,
-            'starttime': test.starttime,
-            'endtime': test.endtime,
+            'endtime': ts,
             'elapsedtime': test.elapsedtime,
             'status': test.status,
             'message': test.message,
         }
-        listener.end_test(test.name, attrs)
+        listener.end_test(test.name, attrs, ts)
 
     def start_keyword(self, kw):
+        ts = to_timestamp(kw.starttime if kw.id not in corrections else corrections[kw.id][0])
         attrs = {
             'type': string.capwords(kw.type),
             'kwname': kw.kwname,
@@ -91,11 +103,12 @@ class RobotResultsVisitor(ResultVisitor):
             'args': kw.args,
             'assign': kw.assign,
             'tags': kw.tags,
-            'starttime': kw.starttime,
+            'starttime': ts,
         }
-        listener.start_keyword(kw.name, attrs)
+        listener.start_keyword(kw.name, attrs, ts)
 
     def end_keyword(self, kw):
+        ts = to_timestamp(kw.endtime if kw.id not in corrections else corrections[kw.id][1])
         attrs = {
             'type': string.capwords(kw.type),
             'kwname': kw.kwname,
@@ -104,12 +117,11 @@ class RobotResultsVisitor(ResultVisitor):
             'args': kw.args,
             'assign': kw.assign,
             'tags': kw.tags,
-            'starttime': kw.starttime,
-            'endtime': kw.endtime,
+            'endtime': ts,
             'elapsedtime': kw.elapsedtime,
             'status': 'PASS' if kw.assign else kw.status,
         }
-        listener.end_keyword(kw.name, attrs)
+        listener.end_keyword(kw.name, attrs, ts)
 
     def start_message(self, msg):
         if msg.message:
