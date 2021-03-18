@@ -24,7 +24,7 @@ class Variables(object):
     log_batch_size = None
     launch_attributes = None
     launch_id = None
-    skip_analytics = getenv('ALLURE_NO_ANALYTICS')
+    skip_analytics = getenv('AGENT_NO_ANALYTICS')
     test_attributes = None
     mode = None
 

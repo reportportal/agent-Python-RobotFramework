@@ -99,7 +99,7 @@ ReportPortal collects information about agent name and its version only. This in
 If you still want to switch Off Google analytics, please change env variable the way below.
 
 ```bash
-export ALLURE_NO_ANALYTICS=1
+export AGENT_NO_ANALYTICS=1
 ```
 
 ## Copyright Notice
