@@ -7,3 +7,4 @@ robotframework_reportportal.egg-info
 build/
 robot-plugin/
 .vscode/
+venv/
