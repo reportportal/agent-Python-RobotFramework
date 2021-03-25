@@ -1,7 +1,9 @@
 # ReportPortal RobotFramework agent
 
-[![Build Status](https://travis-ci.org/reportportal/agent-Python-RobotFramework.svg?branch=master)](https://travis-ci.org/reportportal/agent-Python-RobotFramework)
-[![PyPI](https://img.shields.io/pypi/v/robotframework-reportportal.svg?maxAge=2592000)](https://pypi.python.org/pypi/robotframework-reportportal)
+[![PyPI](https://img.shields.io/pypi/v/robotframework-reportportal.svg?maxAge=259200)](https://pypi.python.org/pypi/robotframework-reportportal)
+[![Python versions](https://img.shields.io/pypi/pyversions/robotframework-reportportal.svg)](https://pypi.org/project/robotframework-reportportal)
+[![Build Status](https://github.com/reportportal/agent-Python-RobotFramework/actions/workflows/tests.yml/badge.svg)](https://github.com/reportportal/agent-Python-RobotFramework/actions/workflows/tests.yml)
+[![codecov.io](https://codecov.io/gh/reportportal/agent-Python-RobotFramework/branch/master/graph/badge.svg)](https://codecov.io/gh/reportportal/agent-Python-RobotFramework)
 
 Listener for RobotFramework to report results to ReportPortal
 
