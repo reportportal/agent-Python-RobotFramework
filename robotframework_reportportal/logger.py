@@ -5,7 +5,6 @@ of an extra kwarg "attachment" to all logging functions.
 
 Example
 -------
-
 import subprocess
 from robotframework_reportportal import logger
 
@@ -28,7 +27,7 @@ from .model import LogMessage
 
 
 def write(msg, level="INFO", html=False, attachment=None):
-    """Writes the message to the log file using the given level.
+    """Write the message to the log file using the given level.
 
     Valid log levels are ``TRACE``, ``DEBUG``, ``INFO`` (default since RF
     2.9.1), ``WARN``, and ``ERROR`` (new in RF 2.9). Additionally it is
@@ -49,17 +48,17 @@ def write(msg, level="INFO", html=False, attachment=None):
 
 
 def trace(msg, html=False, attachment=None):
-    """Writes the message to the log file using the ``TRACE`` level."""
+    """Write the message to the log file using the ``TRACE`` level."""
     write(msg, "TRACE", html, attachment)
 
 
 def debug(msg, html=False, attachment=None):
-    """Writes the message to the log file using the ``DEBUG`` level."""
+    """Write the message to the log file using the ``DEBUG`` level."""
     write(msg, "DEBUG", html, attachment)
 
 
 def info(msg, html=False, also_console=False, attachment=None):
-    """Writes the message to the log file using the ``INFO`` level.
+    """Write the message to the log file using the ``INFO`` level.
 
     If ``also_console`` argument is set to ``True``, the message is
     written both to the log file and to the console.
@@ -70,17 +69,17 @@ def info(msg, html=False, also_console=False, attachment=None):
 
 
 def warn(msg, html=False, attachment=None):
-    """Writes the message to the log file using the ``WARN`` level."""
+    """Write the message to the log file using the ``WARN`` level."""
     write(msg, "WARN", html, attachment)
 
 
 def error(msg, html=False, attachment=None):
-    """Writes the message to the log file using the ``ERROR`` level."""
+    """Write the message to the log file using the ``ERROR`` level."""
     write(msg, "ERROR", html, attachment)
 
 
 def console(msg, newline=True, stream="stdout"):
-    """Writes the message to the console.
+    """Write the message to the console.
 
     If the ``newline`` argument is ``True``, a newline character is
     automatically added to the message.

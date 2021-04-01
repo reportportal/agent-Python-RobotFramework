@@ -12,6 +12,14 @@ repos:
     rev: 6.0.0
     hooks:
     -   id: pydocstyle
+        # Temporary exclude files in which are in charge of offline reporting
+        exclude: |
+            (?x)^(
+                tests/*|
+                robotframework_reportportal/result_visitor.py|
+                robotframework_reportportal/post_report.py|
+                robotframework_reportportal/time_visitor.py
+            )
 -   repo: https://github.com/Lucas-C/pre-commit-hooks-markup
     rev: v1.0.1
     hooks:
@@ -20,3 +28,10 @@ repos:
     rev: 3.9.0
     hooks:
     -   id: flake8
+        # Temporary exclude files in which are in charge of offline reporting
+        exclude: |
+            (?x)^(
+                robotframework_reportportal/result_visitor.py|
+                robotframework_reportportal/post_report.py|
+                robotframework_reportportal/time_visitor.py
+            )$

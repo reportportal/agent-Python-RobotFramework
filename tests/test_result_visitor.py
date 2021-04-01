@@ -18,7 +18,8 @@ class TestResultVisitorTest:
             visitor.parse_message('<img src=\'bad.html.img>')
 
     def test_parse_message_contains_image(self, visitor):
-        assert ['src="any.png"', 'any.png'] == visitor.parse_message('<img alt="" src="any.png" />')
+        assert ['src="any.png"', 'any.png'] == visitor.parse_message(
+            '<img alt="" src="any.png" />')
 
     def test_parse_message_contains_image_with_space(self, visitor):
         assert ['src="any%20image.png"', 'any image.png'] == \

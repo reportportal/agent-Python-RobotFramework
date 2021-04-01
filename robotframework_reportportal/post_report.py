@@ -1,4 +1,4 @@
-"""Robot Framework test report sender to Report Portal
+"""Robot Framework test report sender to Report Portal.
 
 This tool replays a Robot Framework test session using the output XML file
 with ReportPortal's listener agent injected without actually doing the test.
@@ -43,7 +43,8 @@ def process(infile="output.xml"):
     test_run.visit(TimeVisitor())
     if corrections:
         logging.warning("{0} is missing some of its starttime/endtime. "
-                        "This might cause inconsistencies with your duration report.".format(infile))
+                        "This might cause inconsistencies with your "
+                        "duration report.".format(infile))
     test_run.visit(RobotResultsVisitor())
 
 
