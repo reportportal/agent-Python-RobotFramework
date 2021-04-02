@@ -107,7 +107,7 @@ class LogMessage(text_type):
 
     def __init__(self, *args, **kwargs):
         """Initialize required attributes."""
-        super(LogMessage, self).__init__(*args, **kwargs)
+        super(LogMessage, self).__init__()
         self.attachment = None
         self.item_id = None
         self.level = 'INFO'
