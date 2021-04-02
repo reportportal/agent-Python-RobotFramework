@@ -124,8 +124,10 @@ def end_test(name, attributes, ts=None):
     :param ts:         Timestamp(used by the ResultVisitor)
     """
     test = Test(name=name, attributes=attributes)
+    if not test.critical and test.status == 'FAIL':
+        test.status = 'SKIP'
     item_id = items.pop()[0]
-    logging.debug("ReportPortal - End Test: {0}".format(attributes))
+    logging.debug('ReportPortal - End Test: {0}'.format(attributes))
     RobotService.finish_test(
         item_id=item_id,
         test=test,

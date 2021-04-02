@@ -48,7 +48,7 @@ class Test(object):
         :param name:       Name of the test
         :param attributes: Test attributes passed through the listener
         """
-        self.critical = attributes.get('critical', '')
+        self.critical = attributes.get('critical', 'yes') == 'yes'
         self.doc = attributes['doc']
         self.longname = attributes['longname']
         self.message = attributes.get('message')
@@ -102,13 +102,15 @@ class Keyword(object):
             return 'STEP'
 
 
-class LogMessage(text_type):
+class LogMessage:
     """Class represents Robot Framework messages."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, message):
         """Initialize required attributes."""
-        super(LogMessage, self).__init__()
         self.attachment = None
         self.item_id = None
         self.level = 'INFO'
-        self.message = self
+        self.message = message
+
+    def __repr__(self):
+        return self.message
