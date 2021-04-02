@@ -1,30 +1,33 @@
+"""This module includes Robot service for reporting results to Report Portal.
+
+Copyright (c) 2021 http://reportportal.io .
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
 import logging
-import traceback
-from time import time
 
 from reportportal_client.external.google_analytics import send_event
 from reportportal_client.helpers import (
     get_launch_sys_attrs,
-    get_package_version
+    get_package_version,
+    timestamp
 )
 from reportportal_client.service import (
     _dict_to_payload,
     ReportPortalService
 )
 
-from .variables import Variables
-
-
-def async_error_handler(exc_info):
-    exc, msg, tb = exc_info
-    traceback.print_exception(exc, msg, tb)
-
-
-def timestamp():
-    return str(int(time() * 1000))
-
 
 class RobotService(object):
+    """Class represents service that sends Robot items to Report Portal."""
+
     agent_name = "robotframework-reportportal"
     agent_version = get_package_version(agent_name)
     rp = None
@@ -61,6 +64,14 @@ class RobotService(object):
 
     @staticmethod
     def init_service(endpoint, project, uuid, log_batch_size, pool_size):
+        """Initialize common reportportal client.
+
+        :param endpoint:       Report Portal API endpoint
+        :param project:        Report Portal project
+        :param uuid:           API token
+        :param log_batch_size: Number of logs to be sent within one batch
+        :param pool_size:      HTTPAdapter max pool size
+        """
         if RobotService.rp is None:
             logging.debug(
                 "ReportPortal - Init service: "
@@ -77,20 +88,22 @@ class RobotService(object):
 
     @staticmethod
     def terminate_service():
+        """Terminate common reportportal client."""
         if RobotService.rp is not None:
             RobotService.rp.terminate()
 
     @staticmethod
-    def start_launch(launch_name, attributes=None,
-                     description=None, mode=None, ts=None):
+    def start_launch(launch_name, attributes=None, description=None,
+                     mode=None, ts=None, skip_analytics=False):
         """Call start_launch method of the common client.
 
-        :param launch_name: Launch name
-        :param attributes:  Launch attributes
-        :param description: Launch description
-        :param mode:        Launch mode
-        :param ts:          start time
-        :return:            launch UUID
+        :param launch_name:    Launch name
+        :param attributes:     Launch attributes
+        :param description:    Launch description
+        :param mode:           Launch mode
+        :param ts:             Start time
+        :param skip_analytics: Skip reporting of agent name and version to GA?
+        :return:               launch UUID
         """
         sl_pt = {
             "attributes": RobotService._get_launch_attributes(attributes),
@@ -101,12 +114,17 @@ class RobotService(object):
         }
         logging.debug("ReportPortal - Start launch: "
                       "request_body={0}".format(sl_pt))
-        if not Variables.skip_analytics:
+        if not skip_analytics:
             send_event(RobotService.agent_name, RobotService.agent_version)
         return RobotService.rp.start_launch(**sl_pt)
 
     @staticmethod
     def finish_launch(launch=None, ts=None):
+        """Finish started launch.
+
+        :param launch: Launch name
+        :param ts:     End time
+        """
         fl_rq = {
             "end_time": ts or timestamp(),
             "status": RobotService.status_mapping[launch.status]
@@ -116,7 +134,17 @@ class RobotService(object):
         RobotService.rp.finish_launch(**fl_rq)
 
     @staticmethod
-    def start_suite(name=None, suite=None, parent_item_id=None, attributes=None, ts=None):
+    def start_suite(name=None, suite=None, parent_item_id=None,
+                    attributes=None, ts=None):
+        """Call start_test method of the common client.
+
+        :param name:           Test suite name
+        :param suite:          model.Suite object
+        :param parent_item_id: Parent item UUID
+        :param attributes:     attributes of the test suite
+        :param ts:             Start time
+        :return:               Suite UUID
+        """
         start_rq = {
             "name": name,
             "attributes": attributes,
@@ -132,6 +160,13 @@ class RobotService(object):
 
     @staticmethod
     def finish_suite(item_id, issue=None, suite=None, ts=None):
+        """Finish started suite.
+
+        :param item_id: UUID of the started suite item
+        :param issue:   Corresponding issue if it exists
+        :param suite:   model.Suite object
+        :param ts:      End time
+        """
         fta_rq = {
             "end_time": ts or timestamp(),
             "status": RobotService.status_mapping[suite.status],
@@ -145,8 +180,16 @@ class RobotService(object):
 
     @staticmethod
     def start_test(test=None, parent_item_id=None, attributes=None, ts=None):
+        """Call start_test method of the common client.
+
+        :param test:           model.Test object
+        :param parent_item_id: Parent item UUID
+        :param attributes:     attributes of the test case
+        :param ts:             Start time
+        """
         # Item type should be sent as "STEP" until we upgrade to RPv6.
-        # Details at: https://github.com/reportportal/agent-Python-RobotFramework/issues/56
+        # Details at:
+        # https://github.com/reportportal/agent-Python-RobotFramework/issues/56
         start_rq = {
             "name": test.name,
             "attributes": attributes,
@@ -162,6 +205,13 @@ class RobotService(object):
 
     @staticmethod
     def finish_test(item_id, issue=None, test=None, ts=None):
+        """Finish started test case.
+
+        :param item_id: UUID of the started test item
+        :param issue:   Corresponding issue if it exists
+        :param test:    model.Test object
+        :param ts:      End time
+        """
         fta_rq = {
             "end_time": ts or timestamp(),
             "status": RobotService.status_mapping[test.status],
@@ -174,7 +224,16 @@ class RobotService(object):
         RobotService.rp.finish_test_item(**fta_rq)
 
     @staticmethod
-    def start_keyword(keyword=None, parent_item_id=None, has_stats=True, ts=None):
+    def start_keyword(keyword=None, parent_item_id=None, has_stats=True,
+                      ts=None):
+        """Call start_test method of the common client.
+
+        :param keyword:        model.Keyword object
+        :param parent_item_id: Parent item UUID
+        :param has_stats:      Flag that indicated whether keyword needs to
+                               be nested step or not. (False - nested)
+        :param ts:             Start time
+        """
         start_rq = {
             "name": keyword.get_name(),
             "description": keyword.doc,
@@ -190,6 +249,13 @@ class RobotService(object):
 
     @staticmethod
     def finish_keyword(item_id, issue=None, keyword=None, ts=None):
+        """Finish started test case.
+
+        :param item_id: UUID of the started test item
+        :param issue:   Corresponding issue if it exists
+        :param keyword: model.Keyword object
+        :param ts:      End time
+        """
         fta_rq = {
             "end_time": ts or timestamp(),
             "status": RobotService.status_mapping[keyword.status],
@@ -203,6 +269,11 @@ class RobotService(object):
 
     @staticmethod
     def log(message, ts=None):
+        """Send log message to Report Portal.
+
+        :param message: model.LogMessage object
+        :param ts:      Timestamp
+        """
         sl_rq = {
             "time": ts or timestamp(),
             "message": message.message,

@@ -17,12 +17,14 @@ class TimeVisitor(ResultVisitor):
         if o.starttime:
             corrected = False
             for parent_id in _stack:
-                if corrections[parent_id][0] is None or corrections[parent_id][0] > o.starttime:
+                if corrections[parent_id][0] is None or \
+                        corrections[parent_id][0] > o.starttime:
                     corrections[parent_id][0] = o.starttime
                     corrected = True
             if corrected:
                 logging.debug(
-                    "Correcting parents' starttime to {0} based on {2}={1}".format(o.starttime, o.id, node_class))
+                    "Correcting parents' starttime to {0} based on {2}={1}"
+                    .format(o.starttime, o.id, node_class))
         else:
             _stack.append(o.id)
             corrections[o.id] = [None, None]
@@ -36,12 +38,14 @@ class TimeVisitor(ResultVisitor):
         if o.endtime:
             corrected = False
             for parent_id in _stack:
-                if corrections[parent_id][1] is None or corrections[parent_id][1] < o.endtime:
+                if corrections[parent_id][1] is None or \
+                        corrections[parent_id][1] < o.endtime:
                     corrections[parent_id][1] = o.endtime
                     corrected = True
             if corrected:
                 logging.debug(
-                    "Correcting parents' endtime to {0} based on {2}={1}".format(o.endtime, o.id, node_class))
+                    "Correcting parents' endtime to {0} based on {2}={1}"
+                    .format(o.endtime, o.id, node_class))
         if o.id == _stack[-1]:
             _stack.pop()
 

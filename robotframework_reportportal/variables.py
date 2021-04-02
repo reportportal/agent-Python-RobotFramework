@@ -1,13 +1,34 @@
+"""This module contains model that stores Robot Framework variables.
+
+Copyright (c) 2021 http://reportportal.io .
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+"""
+
 from os import getenv
 
 from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
 
 from .exception import RobotServiceException
 
+# This is a storage for the result visitor
 _variables = {}
 
 
 def get_variable(name, default=None):
+    """Get Robot Framework variable.
+
+    :param name:    Name of the variable
+    :param default: Default value
+    :return:        The value of the variable, otherwise default value
+    """
     try:
         return BuiltIn().get_variable_value("${" + name + "}", default=default)
     except RobotNotRunningError:
@@ -15,45 +36,78 @@ def get_variable(name, default=None):
 
 
 class Variables(object):
-    pool_size = None
-    uuid = None
-    endpoint = None
-    launch_name = None
-    project = None
-    launch_doc = None
-    log_batch_size = None
-    launch_attributes = None
-    launch_id = None
-    skip_analytics = getenv('AGENT_NO_ANALYTICS')
-    test_attributes = None
-    mode = None
+    """This class stores Robot Framework variables related to Report Portal."""
 
-    @staticmethod
-    def check_variables():
-        Variables.uuid = get_variable("RP_UUID", default=None)
-        if Variables.uuid is None:
+    def __init__(self):
+        """Initialize instance attributes."""
+        self._endpoint = None
+        self._launch_name = None
+        self._project = None
+        self._uuid = None
+        self.launch_attributes = get_variable(
+            'RP_LAUNCH_ATTRIBUTES', default='').split()
+        self.launch_id = get_variable('RP_LAUNCH_UUID')
+        self.launch_doc = get_variable('RP_LAUNCH_DOC')
+        self.log_batch_size = int(get_variable(
+            'RP_LOG_BATCH_SIZE', default='20'))
+        self.mode = get_variable('RP_MODE')
+        self.pool_size = int(get_variable('RP_MAX_POOL_SIZE', default='50'))
+        self.skip_analytics = getenv('AGENT_NO_ANALYTICS')
+        self.test_attributes = get_variable(
+            'RP_TEST_ATTRIBUTES', default='').split()
+
+    @property
+    def endpoint(self):
+        """Get Report Portal API endpoint.
+
+        :raises: RobotServiceException if it is None
+        :return: Report Portal API endpoint
+        """
+        self._endpoint = self._endpoint or get_variable('RP_ENDPOINT')
+        if self._endpoint is None:
             raise RobotServiceException(
-                "Missing parameter RP_UUID for robot run\n"
-                "You should pass -v RP_UUID:<uuid_value>")
-        Variables.endpoint = get_variable("RP_ENDPOINT", default=None)
-        if Variables.endpoint is None:
+                'Missing parameter RP_ENDPOINT for robot run\n'
+                'You should pass -v RP_ENDPOINT:<endpoint_value>')
+        return self._endpoint
+
+    @property
+    def launch_name(self):
+        """Get Report Portal launch name.
+
+        :raises: RobotServiceException if it is None
+        :return: Report Portal launch name
+        """
+        self._launch_name = self._launch_name or get_variable('RP_LAUNCH')
+        if self._launch_name is None:
             raise RobotServiceException(
-                "Missing parameter RP_ENDPOINT for robot run\n"
-                "You should pass -v RP_RP_ENDPOINT:<endpoint_value>")
-        Variables.launch_name = get_variable("RP_LAUNCH", default=None)
-        if Variables.launch_name is None:
+                'Missing parameter RP_LAUNCH for robot run\n'
+                'You should pass -v RP_LAUNCH:<launch_name_value>')
+        return self._launch_name
+
+    @property
+    def project(self):
+        """Get Report Portal project name.
+
+        :raises: RobotServiceException if it is None
+        :return: Report Portal project name
+        """
+        self._project = self._project or get_variable('RP_PROJECT')
+        if self._project is None:
             raise RobotServiceException(
-                "Missing parameter RP_LAUNCH for robot run\n"
-                "You should pass -v RP_LAUNCH:<launch_name_value>")
-        Variables.project = get_variable("RP_PROJECT", default=None)
-        if Variables.project is None:
+                'Missing parameter RP_PROJECT for robot run\n'
+                'You should pass -v RP_PROJECT:<project_name_value>')
+        return self._project
+
+    @property
+    def uuid(self):
+        """Get Report Portal API token UUID.
+
+        :raises: RobotServiceException if it is None
+        :return: Report Portal token UUID
+        """
+        self._uuid = self._uuid or get_variable('RP_UUID')
+        if self._uuid is None:
             raise RobotServiceException(
-                "Missing parameter RP_PROJECT for robot run\n"
-                "You should pass -v RP_PROJECT:<project_name_value>")
-        Variables.launch_attributes = get_variable("RP_LAUNCH_ATTRIBUTES", default="").split()
-        Variables.launch_id = get_variable("RP_LAUNCH_UUID", default=None)
-        Variables.launch_doc = get_variable("RP_LAUNCH_DOC", default=None)
-        Variables.mode = get_variable("RP_MODE", default=None)
-        Variables.log_batch_size = int(get_variable("RP_LOG_BATCH_SIZE", default="20"))
-        Variables.pool_size = int(get_variable("RP_MAX_POOL_SIZE", default="50"))
-        Variables.test_attributes = get_variable("RP_TEST_ATTRIBUTES", default="").split()
+                'Missing parameter RP_UUID for robot run\n'
+                'You should pass -v RP_UUID:<uuid_value>')
+        return self._uuid
