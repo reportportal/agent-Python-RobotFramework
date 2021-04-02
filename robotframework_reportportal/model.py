@@ -12,8 +12,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from six import text_type
-
 from reportportal_client.service import _convert_string
 
 
