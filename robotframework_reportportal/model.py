@@ -111,5 +111,5 @@ class LogMessage:
         self.message = message
 
     def __repr__(self):
-        """Controls string representation of the object"""
+        """The method controls string representation of the object."""
         return self.message
