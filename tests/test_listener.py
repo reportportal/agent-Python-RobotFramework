@@ -1,4 +1,4 @@
-from six.moves import mock
+from unittest import mock
 
 from robotframework_reportportal import listener
 
