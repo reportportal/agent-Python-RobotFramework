@@ -1,11 +1,11 @@
 """This module contains common Pytest fixtures and hooks for unit tests."""
 
-from six.moves import mock
-
 from pytest import fixture
+from six.moves import mock
 
 from robotframework_reportportal.result_visitor import RobotResultsVisitor
 from robotframework_reportportal.service import RobotService
+
 
 @fixture()
 def visitor():

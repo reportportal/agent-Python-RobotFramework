@@ -22,7 +22,6 @@ class TestListener(object):
             args, kwargs = mock_client.finish_test_item.call_args
             assert kwargs['status'] == 'FAILED'
 
-
     @mock.patch(ROBOT_SERVICE + 'init_service')
     def test_non_critical_test_skip(self, mock_init, mock_variables,
                                     suite_attributes, mock_client,
