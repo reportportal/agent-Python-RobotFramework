@@ -38,7 +38,6 @@ setup(
         'Programming Language :: Python :: 3.8'
         ],
     install_requires=read_file('requirements.txt').splitlines(),
-    test_requires=read_file('test_requirements.txt').splitlines(),
     entry_points={
         'console_scripts': [
             'post_report=robotframework_reportportal.post_report:main'
