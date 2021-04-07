@@ -102,7 +102,7 @@ class Keyword(object):
             return 'STEP'
 
 
-class LogMessage:
+class LogMessage(object):
     """Class represents Robot Framework messages."""
 
     def __init__(self, message):
