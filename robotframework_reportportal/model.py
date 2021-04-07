@@ -46,6 +46,8 @@ class Test(object):
         :param name:       Name of the test
         :param attributes: Test attributes passed through the listener
         """
+        # for backward compatibility with Robot < 4.0 mark every test case
+        # as critical if not set
         self.critical = attributes.get('critical', 'yes') == 'yes'
         self.doc = attributes['doc']
         self.longname = attributes['longname']

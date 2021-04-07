@@ -1,13 +1,7 @@
 import pytest
 
-from robotframework_reportportal.result_visitor import RobotResultsVisitor
-
 
 class TestResultVisitorTest:
-
-    @pytest.fixture()
-    def visitor(self):
-        return RobotResultsVisitor()
 
     def test_parse_message_no_img_tag(self, visitor):
         with pytest.raises(AttributeError):
