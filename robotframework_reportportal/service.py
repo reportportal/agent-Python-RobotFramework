@@ -36,8 +36,13 @@ def to_epoch(date):
     try:
         iso_date = isoparse(date)
     except ValueError:
-        return ''
-    return str(int(iso_date.timestamp() * 1000))
+        return None
+    if hasattr(iso_date, 'timestamp'):
+        epoch_time = iso_date.timestamp()
+    else:
+        epoch_time = \
+            float(iso_date.strftime('%s')) + iso_date.microsecond / 1e6
+    return str(int(epoch_time * 1000))
 
 
 class RobotService(object):
