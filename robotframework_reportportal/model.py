@@ -20,65 +20,118 @@ from reportportal_client.service import _convert_string
 class Suite(object):
     """Class represents Robot Framework test suite."""
 
-    def __init__(self, attributes):
+    def __init__(self, name, attributes):
         """Initialize required attributes.
 
+        :param name:       Suite name
         :param attributes: Suite attributes passed through the listener
         """
         self.attributes = attributes
         self.doc = attributes['doc']
+        self.end_time = attributes.get('endtime', '')
         self.longname = attributes['longname']
         self.message = attributes.get('message')
         self.metadata = attributes['metadata']
+        self.name = name
         self.robot_id = attributes['id']
+        self.rp_item_id = None
+        self.rp_parent_item_id = None
         self.source = attributes['source']
+        self.start_time = attributes.get('starttime')
         self.statistics = attributes.get('statistics')
         self.status = attributes.get('status')
         self.suites = attributes['suites']
         self.tests = attributes['tests']
         self.total_tests = attributes['totaltests']
+        self.type = 'SUITE'
+
+    def update(self, attributes):
+        """Update suite attributes on suite finish.
+
+        :param attributes: Suite attributes passed through the listener
+        """
+        self.end_time = attributes.get('endtime', '')
+        self.message = attributes.get('message')
+        self.status = attributes.get('status')
+        self.statistics = attributes.get('statistics')
+        return self
+
+
+class Launch(Suite):
+    """Class represents Robot Framework test suite."""
+
+    def __init__(self, name, attributes):
+        """Initialize required attributes.
+
+        :param name:       Launch name
+        :param attributes: Suite attributes passed through the listener
+        """
+        super(Launch, self).__init__(name, attributes)
+        self.type = 'LAUNCH'
 
 
 class Test(object):
     """Class represents Robot Framework test case."""
 
-    def __init__(self, name=None, attributes=None):
+    def __init__(self, name, attributes):
         """Initialize required attributes.
 
         :param name:       Name of the test
         :param attributes: Test attributes passed through the listener
         """
+        self.attributes = attributes
         self.critical = attributes.get('critical', '')
         self.doc = attributes['doc']
+        self.end_time = attributes.get('endtime', '')
         self.longname = attributes['longname']
         self.message = attributes.get('message')
         self.name = name
         self.robot_id = attributes['id']
+        self.rp_item_id = None
+        self.rp_parent_item_id = None
+        self.start_time = attributes['starttime']
         self.status = attributes.get('status')
         self.tags = attributes['tags']
         self.template = attributes['template']
+        self.type = 'TEST'
+
+    def update(self, attributes):
+        """Update test attributes on test finish.
+
+        :param attributes: Suite attributes passed through the listener
+        """
+        self.end_time = attributes.get('endtime', '')
+        self.message = attributes.get('message')
+        self.status = attributes.get('status')
+        return self
 
 
 class Keyword(object):
     """Class represents Robot Framework keyword."""
 
-    def __init__(self, name=None, parent_type="TEST", attributes=None):
+    def __init__(self, name, attributes, parent_type=None):
         """Initialize required attributes.
 
         :param name:        Name of the keyword
-        :param parent_type: Type of the parent test item
         :param attributes:  Keyword attributes passed through the listener
+        :param parent_type: Type of the parent test item
         """
+        self.attributes = attributes
         self.args = attributes['args']
         self.assign = attributes['assign']
         self.doc = attributes['doc']
+        self.end_time = attributes.get('endtime')
         self.keyword_name = attributes['kwname']
         self.keyword_type = attributes['type']
         self.libname = attributes['libname']
         self.name = name
+        self.rp_item_id = None
+        self.rp_parent_item_id = None
         self.parent_type = parent_type
+        self.start_time = attributes['starttime']
         self.status = attributes.get('status')
         self.tags = attributes['tags']
+        self.type = 'KEYWORD'
 
     def get_name(self):
         """Get name of the keyword suitable for Report Portal."""
@@ -94,12 +147,21 @@ class Keyword(object):
 
     def get_type(self):
         """Get keyword type."""
-        if self.keyword_type == 'Setup':
-            return 'BEFORE_{0}'.format(self.parent_type)
-        elif self.keyword_type == 'Teardown':
-            return 'AFTER_{0}'.format(self.parent_type)
+        if self.keyword_type.lower() == 'setup':
+            return 'BEFORE_{0}'.format(self.parent_type.upper())
+        elif self.keyword_type.lower() == 'teardown':
+            return 'AFTER_{0}'.format(self.parent_type.upper())
         else:
             return 'STEP'
+
+    def update(self, attributes):
+        """Update keyword attributes on keyword finish.
+
+        :param attributes: Suite attributes passed through the listener
+        """
+        self.end_time = attributes.get('endtime', '')
+        self.status = attributes.get('status')
+        return self
 
 
 class LogMessage(text_type):

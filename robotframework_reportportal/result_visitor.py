@@ -10,6 +10,9 @@ from .time_visitor import corrections
 from .variables import _variables
 
 
+listener = listener.listener()
+
+
 def to_timestamp(time_str):
     if time_str:
         dt = datetime.strptime(time_str, '%Y%m%d %H:%M:%S.%f')

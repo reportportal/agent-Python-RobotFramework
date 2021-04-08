@@ -42,6 +42,8 @@ class Variables(object):
         """Initialize instance attributes."""
         self._endpoint = None
         self._launch_name = None
+        self._pabot_pool_id = None
+        self._pabot_used = None
         self._project = None
         self._uuid = None
         self.launch_attributes = get_variable(
@@ -83,6 +85,26 @@ class Variables(object):
                 'Missing parameter RP_LAUNCH for robot run\n'
                 'You should pass -v RP_LAUNCH:<launch_name_value>')
         return self._launch_name
+
+    @property
+    def pabot_pool_id(self):
+        """Get pool id for the current Robot Framework executor.
+
+        :return: Pool id for the current Robot Framework executor
+        """
+        if not self._pabot_pool_id:
+            self._pabot_pool_id = get_variable(name='PABOTEXECUTIONPOOLID')
+        return self._pabot_pool_id
+
+    @property
+    def pabot_used(self):
+        """Get status of using pabot in test execution.
+
+        :return: Cached value of the Pabotlib URI
+        """
+        if not self._pabot_used:
+            self._pabot_used = get_variable(name='PABOTLIBURI')
+        return self._pabot_used
 
     @property
     def project(self):

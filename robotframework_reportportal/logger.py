@@ -26,7 +26,7 @@ from robot.api import logger
 from .model import LogMessage
 
 
-def write(msg, level="INFO", html=False, attachment=None):
+def write(msg, level='INFO', html=False, attachment=None):
     """Write the message to the log file using the given level.
 
     Valid log levels are ``TRACE``, ``DEBUG``, ``INFO`` (default since RF
