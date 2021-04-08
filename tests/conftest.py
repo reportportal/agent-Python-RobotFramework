@@ -1,5 +1,7 @@
 """This module contains common Pytest fixtures and hooks for unit tests."""
 
+import datetime
+
 from pytest import fixture
 from six.moves import mock
 
@@ -28,6 +30,7 @@ def mock_variables():
     mock_variables.skip_analytics = None
     mock_variables.test_attributes = []
     mock_variables.skip_analytics = True
+    mock_variables.pabot_used = None
     return mock_variables
 
 
@@ -41,6 +44,8 @@ def suite_attributes():
         'source': '/Users/User/work/tests/robot/test.robot',
         'suites': [],
         'tests': ['Test'],
+        'starttime': datetime.datetime.now().isoformat().replace('-', '')
+            .replace('T', ' '),
         'totaltests': 1
     }
 
@@ -53,12 +58,7 @@ def test_attributes():
         'longname': 'Suite.Test',
         'tags': [],
         'source': '/Users/User/work/tests/robot/test.robot',
-        'template': ''
+        'template': '',
+        'starttime': datetime.datetime.now().isoformat().replace('-', '')
+            .replace('T', ' ')
     }
-
-
-@fixture()
-def mock_client():
-    client = mock.Mock()
-    RobotService.rp = client
-    return client
