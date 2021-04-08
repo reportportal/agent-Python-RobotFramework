@@ -5,7 +5,7 @@ from robotframework_reportportal.listener import listener
 ROBOT_SERVICE = 'robotframework_reportportal.service.ReportPortalService'
 
 
-class TestListener(object):
+class TestListener:
 
     @mock.patch(ROBOT_SERVICE)
     def test_critical_test_failure(self, mock_init, mock_variables,
@@ -21,6 +21,7 @@ class TestListener(object):
         assert mock_client.finish_test_item.call_count == 1
         args, kwargs = mock_client.finish_test_item.call_args
         assert kwargs['status'] == 'FAILED'
+
 
     @mock.patch(ROBOT_SERVICE)
     def test_non_critical_test_skip(self, mock_init, mock_variables,
