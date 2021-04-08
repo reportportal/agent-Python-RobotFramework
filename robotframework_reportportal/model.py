@@ -71,7 +71,7 @@ class Launch(Suite):
 class Test(object):
     """Class represents Robot Framework test case."""
 
-    def __init__(self, name=None, attributes=None):
+    def __init__(self, name, attributes):
         """Initialize required attributes.
 
         :param name:       Name of the test
