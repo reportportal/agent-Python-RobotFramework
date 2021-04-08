@@ -44,7 +44,7 @@ def suite_attributes():
         'suites': [],
         'tests': ['Test'],
         'starttime': datetime.datetime.now().isoformat().replace('-', '')
-            .replace('T', ' '),
+              .replace('T', ' '),
         'totaltests': 1
     }
 
@@ -59,5 +59,5 @@ def test_attributes():
         'source': '/Users/User/work/tests/robot/test.robot',
         'template': '',
         'starttime': datetime.datetime.now().isoformat().replace('-', '')
-            .replace('T', ' ')
+              .replace('T', ' ')
     }
