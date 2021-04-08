@@ -1,8 +1,9 @@
 # make_stub_files: Thu 22 Oct 2020 at 15:38:24
 from typing import Pattern, List
-
+from .listener import listener as ls
 from robot.result import ResultVisitor, Result, TestSuite, TestCase, Keyword, Message
 
+listener: ls
 
 class RobotResultsVisitor(ResultVisitor):
     def __init__(self):
