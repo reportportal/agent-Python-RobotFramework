@@ -8,7 +8,7 @@ class TestListener:
     @mock.patch(ROBOT_SERVICE)
     def test_critical_test_failure(self, mock_init, mock_listener,
                                    test_attributes):
-        mock_listener.start_test("Test", test_attributes)
+        mock_listener.start_test('Test', test_attributes)
         test_attributes['status'] = 'FAIL'
         mock_listener.end_test('Test', test_attributes)
 
@@ -21,7 +21,7 @@ class TestListener:
     def test_non_critical_test_skip(self, mock_init, mock_listener,
                                     test_attributes):
         test_attributes['critical'] = 'no'
-        mock_listener.start_test("Test", test_attributes)
+        mock_listener.start_test('Test', test_attributes)
         test_attributes['status'] = 'FAIL'
         mock_listener.end_test('Test', test_attributes)
 
