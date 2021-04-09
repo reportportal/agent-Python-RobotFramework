@@ -1,6 +1,7 @@
 from six.moves import mock
 
-REPORT_PORTAL_SERVICE = 'robotframework_reportportal.service.ReportPortalService'
+REPORT_PORTAL_SERVICE = \
+    'robotframework_reportportal.service.ReportPortalService'
 
 
 class TestListener:
