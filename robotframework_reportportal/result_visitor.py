@@ -71,7 +71,9 @@ class RobotResultsVisitor(ResultVisitor):
             # 'originalname': test.originalname,
             'doc': test.doc,
             'tags': list(test.tags),
-            'critical': getattr(test, 'critical', ''),
+            # for backward compatibility with Robot < 4.0 mark every test case
+            # as critical if not set
+            'critical': getattr(test, 'critical', 'yes'),
             'template': '',
             # 'lineno': test.lineno,
             'starttime': ts,
@@ -86,7 +88,9 @@ class RobotResultsVisitor(ResultVisitor):
             # 'originalname': test.originalname,
             'doc': test.doc,
             'tags': list(test.tags),
-            'critical': getattr(test, 'critical', ''),
+            # for backward compatibility with Robot < 4.0 mark every test case
+            # as critical if not set
+            'critical': getattr(test, 'critical', 'yes'),
             'template': '',
             # 'lineno': test.lineno,
             'endtime': ts,

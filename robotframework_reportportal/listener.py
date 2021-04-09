@@ -203,6 +203,8 @@ class listener(object):
         :param ts:         Timestamp(used by the ResultVisitor)
         """
         test = self._finish_current_item().update(attributes)
+        if not test.critical and test.status == 'FAIL':
+            test.status = 'SKIP'
         logger.debug('ReportPortal - End Test: {0}'.format(test.attributes))
         self.service.finish_test(test=test, ts=ts)
 

@@ -12,8 +12,6 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from six import text_type
-
 from reportportal_client.service import _convert_string
 
 
@@ -80,7 +78,9 @@ class Test(object):
         :param attributes: Test attributes passed through the listener
         """
         self.attributes = attributes
-        self.critical = attributes.get('critical', '')
+        # for backward compatibility with Robot < 4.0 mark every test case
+        # as critical if not set
+        self.critical = attributes.get('critical', 'yes') == 'yes'
         self.doc = attributes['doc']
         self.end_time = attributes.get('endtime', '')
         self.longname = attributes['longname']
@@ -164,13 +164,16 @@ class Keyword(object):
         return self
 
 
-class LogMessage(text_type):
+class LogMessage(object):
     """Class represents Robot Framework messages."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, message):
         """Initialize required attributes."""
-        super(LogMessage, self).__init__()
         self.attachment = None
         self.item_id = None
         self.level = 'INFO'
-        self.message = self
+        self.message = message
+
+    def __repr__(self):
+        """Return string representation of the object."""
+        return self.message

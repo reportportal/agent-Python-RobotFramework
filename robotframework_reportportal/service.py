@@ -11,7 +11,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from dateutil.parser import isoparse
+from dateutil.parser import parse
 import logging
 
 from reportportal_client.external.google_analytics import send_event
@@ -33,11 +33,18 @@ logger = logging.getLogger(__name__)
 
 def to_epoch(date):
     """Convert Robot Framework timestamp to UTC timestamp."""
+    if not date:
+        return None
     try:
-        iso_date = isoparse(date)
+        parsed_date = parse(date)
     except ValueError:
-        return ''
-    return str(int(iso_date.timestamp() * 1000))
+        return None
+    if hasattr(parsed_date, 'timestamp'):
+        epoch_time = parsed_date.timestamp()
+    else:
+        epoch_time = \
+            float(parsed_date.strftime('%s')) + parsed_date.microsecond / 1e6
+    return str(int(epoch_time * 1000))
 
 
 class RobotService(object):
