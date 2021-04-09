@@ -1,11 +1,11 @@
 from six.moves import mock
 
-ROBOT_SERVICE = 'robotframework_reportportal.service.ReportPortalService'
+REPORT_PORTAL_SERVICE = 'robotframework_reportportal.service.ReportPortalService'
 
 
 class TestListener:
 
-    @mock.patch(ROBOT_SERVICE)
+    @mock.patch(REPORT_PORTAL_SERVICE)
     def test_critical_test_failure(self, mock_init, mock_listener,
                                    test_attributes):
         mock_listener.start_test('Test', test_attributes)
@@ -17,7 +17,7 @@ class TestListener:
         args, kwargs = mock_client.finish_test_item.call_args
         assert kwargs['status'] == 'FAILED'
 
-    @mock.patch(ROBOT_SERVICE)
+    @mock.patch(REPORT_PORTAL_SERVICE)
     def test_non_critical_test_skip(self, mock_init, mock_listener,
                                     test_attributes):
         test_attributes['critical'] = 'no'
