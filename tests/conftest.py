@@ -1,7 +1,5 @@
 """This module contains common Pytest fixtures and hooks for unit tests."""
 
-import datetime
-
 from pytest import fixture
 from six.moves import mock
 
