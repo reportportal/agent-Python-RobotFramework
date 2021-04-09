@@ -33,15 +33,17 @@ logger = logging.getLogger(__name__)
 
 def to_epoch(date):
     """Convert Robot Framework timestamp to UTC timestamp."""
+    if not date:
+        return None
     try:
-        iso_date = parse(date)
+        parsed_date = parse(date)
     except ValueError:
         return None
-    if hasattr(iso_date, 'timestamp'):
-        epoch_time = iso_date.timestamp()
+    if hasattr(parsed_date, 'timestamp'):
+        epoch_time = parsed_date.timestamp()
     else:
         epoch_time = \
-            float(iso_date.strftime('%s')) + iso_date.microsecond / 1e6
+            float(parsed_date.strftime('%s')) + parsed_date.microsecond / 1e6
     return str(int(epoch_time * 1000))
 
 

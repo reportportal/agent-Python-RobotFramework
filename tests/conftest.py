@@ -5,6 +5,7 @@ import datetime
 from pytest import fixture
 from six.moves import mock
 
+from robotframework_reportportal.listener import listener
 from robotframework_reportportal.result_visitor import RobotResultsVisitor
 
 
@@ -34,6 +35,13 @@ def mock_variables():
 
 
 @fixture()
+def mock_listener(mock_variables):
+    mock_listener = listener()
+    mock_listener._variables = mock_variables
+    return mock_listener
+
+
+@fixture()
 def suite_attributes():
     return {
         'id': 's1',
@@ -43,8 +51,7 @@ def suite_attributes():
         'source': '/Users/User/work/tests/robot/test.robot',
         'suites': [],
         'tests': ['Test'],
-        'starttime': datetime.datetime.now().isoformat().replace('-', '')
-              .replace('T', ' '),
+        'starttime': '20210407 12:24:27.116',
         'totaltests': 1
     }
 
@@ -58,6 +65,5 @@ def test_attributes():
         'tags': [],
         'source': '/Users/User/work/tests/robot/test.robot',
         'template': '',
-        'starttime': datetime.datetime.now().isoformat().replace('-', '')
-              .replace('T', ' ')
+        'starttime': '20210407 12:24:27.116'
     }
