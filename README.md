@@ -65,7 +65,7 @@ NOT REQUIRED:
 --variable RP_LOG_BATCH_SIZE:"Long"
     - Default value is "20", affects size of async batch log requests
 --variable RP_SKIPPED_ISSUE:"Boolean"
-    - Default value is "True", mark skipped test items with 'To Investigate' 
+    - Default value is "True", mark skipped test items with 'To Investigate'
 ```
 
 Custom logger which supports attachments can be used in Python keywords.
