@@ -67,7 +67,8 @@ class RobotService(object):
             '{}-{}'.format(self.agent_name, self.agent_version))
         return attributes + _dict_to_payload(system_attributes)
 
-    def init_service(self, endpoint, project, uuid, log_batch_size, pool_size):
+    def init_service(self, endpoint, project, uuid, log_batch_size, pool_size,
+                     skipped_issue=True):
         """Initialize common reportportal client.
 
         :param endpoint:       Report Portal API endpoint
@@ -75,6 +76,8 @@ class RobotService(object):
         :param uuid:           API token
         :param log_batch_size: Number of logs to be sent within one batch
         :param pool_size:      HTTPAdapter max pool size
+        :param skipped_issue   Mark skipped test items with 'To Investigate',
+                               default value 'True'
         """
         if self.rp is None:
             logger.debug(
@@ -86,7 +89,8 @@ class RobotService(object):
                 project=project,
                 token=uuid,
                 log_batch_size=log_batch_size,
-                max_pool_size=pool_size)
+                max_pool_size=pool_size,
+                skipped_issue=skipped_issue)
         else:
             raise RobotServiceException(
                 'RobotFrameworkService is already initialized.')
