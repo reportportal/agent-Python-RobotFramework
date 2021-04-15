@@ -62,7 +62,7 @@ NOT REQUIRED:
     - Space-separated list of tags/attributes for the launch
 --variable RP_TEST_ATTRIBUTES:"key1:value1 key1:value2 tag key2:value3"
     - Space-separated list of tags/attributes for the tests
---variable RP_LOG_BATCH_SIZE:"Long"
+--variable RP_LOG_BATCH_SIZE:"10"
     - Default value is "20", affects size of async batch log requests
 --variable RP_SKIPPED_ISSUE:"Boolean"
     - Default value is "True", mark skipped test items with 'To Investigate'
