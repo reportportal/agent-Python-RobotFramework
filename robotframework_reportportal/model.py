@@ -77,7 +77,9 @@ class Test(object):
         :param name:       Name of the test
         :param attributes: Test attributes passed through the listener
         """
+        self._tags = attributes['tags']
         self.attributes = attributes
+        self.code_ref = '{0}:{1}'.format(attributes['source'], name)
         # for backward compatibility with Robot < 4.0 mark every test case
         # as critical if not set
         self.critical = attributes.get('critical', 'yes') == 'yes'
@@ -91,9 +93,21 @@ class Test(object):
         self.rp_parent_item_id = None
         self.start_time = attributes['starttime']
         self.status = attributes.get('status')
-        self.tags = attributes['tags']
         self.template = attributes['template']
         self.type = 'TEST'
+
+    @property
+    def tags(self):
+        """Get list of test tags excluding test_case_id."""
+        return [
+            tag for tag in self._tags if not tag.startswith('test_case_id')]
+
+    @property
+    def test_case_id(self):
+        """Get test case ID through the tags."""
+        for tag in self._tags:
+            if tag.startswith('test_case_id'):
+                return tag.split(':')[1]
 
     def update(self, attributes):
         """Update test attributes on test finish.

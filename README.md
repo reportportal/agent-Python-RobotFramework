@@ -88,6 +88,9 @@ class MyLibrary(object):
         )
 ```
 
+## Test case ID
+It's possible to tag tests the following way `test_case_id:12345` using default Robot Framework tagging functionality. ID specified after `:` will be sent to ReportPortal.
+
 ## Send attachement (screenshots)
 
 https://github.com/reportportal/client-Python#send-attachement-screenshots
