@@ -183,11 +183,13 @@ class RobotService(object):
         # https://github.com/reportportal/agent-Python-RobotFramework/issues/56
         start_rq = {
             'attributes': test.attributes,
+            'code_ref': test.code_ref,
             'description': test.doc,
             'item_type': 'STEP',
             'name': test.name,
             'parent_item_id': test.rp_parent_item_id,
-            'start_time': ts or to_epoch(test.start_time) or timestamp()
+            'start_time': ts or to_epoch(test.start_time) or timestamp(),
+            'test_case_id': test.test_case_id
         }
         logger.debug(
             'ReportPortal - Start test: request_body={0}'.format(start_rq))
