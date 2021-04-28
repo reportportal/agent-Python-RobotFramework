@@ -29,6 +29,7 @@ def mock_variables():
     mock_variables.test_attributes = []
     mock_variables.skip_analytics = True
     mock_variables.pabot_used = None
+    mock_variables.skipped_issue = True
     return mock_variables
 
 

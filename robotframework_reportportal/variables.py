@@ -13,6 +13,7 @@ limitations under the License.
 """
 
 from os import getenv
+from distutils.util import strtobool
 
 from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
 
@@ -57,6 +58,8 @@ class Variables(object):
         self.skip_analytics = getenv('AGENT_NO_ANALYTICS')
         self.test_attributes = get_variable(
             'RP_TEST_ATTRIBUTES', default='').split()
+        self.skipped_issue = strtobool(get_variable(
+            'RP_SKIPPED_ISSUE', default='True'))
 
     @property
     def endpoint(self):
