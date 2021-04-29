@@ -31,6 +31,23 @@ class TestListener:
         assert kwargs['status'] == 'FAILED'
 
     @mock.patch(REPORT_PORTAL_SERVICE)
+    def test_dynamic_attributes(self, mock_client_init, mock_listener,
+                                test_attributes):
+        test_attributes['tags'] = ['simple']
+        mock_listener.start_test('Test', test_attributes)
+        test_attributes['tags'] = ['simple', 'SLID:12345']
+        test_attributes['status'] = 'PASS'
+        mock_listener.end_test('Test', test_attributes)
+        mock_client = mock_client_init.return_value
+        assert mock_client.start_test_item.call_count == 1
+        assert mock_client.finish_test_item.call_count == 1
+        args, kwargs = mock_client.start_test_item.call_args
+        assert kwargs['attributes'] == [{'value': 'simple'}]
+        args, kwargs = mock_client.finish_test_item.call_args
+        assert kwargs['attributes'] == [{'value': 'simple'},
+                                        {'key': 'SLID', 'value': '12345'}]
+
+    @mock.patch(REPORT_PORTAL_SERVICE)
     def test_non_critical_test_skip(self, mock_client_init, mock_listener,
                                     test_attributes):
         test_attributes['critical'] = 'no'

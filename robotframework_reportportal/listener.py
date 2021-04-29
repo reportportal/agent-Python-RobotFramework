@@ -204,6 +204,8 @@ class listener(object):
         :param ts:         Timestamp(used by the ResultVisitor)
         """
         test = self._finish_current_item().update(attributes)
+        test.attributes = gen_attributes(
+            self.variables.test_attributes + test.tags)
         if not test.critical and test.status == 'FAIL':
             test.status = 'SKIP'
         logger.debug('ReportPortal - End Test: {0}'.format(test.attributes))

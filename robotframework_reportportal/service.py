@@ -203,6 +203,7 @@ class RobotService(object):
         :param ts:    End time
         """
         fta_rq = {
+            'attributes': test.attributes,
             'end_time': ts or to_epoch(test.end_time) or timestamp(),
             'issue': issue,
             'item_id': test.rp_item_id,

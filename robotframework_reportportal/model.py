@@ -114,6 +114,7 @@ class Test(object):
 
         :param attributes: Suite attributes passed through the listener
         """
+        self._tags = attributes.get('tags', self._tags)
         self.end_time = attributes.get('endtime', '')
         self.message = attributes.get('message')
         self.status = attributes.get('status')
