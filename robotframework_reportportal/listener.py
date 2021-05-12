@@ -48,7 +48,7 @@ class listener(object):
         else:
             msg = LogMessage(message['message'])
             msg.level = message['level']
-        msg.item_id = self.current_item.rp_item_id
+        msg.item_id = getattr(self.current_item, 'rp_item_id', None)
         return msg
 
     def _finish_current_item(self):
@@ -175,7 +175,6 @@ class listener(object):
             logger.debug(
                 msg='ReportPortal - End Launch: {0}'.format(attributes))
             self.service.finish_launch(launch=launch, ts=ts)
-            self.service.terminate_service()
         else:
             suite = self._finish_current_item().update(attributes)
             logger.debug(
@@ -234,3 +233,16 @@ class listener(object):
         kwd = self._finish_current_item().update(attributes)
         logger.debug('ReportPortal - End Keyword: {0}'.format(kwd.attributes))
         self.service.finish_keyword(keyword=kwd, ts=ts)
+
+    def report_file(self, report_path):
+        """Attach HTML report created by Robot Framework to RP launch.
+
+        :param report_path: Path to the report file
+        """
+        if self.variables.attach_report:
+            message = {'message': 'Execution report', 'level': 'INFO'}
+            self.log_message_with_image(message, report_path)
+
+    def close(self):
+        """Call service terminate when the whole test execution is done."""
+        self.service.terminate_service()

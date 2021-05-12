@@ -47,6 +47,8 @@ class Variables(object):
         self._pabot_used = None
         self._project = None
         self._uuid = None
+        self.attach_report = strtobool(get_variable(
+            'RP_ATTACH_REPORT', default='True'))
         self.launch_attributes = get_variable(
             'RP_LAUNCH_ATTRIBUTES', default='').split()
         self.launch_id = get_variable('RP_LAUNCH_UUID')
@@ -56,10 +58,10 @@ class Variables(object):
         self.mode = get_variable('RP_MODE')
         self.pool_size = int(get_variable('RP_MAX_POOL_SIZE', default='50'))
         self.skip_analytics = getenv('AGENT_NO_ANALYTICS')
-        self.test_attributes = get_variable(
-            'RP_TEST_ATTRIBUTES', default='').split()
         self.skipped_issue = strtobool(get_variable(
             'RP_SKIPPED_ISSUE', default='True'))
+        self.test_attributes = get_variable(
+            'RP_TEST_ATTRIBUTES', default='').split()
 
     @property
     def endpoint(self):
