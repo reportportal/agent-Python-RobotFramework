@@ -221,7 +221,7 @@ class RobotService(object):
         """
         start_rq = {
             'description': keyword.doc,
-            'has_stats': keyword.parent_type == 'KEYWORD',
+            'has_stats': False,
             'item_type': keyword.get_type(),
             'name': keyword.get_name(),
             'parent_item_id': keyword.rp_parent_item_id,
