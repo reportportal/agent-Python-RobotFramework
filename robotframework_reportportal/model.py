@@ -11,6 +11,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+from six import text_type
+
 from reportportal_client.service import _convert_string
 
 
@@ -178,7 +180,7 @@ class Keyword(object):
         return self
 
 
-class LogMessage(object):
+class LogMessage(text_type):
     """Class represents Robot Framework messages."""
 
     def __init__(self, message):
