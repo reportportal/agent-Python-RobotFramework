@@ -64,8 +64,11 @@ NOT REQUIRED:
     - Space-separated list of tags/attributes for the tests
 --variable RP_LOG_BATCH_SIZE:"10"
     - Default value is "20", affects size of async batch log requests
---variable RP_SKIPPED_ISSUE:"Boolean"
-    - Default value is "True", mark skipped test items with 'To Investigate'
+--variable RP_SKIPPED_ISSUE:"True"
+    - Default value is "True", marks skipped test items with 'To Investigate'
+--variable RP_ATTACH_REPORT:"True"
+    - Default value is "False", attaches Robot Framework HTML report file to
+      the launch.
 ```
 
 Custom logger which supports attachments can be used in Python keywords.
@@ -76,18 +79,16 @@ of an extra kwarg "attachment":
 import subprocess
 from robotframework_reportportal import logger
 
-class MyLibrary(object):
-
-    def log_free_memory(self):
-        logger.debug("Collecting free memory statistics!")
-        logger.debug(
-            "Memory consumption report",
-            attachment={
-                "name": "free_memory.txt",
-                "data": subprocess.check_output("free -h".split()),
-                "mime": "application/octet-stream",
-            },
-        )
+def log_free_memory():
+    logger.debug("Collecting free memory statistics!")
+    logger.debug(
+        "Memory consumption report",
+        attachment={
+            "name": "free_memory.txt",
+            "data": subprocess.check_output("free -h".split()),
+            "mime": "text/plain",
+        },
+    )
 ```
 
 ## Test case ID
