@@ -74,6 +74,7 @@ class RobotResultsVisitor(ResultVisitor):
             # for backward compatibility with Robot < 4.0 mark every test case
             # as critical if not set
             'critical': getattr(test, 'critical', 'yes'),
+            'source': test.source,
             'template': '',
             # 'lineno': test.lineno,
             'starttime': ts,
@@ -95,6 +96,7 @@ class RobotResultsVisitor(ResultVisitor):
             # 'lineno': test.lineno,
             'endtime': ts,
             'elapsedtime': test.elapsedtime,
+            'source': test.source,
             'status': test.status,
             'message': test.message,
         }

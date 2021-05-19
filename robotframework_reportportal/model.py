@@ -78,12 +78,12 @@ class Test(object):
         :param name:       Name of the test
         :param attributes: Test attributes passed through the listener
         """
+        self._critical = attributes.get('critical', 'yes')
         self._tags = attributes['tags']
         self.attributes = attributes
         self.code_ref = '{0}:{1}'.format(attributes['source'], name)
         # for backward compatibility with Robot < 4.0 mark every test case
         # as critical if not set
-        self.critical = attributes.get('critical', 'yes') == 'yes'
         self.doc = attributes['doc']
         self.end_time = attributes.get('endtime', '')
         self.longname = attributes['longname']
@@ -96,6 +96,11 @@ class Test(object):
         self.status = attributes.get('status')
         self.template = attributes['template']
         self.type = 'TEST'
+
+    @property
+    def critical(self):
+        """Form unique value for RF 4.0+ and older versions."""
+        return self._critical in ('yes', True)
 
     @property
     def tags(self):
