@@ -48,16 +48,19 @@ class TestListener:
                                         {'key': 'SLID', 'value': '12345'}]
 
     @mock.patch(REPORT_PORTAL_SERVICE)
-    def test_non_critical_test_skip(self, mock_client_init, mock_listener,
-                                    test_attributes):
-        test_attributes['critical'] = 'no'
+    @pytest.mark.parametrize('critical, expected_status', [
+            (True, 'FAILED'), ('yes', 'FAILED'), ('no', 'SKIPPED')])
+    def test_non_critical_test_skip(
+            self, mock_client_init, mock_listener,
+            test_attributes, critical, expected_status):
+        test_attributes['critical'] = critical
         mock_listener.start_test('Test', test_attributes)
         test_attributes['status'] = 'FAIL'
         mock_listener.end_test('Test', test_attributes)
         mock_client = mock_client_init.return_value
         assert mock_client.finish_test_item.call_count == 1
         args, kwargs = mock_client.finish_test_item.call_args
-        assert kwargs['status'] == 'SKIPPED'
+        assert kwargs['status'] == expected_status
 
     @mock.patch(REPORT_PORTAL_SERVICE)
     @pytest.mark.parametrize('skipped_issue_value', [True, False])

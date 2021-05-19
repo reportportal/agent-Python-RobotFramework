@@ -46,7 +46,7 @@ class TimeVisitor(ResultVisitor):
                 logging.debug(
                     "Correcting parents' endtime to {0} based on {2}={1}"
                     .format(o.endtime, o.id, node_class))
-        if o.id == _stack[-1]:
+        if _stack and o.id == _stack[-1]:
             _stack.pop()
 
     def start_suite(self, suite):
