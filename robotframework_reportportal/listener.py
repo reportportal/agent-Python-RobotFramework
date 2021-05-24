@@ -188,6 +188,10 @@ class listener(object):
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
+        if not hasattr(attributes, 'source'):
+            # no 'source' parameter at this level for Robot versions < 4
+            attributes = attributes.copy()
+            attributes['source'] = self.current_item.source
         test = Test(name=name, attributes=attributes)
         logger.debug('ReportPortal - Start Test: {0}'.format(attributes))
         test.attributes = gen_attributes(
