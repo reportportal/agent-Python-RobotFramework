@@ -22,9 +22,14 @@ from .model import Keyword, Launch, Test, LogMessage, Suite
 from .service import RobotService
 from .static import MAIN_SUITE_ID, PABOT_WIHOUT_LAUNCH_ID_MSG
 from .variables import Variables
-
+from threading import local
 
 logger = logging.getLogger(__name__)
+thread_local = local()
+
+
+def current():
+    return getattr(thread_local, 'current_instance', None)
 
 
 class listener(object):
@@ -37,6 +42,7 @@ class listener(object):
         self._items = []
         self._service = None
         self._variables = None
+        thread_local.current_instance = self
 
     def _build_msg_struct(self, message):
         """Check if the given message comes from our custom logger or not.
