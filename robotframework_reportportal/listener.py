@@ -33,8 +33,8 @@ class listener(object):
     ROBOT_LISTENER_API_VERSION = 2
 
     def __init__(self):
-        global current
         """Initialize listener attributes."""
+        global current
         self._items = []
         self._service = None
         self._variables = None
