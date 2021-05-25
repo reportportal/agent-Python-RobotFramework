@@ -194,7 +194,7 @@ class listener(object):
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
-        if not hasattr(attributes, 'source'):
+        if 'source' not in attributes:
             # no 'source' parameter at this level for Robot versions < 4
             attributes = attributes.copy()
             attributes['source'] = self.current_item.source
