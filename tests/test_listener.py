@@ -19,6 +19,8 @@ class TestListener:
         assert (kwargs['code_ref'] ==
                 '{0}:{1}'.format(test_attributes['source'], 'Test'))
 
+    # Robot Framework of versions < 4 does not bypass 'source' attribute on
+    # 'start_test' method call
     @mock.patch(REPORT_PORTAL_SERVICE)
     def test_code_ref_robot_3_2_2(self, mock_client_init, mock_listener,
                                   suite_attributes, test_attributes):
@@ -62,7 +64,7 @@ class TestListener:
 
     @mock.patch(REPORT_PORTAL_SERVICE)
     @pytest.mark.parametrize('critical, expected_status', [
-            (True, 'FAILED'), ('yes', 'FAILED'), ('no', 'SKIPPED')])
+        (True, 'FAILED'), ('yes', 'FAILED'), ('no', 'SKIPPED')])
     def test_non_critical_test_skip(
             self, mock_client_init, mock_listener,
             test_attributes, critical, expected_status):
