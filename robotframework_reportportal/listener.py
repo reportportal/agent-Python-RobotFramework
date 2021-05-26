@@ -25,6 +25,7 @@ from .variables import Variables
 
 logger = logging.getLogger(__name__)
 
+
 class listener(object):
     """Robot Framework listener interface for reporting to Report Portal."""
 
