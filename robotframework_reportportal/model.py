@@ -168,10 +168,13 @@ class Keyword(object):
 
     def get_type(self):
         """Get keyword type."""
-        if self.keyword_type.lower() == 'setup':
-            return 'BEFORE_{0}'.format(self.parent_type.upper())
-        elif self.keyword_type.lower() == 'teardown':
-            return 'AFTER_{0}'.format(self.parent_type.upper())
+        if self.keyword_type.lower() in ('setup', 'teardown'):
+            if self.parent_type.lower() == 'keyword':
+                return 'STEP'
+            if self.keyword_type.lower() == 'setup':
+                return 'BEFORE_{0}'.format(self.parent_type.upper())
+            if self.keyword_type.lower() == 'teardown':
+                return 'AFTER_{0}'.format(self.parent_type.upper())
         else:
             return 'STEP'
 
