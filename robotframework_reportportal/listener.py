@@ -24,8 +24,6 @@ from .static import MAIN_SUITE_ID, PABOT_WIHOUT_LAUNCH_ID_MSG
 from .variables import Variables
 
 logger = logging.getLogger(__name__)
-current = None
-
 
 class listener(object):
     """Robot Framework listener interface for reporting to Report Portal."""
@@ -34,11 +32,9 @@ class listener(object):
 
     def __init__(self):
         """Initialize listener attributes."""
-        global current
         self._items = []
         self._service = None
         self._variables = None
-        current = self
 
     def _build_msg_struct(self, message):
         """Check if the given message comes from our custom logger or not.
@@ -193,7 +189,7 @@ class listener(object):
         if 'source' not in attributes:
             # no 'source' parameter at this level for Robot versions < 4
             attributes = attributes.copy()
-            attributes['source'] = self.current_item.source
+            attributes['source'] = getattr(self.current_item, 'source', None)
         test = Test(name=name, attributes=attributes)
         logger.debug('ReportPortal - Start Test: {0}'.format(attributes))
         test.attributes = gen_attributes(
