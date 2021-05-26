@@ -23,7 +23,6 @@ from .service import RobotService
 from .static import MAIN_SUITE_ID, PABOT_WIHOUT_LAUNCH_ID_MSG
 from .variables import Variables
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -188,6 +187,10 @@ class listener(object):
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
+        if 'source' not in attributes:
+            # no 'source' parameter at this level for Robot versions < 4
+            attributes = attributes.copy()
+            attributes['source'] = getattr(self.current_item, 'source', None)
         test = Test(name=name, attributes=attributes)
         logger.debug('ReportPortal - Start Test: {0}'.format(attributes))
         test.attributes = gen_attributes(

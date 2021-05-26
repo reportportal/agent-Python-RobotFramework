@@ -17,7 +17,7 @@ class MyLibrary(object):
             attachment={
                 "name": "free_memory.txt",
                 "data": subprocess.check_output("free -h".split()),
-                "mime": "application/octet-stream",
+                "mime": "text/plain",
             },
         )
 """

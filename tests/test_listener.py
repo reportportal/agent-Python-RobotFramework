@@ -19,6 +19,33 @@ class TestListener:
         assert (kwargs['code_ref'] ==
                 '{0}:{1}'.format(test_attributes['source'], 'Test'))
 
+    # Robot Framework of versions < 4 does not bypass 'source' attribute on
+    # 'start_test' method call
+    @mock.patch(REPORT_PORTAL_SERVICE)
+    def test_code_ref_robot_3_2_2(self, mock_client_init, mock_listener,
+                                  suite_attributes, test_attributes):
+        test_attributes = test_attributes.copy()
+        del test_attributes['source']
+        mock_listener.start_suite('Suite', suite_attributes)
+        mock_listener.start_test('Test', test_attributes)
+        mock_client = mock_client_init.return_value
+        assert mock_client.start_test_item.call_count == 2
+        args, kwargs = mock_client.start_test_item.call_args
+        assert (kwargs['code_ref'] ==
+                '{0}:{1}'.format(suite_attributes['source'], 'Test'))
+
+    @mock.patch(REPORT_PORTAL_SERVICE)
+    def test_code_ref_robot_3_2_2_no_source_in_parent(self, mock_client_init,
+                                                      mock_listener,
+                                                      test_attributes):
+        test_attributes = test_attributes.copy()
+        del test_attributes['source']
+        mock_listener.start_test('Test', test_attributes)
+        mock_client = mock_client_init.return_value
+        assert mock_client.start_test_item.call_count == 1
+        args, kwargs = mock_client.start_test_item.call_args
+        assert (kwargs['code_ref'] == '{0}:{1}'.format(None, 'Test'))
+
     @mock.patch(REPORT_PORTAL_SERVICE)
     def test_critical_test_failure(self, mock_client_init, mock_listener,
                                    test_attributes):
@@ -49,7 +76,7 @@ class TestListener:
 
     @mock.patch(REPORT_PORTAL_SERVICE)
     @pytest.mark.parametrize('critical, expected_status', [
-            (True, 'FAILED'), ('yes', 'FAILED'), ('no', 'SKIPPED')])
+        (True, 'FAILED'), ('yes', 'FAILED'), ('no', 'SKIPPED')])
     def test_non_critical_test_skip(
             self, mock_client_init, mock_listener,
             test_attributes, critical, expected_status):
