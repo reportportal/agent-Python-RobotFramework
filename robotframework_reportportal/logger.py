@@ -23,10 +23,11 @@ class MyLibrary(object):
 """
 
 from robot.api import logger
+
 from .model import LogMessage
 
 
-def write(msg, level='INFO', html=False, attachment=None):
+def write(msg, level='INFO', html=False, attachment=None, launch_log=False):
     """Write the message to the log file using the given level.
 
     Valid log levels are ``TRACE``, ``DEBUG``, ``INFO`` (default since RF
@@ -39,43 +40,50 @@ def write(msg, level='INFO', html=False, attachment=None):
 
     Instead of using this method, it is generally better to use the level
     specific methods such as ``info`` and ``debug`` that have separate
-    ``html`` argument to control the message format.
+
+    :param msg: argument to control the message format.
+    :param level: log level
+    :param html: format or not format the message as html.
+    :param attachment: a binary content to attach to the log entry
+    :param launch_log: put the log entry on Launch level
     """
     log_message = LogMessage(msg)
     log_message.level = level
     log_message.attachment = attachment
+    log_message.launch_log = launch_log
     logger.write(log_message, level, html)
 
 
-def trace(msg, html=False, attachment=None):
+def trace(msg, html=False, attachment=None, launch_log=False):
     """Write the message to the log file using the ``TRACE`` level."""
-    write(msg, "TRACE", html, attachment)
+    write(msg, "TRACE", html, attachment, launch_log)
 
 
-def debug(msg, html=False, attachment=None):
+def debug(msg, html=False, attachment=None, launch_log=False):
     """Write the message to the log file using the ``DEBUG`` level."""
-    write(msg, "DEBUG", html, attachment)
+    write(msg, "DEBUG", html, attachment, launch_log)
 
 
-def info(msg, html=False, also_console=False, attachment=None):
+def info(msg, html=False, also_console=False, attachment=None,
+         launch_log=False):
     """Write the message to the log file using the ``INFO`` level.
 
     If ``also_console`` argument is set to ``True``, the message is
     written both to the log file and to the console.
     """
-    write(msg, "INFO", html, attachment)
+    write(msg, "INFO", html, attachment, launch_log)
     if also_console:
         console(msg)
 
 
-def warn(msg, html=False, attachment=None):
+def warn(msg, html=False, attachment=None, launch_log=False):
     """Write the message to the log file using the ``WARN`` level."""
-    write(msg, "WARN", html, attachment)
+    write(msg, "WARN", html, attachment, launch_log)
 
 
-def error(msg, html=False, attachment=None):
+def error(msg, html=False, attachment=None, launch_log=False):
     """Write the message to the log file using the ``ERROR`` level."""
-    write(msg, "ERROR", html, attachment)
+    write(msg, "ERROR", html, attachment, launch_log)
 
 
 def console(msg, newline=True, stream="stdout"):

@@ -196,6 +196,7 @@ class LogMessage(text_type):
         self.attachment = None
         self.item_id = None
         self.level = 'INFO'
+        self.launch_log = False
         self.message = message
 
     def __repr__(self):

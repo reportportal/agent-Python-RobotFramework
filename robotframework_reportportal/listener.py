@@ -50,7 +50,8 @@ class listener(object):
         else:
             msg = LogMessage(message['message'])
             msg.level = message['level']
-        msg.item_id = getattr(self.current_item, 'rp_item_id', None)
+        if not getattr(msg, 'launch_log', False):
+            msg.item_id = getattr(self.current_item, 'rp_item_id', None)
         return msg
 
     def _finish_current_item(self):
