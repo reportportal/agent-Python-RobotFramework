@@ -41,6 +41,21 @@ def mock_listener(mock_variables):
 
 
 @fixture()
+def kwd_attributes():
+    """Keyword attributes."""
+    return {
+        'args': ('Kw Body Start',),
+        'assign': (),
+        'doc': 'Logs the given message with the given level.',
+        'kwname': 'Log',
+        'libname': 'BuiltIn',
+        'starttime': '1621947055434',
+        'tags': [],
+        'type': 'Keyword'
+    }
+
+
+@fixture()
 def suite_attributes():
     return {
         'id': 's1',

@@ -35,6 +35,18 @@ class TestListener:
                 '{0}:{1}'.format(suite_attributes['source'], 'Test'))
 
     @mock.patch(REPORT_PORTAL_SERVICE)
+    def test_code_ref_robot_3_2_2_no_source_in_parent(self, mock_client_init,
+                                                      mock_listener,
+                                                      test_attributes):
+        test_attributes = test_attributes.copy()
+        del test_attributes['source']
+        mock_listener.start_test('Test', test_attributes)
+        mock_client = mock_client_init.return_value
+        assert mock_client.start_test_item.call_count == 1
+        args, kwargs = mock_client.start_test_item.call_args
+        assert (kwargs['code_ref'] == '{0}:{1}'.format(None, 'Test'))
+
+    @mock.patch(REPORT_PORTAL_SERVICE)
     def test_critical_test_failure(self, mock_client_init, mock_listener,
                                    test_attributes):
         mock_listener.start_test('Test', test_attributes)

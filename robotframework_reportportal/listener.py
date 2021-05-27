@@ -193,7 +193,7 @@ class listener(object):
         if 'source' not in attributes:
             # no 'source' parameter at this level for Robot versions < 4
             attributes = attributes.copy()
-            attributes['source'] = self.current_item.source
+            attributes['source'] = getattr(self.current_item, 'source', None)
         test = Test(name=name, attributes=attributes)
         logger.debug('ReportPortal - Start Test: {0}'.format(attributes))
         test.attributes = gen_attributes(
