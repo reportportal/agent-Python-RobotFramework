@@ -33,8 +33,7 @@ def screenshot_log(level, message, screenshot_file):
 
 def item_log(level, message, attachment=None):
     """
-    Post a log entry on Report Portal which will be attached to the current
-    processing item.
+    Post a log entry on which will be attached to the current processing item.
 
     :param level: log entry level
     :param message: message to post
@@ -45,7 +44,7 @@ def item_log(level, message, attachment=None):
 
 def launch_log(level, message, attachment=None):
     """
-    Post a log entry on Report Portal which will be attached to the launch.
+    Post a log entry which will be attached to the launch.
 
     :param level: log entry level
     :param message: message to post
