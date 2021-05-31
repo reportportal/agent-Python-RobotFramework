@@ -16,7 +16,7 @@ import os
 from robotframework_reportportal import logger
 
 
-def screenshot_log(level: str, message: str, screenshot_file: str):
+def screenshot_log(level, message, screenshot_file):
     with open(screenshot_file, "rb") as image_file:
         file_data = image_file.read()
     item_log(level, message, {"name": screenshot_file.split(os.path.sep)[-1],
@@ -24,9 +24,9 @@ def screenshot_log(level: str, message: str, screenshot_file: str):
                               "mime": "image/png"})
 
 
-def item_log(level: str, message: str, attachment: dict = None):
+def item_log(level, message, attachment=None):
     logger.write(message, level, attachment=attachment)
 
 
-def launch_log(level: str, message: str, attachment: dict = None):
+def launch_log(level, message, attachment=None):
     logger.write(message, level, attachment=attachment, launch_log=True)
