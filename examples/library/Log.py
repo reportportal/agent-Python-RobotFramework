@@ -17,6 +17,13 @@ from robotframework_reportportal import logger
 
 
 def screenshot_log(level, message, screenshot_file):
+    """
+    Attach a screenshot file into a log entry on Report Portal.
+
+    :param level: log entry level
+    :param message: screenshot description
+    :param screenshot_file: path to image file
+    """
     with open(screenshot_file, "rb") as image_file:
         file_data = image_file.read()
     item_log(level, message, {"name": screenshot_file.split(os.path.sep)[-1],
@@ -25,8 +32,23 @@ def screenshot_log(level, message, screenshot_file):
 
 
 def item_log(level, message, attachment=None):
+    """
+    Post a log entry on Report Portal which will be attached to the current
+    processing item.
+
+    :param level: log entry level
+    :param message: message to post
+    :param attachment: path to attachment file
+    """
     logger.write(message, level, attachment=attachment)
 
 
 def launch_log(level, message, attachment=None):
+    """
+    Post a log entry on Report Portal which will be attached to the launch.
+
+    :param level: log entry level
+    :param message: message to post
+    :param attachment: path to attachment file
+    """
     logger.write(message, level, attachment=attachment, launch_log=True)
