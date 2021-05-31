@@ -5,7 +5,6 @@ from .variables import Variables as Variables
 from typing import Any, Dict, List, Optional, Text, Union
 
 logger: Logger
-current: Optional[listener]
 
 class listener:
     _items: List = ...
