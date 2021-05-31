@@ -23,8 +23,10 @@ def test_launch_log(mock_client_init):
     utils.run_robot_tests('examples/launch_log.robot')
 
     mock_client = mock_client_init.return_value
-    calls = list(filter(lambda x: 'item_id' in x[1] and x[1]['item_id'] is None,
-                        mock_client.log.call_args_list))
+    calls = list(
+        filter(lambda x: 'item_id' in x[1] and x[1]['item_id'] is None,
+               mock_client.log.call_args_list)
+    )
     assert len(calls) == 3
 
     messages = set(map(lambda x: x[1]['message'], calls))
