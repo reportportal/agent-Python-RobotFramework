@@ -1,3 +1,4 @@
+"""Logging library for Robot Framework."""
 #  Copyright 2021 EPAM Systems
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
