@@ -24,7 +24,6 @@ from .static import MAIN_SUITE_ID, PABOT_WIHOUT_LAUNCH_ID_MSG
 from .variables import Variables
 
 logger = logging.getLogger(__name__)
-current = None
 
 
 class listener(object):
@@ -34,11 +33,9 @@ class listener(object):
 
     def __init__(self):
         """Initialize listener attributes."""
-        global current
         self._items = []
         self._service = None
         self._variables = None
-        current = self
 
     def _build_msg_struct(self, message):
         """Check if the given message comes from our custom logger or not.
