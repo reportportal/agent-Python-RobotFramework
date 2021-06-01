@@ -26,7 +26,7 @@ DEFAULT_VARIABLES = {
 
 
 def run_robot_tests(tests, listener='robotframework_reportportal.listener',
-                    variables=None):
+                    variables=None) -> int:
     if variables is None:
         variables = DEFAULT_VARIABLES
 

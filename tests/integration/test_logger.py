@@ -21,7 +21,8 @@ from tests import REPORT_PORTAL_SERVICE
 
 @mock.patch(REPORT_PORTAL_SERVICE)
 def test_launch_log(mock_client_init):
-    utils.run_robot_tests(['examples/launch_log.robot'])
+    result = utils.run_robot_tests(['examples/launch_log.robot'])
+    assert result == 0  # the test successfully passed
 
     mock_client = mock_client_init.return_value
     calls = list(
