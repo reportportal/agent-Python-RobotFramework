@@ -38,10 +38,7 @@ def run_robot_tests(tests, listener='robotframework_reportportal.listener',
         else:
             arguments.append(k + ':' + str(v))
 
-    if type(tests) is list:
-        for t in tests:
-            arguments.append(t)
-    else:
-        arguments.append(tests)
+    for t in tests:
+        arguments.append(t)
 
-    RobotFramework().execute_cli(arguments, False)
+    return RobotFramework().execute_cli(arguments, False)

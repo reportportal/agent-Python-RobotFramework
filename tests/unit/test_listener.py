@@ -17,7 +17,7 @@ import pytest
 from six.moves import mock
 
 from robotframework_reportportal.listener import listener
-from tests.conftest import REPORT_PORTAL_SERVICE
+from tests import REPORT_PORTAL_SERVICE
 
 
 class TestListener:

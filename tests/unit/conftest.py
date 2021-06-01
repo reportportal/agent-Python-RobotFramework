@@ -14,17 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License
 """
 
-import sys
-import os
 from pytest import fixture
 from six.moves import mock
 
 from robotframework_reportportal.listener import listener
 from robotframework_reportportal.result_visitor import RobotResultsVisitor
-sys.path.append(os.path.join(os.path.dirname(__file__), 'helpers'))
-
-REPORT_PORTAL_SERVICE = (
-    'robotframework_reportportal.service.ReportPortalService')
 
 
 @fixture()
