@@ -12,6 +12,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License
 """
+import sys
+
 import pytest
 from delayed_assert import assert_expectations, expect
 from six.moves import mock
@@ -56,6 +58,8 @@ DATADRIVER_EXPECTED_CODE_REF_SUFFIXES = \
 @mock.patch(REPORT_PORTAL_SERVICE)
 def test_code_reference_settings_template(mock_client_init, test, test_names,
                                           code_ref_suffixes):
+    if test.endswith('datadriver.robot') and sys.version_info < (3, 6):
+        return  # DataDriver requires Python 3.6
     result = utils.run_robot_tests([test])
     assert result == 0  # the test successfully passed
 
