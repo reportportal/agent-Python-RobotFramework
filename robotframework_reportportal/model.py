@@ -130,7 +130,7 @@ class Test(object):
                 for i, line in enumerate(sf):
                     if i == line_number - 1:
                         source_line = line.strip()
-            if test_name != source_line:
+            if not source_line.startswith(test_name):
                 test_name = source_line
         return '{0}:{1}'.format(self.source, test_name)
 
