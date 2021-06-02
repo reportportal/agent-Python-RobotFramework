@@ -111,7 +111,9 @@ class Test(object):
     @property
     def source(self):
         """Return the test case source file path."""
-        return os.path.relpath(self._attributes['source'], os.getcwd())
+        if self._attributes['source'] is not None:
+            return os.path.relpath(self._attributes['source'], os.getcwd())
+        return None
 
     @property
     def code_ref(self):
