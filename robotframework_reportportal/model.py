@@ -11,9 +11,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from six import text_type
+import os
 
 from reportportal_client.service import _convert_string
+from six import text_type
 
 
 class Suite(object):
@@ -35,7 +36,7 @@ class Suite(object):
         self.robot_id = attributes['id']
         self.rp_item_id = None
         self.rp_parent_item_id = None
-        self.source = attributes['source']
+        self.source = os.path.relpath(attributes['source'], os.getcwd())
         self.start_time = attributes.get('starttime')
         self.statistics = attributes.get('statistics')
         self.status = attributes.get('status')
@@ -82,8 +83,7 @@ class Test(object):
         # as critical if not set
         self._critical = attributes.get('critical', 'yes')
         self._tags = attributes['tags']
-        self.attributes = attributes
-        self.code_ref = '{0}:{1}'.format(attributes['source'], name)
+        self._attributes = attributes
         self.doc = attributes['doc']
         self.end_time = attributes.get('endtime', '')
         self.longname = attributes['longname']
@@ -109,11 +109,38 @@ class Test(object):
             tag for tag in self._tags if not tag.startswith('test_case_id')]
 
     @property
+    def source(self):
+        """Return the test case source file path."""
+        return os.path.relpath(self._attributes['source'], os.getcwd())
+
+    @property
+    def code_ref(self):
+        """Return the test case code reference.
+
+        The result line should be exactly how it appears in '.robot' file.
+        """
+        test_name = self.name
+        line_number = self._attributes.get("lineno")
+        if line_number is not None:
+            source = self._attributes['source']
+            source_line = None
+            with open(source) as sf:
+                for i, line in enumerate(sf):
+                    if i == line_number - 1:
+                        source_line = line.strip()
+            if test_name != source_line:
+                test_name = source_line
+        return '{0}:{1}'.format(self.source, test_name)
+
+    @property
     def test_case_id(self):
         """Get test case ID through the tags."""
+        # use test case id from tags if specified
         for tag in self._tags:
-            if tag.startswith('test_case_id'):
+            if tag.startswith('test_case_id:'):
                 return tag.split(':')[1]
+        # generate it if not
+        return '{0}:{1}'.format(self.source, self.name)
 
     def update(self, attributes):
         """Update test attributes on test finish.
