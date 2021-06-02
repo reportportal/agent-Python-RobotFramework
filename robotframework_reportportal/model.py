@@ -78,12 +78,12 @@ class Test(object):
         :param name:       Name of the test
         :param attributes: Test attributes passed through the listener
         """
+        # for backward compatibility with Robot < 4.0 mark every test case
+        # as critical if not set
         self._critical = attributes.get('critical', 'yes')
         self._tags = attributes['tags']
         self.attributes = attributes
         self.code_ref = '{0}:{1}'.format(attributes['source'], name)
-        # for backward compatibility with Robot < 4.0 mark every test case
-        # as critical if not set
         self.doc = attributes['doc']
         self.end_time = attributes.get('endtime', '')
         self.longname = attributes['longname']
