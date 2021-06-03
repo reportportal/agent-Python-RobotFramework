@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License
 """
+import os
 
 from pytest import fixture
 from six.moves import mock
@@ -76,7 +77,7 @@ def suite_attributes():
         'doc': '',
         'longname': 'Suite',
         'metadata': {},
-        'source': '/Users/User/work/tests/robot/test.robot',
+        'source': os.getcwd() + '/robot/test.robot',
         'suites': [],
         'tests': ['Test'],
         'starttime': '20210407 12:24:27.116',
@@ -91,7 +92,7 @@ def test_attributes():
         'doc': '',
         'longname': 'Suite.Test',
         'tags': [],
-        'source': '/Users/User/work/tests/robot/test.robot',
+        'source': os.getcwd() + '/robot/test.robot',
         'template': '',
         'starttime': '20210407 12:24:27.116'
     }

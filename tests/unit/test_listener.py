@@ -30,7 +30,7 @@ class TestListener:
         assert mock_client.start_test_item.call_count == 1
         args, kwargs = mock_client.start_test_item.call_args
         assert (kwargs['code_ref'] ==
-                '{0}:{1}'.format(test_attributes['source'], 'Test'))
+                '{0}:{1}'.format('robot/test.robot', 'Test'))
 
     # Robot Framework of versions < 4 does not bypass 'source' attribute on
     # 'start_test' method call
@@ -45,7 +45,7 @@ class TestListener:
         assert mock_client.start_test_item.call_count == 2
         args, kwargs = mock_client.start_test_item.call_args
         assert (kwargs['code_ref'] ==
-                '{0}:{1}'.format(suite_attributes['source'], 'Test'))
+                '{0}:{1}'.format('robot/test.robot', 'Test'))
 
     @mock.patch(REPORT_PORTAL_SERVICE)
     def test_code_ref_robot_3_2_2_no_source_in_parent(self, mock_client_init,
@@ -56,6 +56,19 @@ class TestListener:
         mock_listener.start_test('Test', test_attributes)
         mock_client = mock_client_init.return_value
         assert mock_client.start_test_item.call_count == 1
+        args, kwargs = mock_client.start_test_item.call_args
+        assert (kwargs['code_ref'] == '{0}:{1}'.format(None, 'Test'))
+
+    @mock.patch(REPORT_PORTAL_SERVICE)
+    def test_suite_no_source_attribute(self, mock_client_init, mock_listener,
+                                       suite_attributes, test_attributes):
+        suite_attributes = suite_attributes.copy()
+        del suite_attributes['source']
+        del test_attributes['source']
+        mock_listener.start_suite('Suite', suite_attributes)
+        mock_listener.start_test('Test', test_attributes)
+        mock_client = mock_client_init.return_value
+        assert mock_client.start_test_item.call_count == 2
         args, kwargs = mock_client.start_test_item.call_args
         assert (kwargs['code_ref'] == '{0}:{1}'.format(None, 'Test'))
 

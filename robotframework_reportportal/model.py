@@ -11,9 +11,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
-from six import text_type
+import os
 
 from reportportal_client.service import _convert_string
+from six import text_type
 
 
 class Suite(object):
@@ -35,7 +36,6 @@ class Suite(object):
         self.robot_id = attributes['id']
         self.rp_item_id = None
         self.rp_parent_item_id = None
-        self.source = attributes['source']
         self.start_time = attributes.get('starttime')
         self.statistics = attributes.get('statistics')
         self.status = attributes.get('status')
@@ -43,6 +43,12 @@ class Suite(object):
         self.tests = attributes['tests']
         self.total_tests = attributes['totaltests']
         self.type = 'SUITE'
+
+    @property
+    def source(self):
+        """Return the test case source file path."""
+        if self.attributes.get('source') is not None:
+            return os.path.relpath(self.attributes['source'], os.getcwd())
 
     def update(self, attributes):
         """Update suite attributes on suite finish.
@@ -78,12 +84,11 @@ class Test(object):
         :param name:       Name of the test
         :param attributes: Test attributes passed through the listener
         """
-        self._critical = attributes.get('critical', 'yes')
-        self._tags = attributes['tags']
-        self.attributes = attributes
-        self.code_ref = '{0}:{1}'.format(attributes['source'], name)
         # for backward compatibility with Robot < 4.0 mark every test case
         # as critical if not set
+        self._critical = attributes.get('critical', 'yes')
+        self._tags = attributes['tags']
+        self._attributes = attributes
         self.doc = attributes['doc']
         self.end_time = attributes.get('endtime', '')
         self.longname = attributes['longname']
@@ -109,11 +114,31 @@ class Test(object):
             tag for tag in self._tags if not tag.startswith('test_case_id')]
 
     @property
+    def source(self):
+        """Return the test case source file path."""
+        if self._attributes['source'] is not None:
+            return os.path.relpath(self._attributes['source'], os.getcwd())
+
+    @property
+    def code_ref(self):
+        """Return the test case code reference.
+
+        The result line should be exactly how it appears in '.robot' file.
+        """
+        line_number = self._attributes.get("lineno")
+        if line_number is not None:
+            return '{0}:{1}'.format(self.source, line_number)
+        return '{0}:{1}'.format(self.source, self.name)
+
+    @property
     def test_case_id(self):
         """Get test case ID through the tags."""
+        # use test case id from tags if specified
         for tag in self._tags:
-            if tag.startswith('test_case_id'):
+            if tag.startswith('test_case_id:'):
                 return tag.split(':')[1]
+        # generate it if not
+        return '{0}:{1}'.format(self.source, self.name)
 
     def update(self, attributes):
         """Update test attributes on test finish.
