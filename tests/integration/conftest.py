@@ -23,7 +23,7 @@ SETTINGS_EXPECTED_TEST_NAMES = ['Invalid User Name', 'Invalid Password',
                                 'Empty User Name',
                                 'Empty Password',
                                 'Empty User Name and Password']
-SETTINGS_EXPECTED_CODE_REF_SUFFIXES = list(map(lambda x: str(x), range(7, 14)))
+SETTINGS_EXPECTED_CODE_REF_SUFFIXES = [str(x) for x in range(7, 14)]
 
 DATADRIVER_EXPECTED_TEST_NAMES = \
     ['Login with user \'invalid\' and password \'Password\'',
