@@ -36,9 +36,6 @@ class Suite(object):
         self.robot_id = attributes['id']
         self.rp_item_id = None
         self.rp_parent_item_id = None
-        self.source = next(iter(map(
-            lambda x: x if x is None else os.path.relpath(x, os.getcwd()),
-            [attributes.get('source')])))
         self.start_time = attributes.get('starttime')
         self.statistics = attributes.get('statistics')
         self.status = attributes.get('status')
@@ -46,6 +43,12 @@ class Suite(object):
         self.tests = attributes['tests']
         self.total_tests = attributes['totaltests']
         self.type = 'SUITE'
+
+    @property
+    def source(self):
+        """Return the test case source file path."""
+        if self.attributes.get('source') is not None:
+            return os.path.relpath(self.attributes['source'], os.getcwd())
 
     def update(self, attributes):
         """Update suite attributes on suite finish.
