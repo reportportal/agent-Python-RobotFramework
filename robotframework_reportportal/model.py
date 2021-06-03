@@ -36,7 +36,9 @@ class Suite(object):
         self.robot_id = attributes['id']
         self.rp_item_id = None
         self.rp_parent_item_id = None
-        self.source = os.path.relpath(attributes['source'], os.getcwd())
+        self.source = map(
+            lambda x: x if x is None else os.path.relpath(x, os.getcwd()),
+            [attributes.get('source')]).__next__()
         self.start_time = attributes.get('starttime')
         self.statistics = attributes.get('statistics')
         self.status = attributes.get('status')
@@ -124,14 +126,7 @@ class Test(object):
         test_name = self.name
         line_number = self._attributes.get("lineno")
         if line_number is not None:
-            source = self._attributes['source']
-            source_line = None
-            with open(source) as sf:
-                for i, line in enumerate(sf):
-                    if i == line_number - 1:
-                        source_line = line.strip()
-            if not source_line.startswith(test_name):
-                test_name = source_line
+            return '{0}:{1}'.format(self.source, line_number)
         return '{0}:{1}'.format(self.source, test_name)
 
     @property
