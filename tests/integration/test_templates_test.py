@@ -29,7 +29,7 @@ def test_code_reference_template(mock_client_init, test, test_names,
     mock_client = mock_client_init.return_value
     calls = list(
         filter(lambda x: x[1]['item_type'] == 'STEP'
-                         and x[1].get('has_stats', True) is True,
+               and x[1].get('has_stats', True) is True,
                mock_client.start_test_item.call_args_list)
     )
     assert len(calls) == len(test_names)
