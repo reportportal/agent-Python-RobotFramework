@@ -27,7 +27,7 @@ def test_code_reference_template(mock_client_init, test, test_names,
     assert result == 0  # the test successfully passed
 
     mock_client = mock_client_init.return_value
-    calls = list(
+    calls = [call for call in mock_client.start_test_item.call_args_list if call[1]['item_type'] == 'STEP' and call[1].get('has_stats', True) is True]
         filter(lambda x: x[1]['item_type'] == 'STEP'
                and x[1].get('has_stats', True) is True,
                mock_client.start_test_item.call_args_list)
