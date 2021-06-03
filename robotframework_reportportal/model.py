@@ -115,7 +115,6 @@ class Test(object):
         """Return the test case source file path."""
         if self._attributes['source'] is not None:
             return os.path.relpath(self._attributes['source'], os.getcwd())
-        return None
 
     @property
     def code_ref(self):
@@ -123,11 +122,10 @@ class Test(object):
 
         The result line should be exactly how it appears in '.robot' file.
         """
-        test_name = self.name
         line_number = self._attributes.get("lineno")
         if line_number is not None:
             return '{0}:{1}'.format(self.source, line_number)
-        return '{0}:{1}'.format(self.source, test_name)
+        return '{0}:{1}'.format(self.source, self.name)
 
     @property
     def test_case_id(self):
