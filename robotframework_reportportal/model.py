@@ -36,9 +36,9 @@ class Suite(object):
         self.robot_id = attributes['id']
         self.rp_item_id = None
         self.rp_parent_item_id = None
-        self.source = map(
+        self.source = next(map(
             lambda x: x if x is None else os.path.relpath(x, os.getcwd()),
-            [attributes.get('source')]).__next__()
+            [attributes.get('source')]))
         self.start_time = attributes.get('starttime')
         self.statistics = attributes.get('statistics')
         self.status = attributes.get('status')
