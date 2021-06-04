@@ -42,3 +42,10 @@ def run_robot_tests(tests, listener='robotframework_reportportal.listener',
         arguments.append(t)
 
     return RobotFramework().execute_cli(arguments, False)
+
+
+def get_launch_log_calls(mock):
+    return list(
+        filter(lambda x: 'item_id' in x[1] and x[1]['item_id'] is None,
+               mock.log.call_args_list)
+    )
