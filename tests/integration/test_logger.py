@@ -25,10 +25,7 @@ def test_launch_log(mock_client_init):
     assert result == 0  # the test successfully passed
 
     mock_client = mock_client_init.return_value
-    calls = list(
-        filter(lambda x: 'item_id' in x[1] and x[1]['item_id'] is None,
-               mock_client.log.call_args_list)
-    )
+    calls = utils.get_launch_log_calls(mock_client)
     assert len(calls) == 3
 
     messages = set(map(lambda x: x[1]['message'], calls))
