@@ -62,5 +62,7 @@ def test_logger_params_bypass(mock_logger, method, params):
         expect(mock_logger.console.call_args[0][0] == params['msg'])
         expect(mock_logger.console.call_args[0][1] is True)
         expect(mock_logger.console.call_args[0][2] == 'stdout')
+    else:
+        expect(mock_logger.console.call_count == 0)
 
     assert_expectations()
