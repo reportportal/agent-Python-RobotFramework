@@ -32,11 +32,10 @@ BASIC_PARAMS = [
      'launch_log': False},
     {'msg': None, 'html': False, 'attachment': None, 'launch_log': True}]
 
-INFO_PARAMS = chain(map(
-    lambda x: {k: v for k, v in chain(x.items(), [('also_console', False)])},
-    iter(BASIC_PARAMS)), [
-    {'msg': 'Console Test', 'html': False, 'attachment': None,
-     'launch_log': False, 'also_console': True}])
+INFO_PARAMS = [{k: v for k, v in chain(e.items(), [('also_console', False)])}
+               for e in BASIC_PARAMS + [BASIC_PARAMS[0]]]
+INFO_PARAMS[-1]['also_console'] = True
+INFO_PARAMS[-1]['msg'] = 'Test console message'
 
 TEST_DATA_METHODS = chain(
     product(['trace', 'debug', 'warn', 'error'], BASIC_PARAMS),
