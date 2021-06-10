@@ -26,7 +26,7 @@ TEST_CASE_UUIDS = [str(uuid.uuid5(uuid.NAMESPACE_OID, i)) for i in TEST_CASES]
 
 
 def generate_id(*args, **kwargs):
-    return str(uuid.uuid5(uuid.NAMESPACE_OID, kwargs['name']))
+    return str(uuid.uuid5(uuid.NAMESPACE_OID, str(kwargs['name'])))
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
