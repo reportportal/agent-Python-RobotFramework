@@ -40,8 +40,7 @@ def test_launch_log(mock_client_init):
     start_tests = [call for call in mock_client.start_test_item.call_args_list
                    if
                    call[1]['item_type'] == 'STEP' and call[1].get('has_stats',
-                                                                  True)
-                   is True]
+                                                                  True)]
     finish_tests = [call for call in
                     mock_client.finish_test_item.call_args_list if
                     call[1]['item_id'] in TEST_CASE_UUIDS]
