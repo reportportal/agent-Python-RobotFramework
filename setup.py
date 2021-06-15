@@ -19,7 +19,7 @@ def read_file(fname):
 
 setup(
     name='robotframework-reportportal',
-    packages=find_packages(),
+    packages=find_packages(exclude=('tests', 'tests.*')),
     version=__version__,
     description='Agent for reporting RobotFramework test results to '
                 'Report Portal',
