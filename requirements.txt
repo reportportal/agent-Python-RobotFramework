@@ -1,6 +1,4 @@
 python-dateutil>=2.8.1
-reportportal-client>=5.0.10
+reportportal-client>=5.0.11
 robotframework
-robotframework-datadriver
-delayed_assert
 six>=1.15.0
