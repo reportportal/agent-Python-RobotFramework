@@ -90,7 +90,8 @@ class RobotService(object):
                 token=uuid,
                 log_batch_size=log_batch_size,
                 max_pool_size=pool_size,
-                is_skipped_an_issue=skipped_issue)
+                is_skipped_an_issue=skipped_issue,
+                verify_ssl=verify_ssl)
         else:
             raise RobotServiceException(
                 'RobotFrameworkService is already initialized.')
