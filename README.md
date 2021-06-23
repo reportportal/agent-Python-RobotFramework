@@ -69,6 +69,9 @@ NOT REQUIRED:
 --variable RP_ATTACH_REPORT:"True"
     - Default value is "False", attaches Robot Framework HTML report file to
       the launch.
+--variable RP_VERIFY_SSL:"True"
+    - Default value is "False", disables SSL verification on underlying 
+    python requests.
 ```
 
 Custom logger which supports attachments can be used in Python keywords.
