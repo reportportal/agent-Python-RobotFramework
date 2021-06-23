@@ -70,7 +70,7 @@ NOT REQUIRED:
     - Default value is "False", attaches Robot Framework HTML report file to
       the launch.
 --variable RP_VERIFY_SSL:"True"
-    - Default value is "False", disables SSL verification on underlying 
+    - Default value is "True", disables SSL verification on underlying 
     python requests.
 ```
 
