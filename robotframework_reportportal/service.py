@@ -68,7 +68,7 @@ class RobotService(object):
         return attributes + _dict_to_payload(system_attributes)
 
     def init_service(self, endpoint, project, uuid, log_batch_size, pool_size,
-                     skipped_issue=True):
+                     skipped_issue=True, verify_ssl=True):
         """Initialize common reportportal client.
 
         :param endpoint:       Report Portal API endpoint
