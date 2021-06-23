@@ -63,7 +63,7 @@ class Variables(object):
         self.test_attributes = get_variable(
             'RP_TEST_ATTRIBUTES', default='').split()
         self.verify_ssl = get_variable(
-            'RP_VERIFY_SSL', default='').split()
+            'RP_VERIFY_SSL', default='True').split()
 
     @property
     def endpoint(self):
