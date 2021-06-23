@@ -106,7 +106,6 @@ class listener(object):
                 pool_size=self.variables.pool_size,
                 skipped_issue=self.variables.skipped_issue,
                 verify_ssl = self.verify_ssl
-                
             )
         return self._service
 
