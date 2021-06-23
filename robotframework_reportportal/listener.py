@@ -104,7 +104,7 @@ class listener(object):
                 log_batch_size=self.variables.log_batch_size,
                 pool_size=self.variables.pool_size,
                 skipped_issue=self.variables.skipped_issue,
-                verify_ssl = self.variables.verify_ssl
+                verify_ssl=self.variables.verify_ssl
             )
         return self._service
 
