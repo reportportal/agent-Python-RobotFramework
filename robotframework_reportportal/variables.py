@@ -62,8 +62,8 @@ class Variables(object):
             'RP_SKIPPED_ISSUE', default='True'))
         self.test_attributes = get_variable(
             'RP_TEST_ATTRIBUTES', default='').split()
-        self.verify_ssl = get_variable(
-            'RP_VERIFY_SSL', default='True').split()
+        self.verify_ssl = strtobool(get_variable(
+            'RP_VERIFY_SSL', default='True'))
 
     @property
     def endpoint(self):
