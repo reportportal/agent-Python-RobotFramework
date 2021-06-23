@@ -31,12 +31,11 @@ class listener(object):
 
     ROBOT_LISTENER_API_VERSION = 2
 
-    def __init__(self, **kwargs):
+    def __init__(self):
         """Initialize listener attributes."""
         self._items = []
         self._service = None
         self._variables = None
-        self.verify_ssl = kwargs.get("verify_ssl")
 
     def _build_msg_struct(self, message):
         """Check if the given message comes from our custom logger or not.
@@ -105,7 +104,7 @@ class listener(object):
                 log_batch_size=self.variables.log_batch_size,
                 pool_size=self.variables.pool_size,
                 skipped_issue=self.variables.skipped_issue,
-                verify_ssl = self.verify_ssl
+                verify_ssl = self.variables.verify_ssl
             )
         return self._service
 
