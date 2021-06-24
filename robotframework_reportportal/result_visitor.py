@@ -9,6 +9,7 @@ from . import listener
 from .time_visitor import corrections
 from .variables import _variables
 
+import os
 
 listener = listener.listener()
 
@@ -19,9 +20,11 @@ def to_timestamp(time_str):
         return str(int(dt.timestamp() * 1000))
     return None
 
-
 class RobotResultsVisitor(ResultVisitor):
     _link_pattern = re.compile("src=[\"\']([^\"\']+)[\"\']")
+
+    def __init__(self, logroot='.'):
+        self.logroot=logroot
 
     def start_result(self, result):
         if "RP_LAUNCH" not in _variables:
@@ -103,7 +106,7 @@ class RobotResultsVisitor(ResultVisitor):
         listener.end_test(test.name, attrs, ts)
 
     def start_keyword(self, kw):
-        ts = to_timestamp(kw.starttime if kw.id not in corrections else corrections[kw.id][0])
+        ts = to_timestamp(kw.starttime if kw.id not in corrections else corrections[kw.id][0])   
         attrs = {
             'type': string.capwords(kw.type),
             'kwname': kw.kwname,
@@ -117,7 +120,7 @@ class RobotResultsVisitor(ResultVisitor):
         listener.start_keyword(kw.name, attrs, ts)
 
     def end_keyword(self, kw):
-        ts = to_timestamp(kw.endtime if kw.id not in corrections else corrections[kw.id][1])
+        ts = to_timestamp(kw.endtime if kw.id not in corrections else corrections[kw.id][1])     
         attrs = {
             'type': string.capwords(kw.type),
             'kwname': kw.kwname,
@@ -141,8 +144,9 @@ class RobotResultsVisitor(ResultVisitor):
             try:
                 m = self.parse_message(message['message'])
                 message["message"] = m[0]
-                listener.log_message_with_image(message, m[1])
-            except (AttributeError, IOError):
+                image_filename=os.path.join(self.logroot, m[1])
+                listener.log_message_with_image(message, image_filename)
+            except (AttributeError, IOError) as e:
                 # noinspection PyBroadException
                 try:
                     listener.log_message(message)
