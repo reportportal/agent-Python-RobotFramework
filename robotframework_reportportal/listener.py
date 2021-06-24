@@ -68,6 +68,7 @@ class listener(object):
         """
         msg = self._build_msg_struct(message)
         logger.debug('ReportPortal - Log Message: {0}'.format(message))
+        msg.handle_img_attachment()
         self.service.log(message=msg)
 
     def log_message_with_image(self, msg, image):
