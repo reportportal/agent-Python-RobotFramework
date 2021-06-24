@@ -16,6 +16,8 @@ import os
 from reportportal_client.service import _convert_string
 from six import text_type
 
+from robot.libraries.BuiltIn import BuiltIn
+import glob, os
 
 class Suite(object):
     """Class represents Robot Framework test suite."""
@@ -227,3 +229,29 @@ class LogMessage(text_type):
     def __repr__(self):
         """Return string representation of the object."""
         return self.message
+
+    def handle_img_attachment(self):
+        msg_len = len(self.message)
+
+        # Limits string lookup to 200 iter
+        l = 100 if msg_len > 100 else msg_len
+        img_tag_index = self.message.find("<img src=", 0, l)
+
+        if img_tag_index >= 0 :
+            # screenshot_dir
+            screenshot_dir = BuiltIn().get_variables()['${OUTPUT_DIR}']
+
+            # img_name
+            name_beg = img_tag_index + len("<img src=") + 1
+            name_end = self.message.find('"', name_beg)
+            img_name = self.message[name_beg:name_end]
+
+            # full_img_path
+            sep = '\\' if os.name == 'nt' else '/'
+            img_path = "%s%s%s" % (screenshot_dir, sep, img_name)
+
+            with open(img_path, "rb") as image_file:
+                self.attachment = {"name": img_name,
+                                "data": image_file.read(),
+                                "mime": "image/png"}
+            self.message = "Screenshot : "
