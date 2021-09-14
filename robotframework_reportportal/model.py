@@ -86,7 +86,7 @@ class Test(object):
         """
         # for backward compatibility with Robot < 4.0 mark every test case
         # as critical if not set
-        self._critical = attributes.get('critical', 'yes')
+       # self._critical = attributes.get('critical', 'yes')
         self._tags = attributes['tags']
         self._attributes = attributes
         self.doc = attributes['doc']
@@ -102,11 +102,10 @@ class Test(object):
         self.template = attributes['template']
         self.type = 'TEST'
 
-    @property
-    def critical(self):
-        """Form unique value for RF 4.0+ and older versions."""
-        return self._critical in ('yes', True)
-
+ #   @property
+  #  def critical(self):
+  #      """Form unique value for RF 4.0+ and older versions."""
+   #     return self._critical in ('yes', True)
     @property
     def tags(self):
         """Get list of test tags excluding test_case_id."""
