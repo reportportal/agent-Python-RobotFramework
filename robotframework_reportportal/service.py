@@ -100,11 +100,15 @@ class RobotService(object):
         if self.rp is not None:
             self.rp.terminate()
 
-    def start_launch(self, launch, mode=None, ts=None, skip_analytics=False):
+    def start_launch(self, launch, mode=None, rerun=False, rerun_of=None,
+                     ts=None, skip_analytics=False):
         """Call start_launch method of the common client.
 
         :param launch:         Instance of the Launch class
         :param mode:           Launch mode
+        :param rerun:          Rerun mode. Allowable values 'True' of 'False'
+        :param rerun_of:       Rerun mode. Specifies launch to be re-runned.
+                               Should be used with the 'rerun' option.
         :param ts:             Start time
         :param skip_analytics: Skip reporting of agent name and version to GA?
         :return:               launch UUID
@@ -114,6 +118,8 @@ class RobotService(object):
             'description': launch.doc,
             'name': launch.name,
             'mode': mode,
+            'rerun': rerun,
+            'rerunOf': rerun_of,
             'start_time': ts or to_epoch(launch.start_time) or timestamp()
         }
         logger.debug(
