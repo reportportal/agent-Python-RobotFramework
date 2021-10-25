@@ -64,6 +64,11 @@ NOT REQUIRED:
     - Space-separated list of tags/attributes for the tests
 --variable RP_LOG_BATCH_SIZE:"10"
     - Default value is "20", affects size of async batch log requests
+--variable RP_RERUN:"True"
+    - Default is "False". Enables rerun mode for the last launch.
+--variable RP_RERUN_OF:"xxxxx-xxxx-xxxx-lauch-uuid"
+    - Default is "None". Enables rerun mode for the launch with the specified
+      UUID. Should be used in combination with the RP_RERUN option.
 --variable RP_SKIPPED_ISSUE:"True"
     - Default value is "True", marks skipped test items with 'To Investigate'
 --variable RP_ATTACH_LOG:"True"

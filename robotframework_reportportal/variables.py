@@ -61,6 +61,9 @@ class Variables(object):
             'RP_LOG_BATCH_SIZE', default='20'))
         self.mode = get_variable('RP_MODE')
         self.pool_size = int(get_variable('RP_MAX_POOL_SIZE', default='50'))
+        self.rerun = strtobool(get_variable(
+            'RP_RERUN', default='False'))
+        self.rerun_of = get_variable('RP_RERUN_OF', default=None)
         self.skip_analytics = getenv('AGENT_NO_ANALYTICS')
         self.skipped_issue = strtobool(get_variable(
             'RP_SKIPPED_ISSUE', default='True'))
