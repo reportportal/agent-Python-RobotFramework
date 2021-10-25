@@ -47,8 +47,12 @@ class Variables(object):
         self._pabot_used = None
         self._project = None
         self._uuid = None
+        self.attach_log = strtobool(get_variable(
+            'RP_ATTACH_LOG', default='False'))
         self.attach_report = strtobool(get_variable(
-            'RP_ATTACH_REPORT', default='True'))
+            'RP_ATTACH_REPORT', default='False'))
+        self.attach_xunit = strtobool(get_variable(
+            'RP_ATTACH_XUNIT', default='False'))
         self.launch_attributes = get_variable(
             'RP_LAUNCH_ATTRIBUTES', default='').split()
         self.launch_id = get_variable('RP_LAUNCH_UUID')
