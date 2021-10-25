@@ -66,8 +66,14 @@ NOT REQUIRED:
     - Default value is "20", affects size of async batch log requests
 --variable RP_SKIPPED_ISSUE:"True"
     - Default value is "True", marks skipped test items with 'To Investigate'
+--variable RP_ATTACH_LOG:"True"
+    - Default value is "False", attaches Robot Framework HTML log file to
+      the launch.
 --variable RP_ATTACH_REPORT:"True"
     - Default value is "False", attaches Robot Framework HTML report file to
+      the launch.
+--variable RP_ATTACH_XUNIT:"True"
+    - Default value is "False", attaches Robot Framework XUnit result file to
       the launch.
 ```
 

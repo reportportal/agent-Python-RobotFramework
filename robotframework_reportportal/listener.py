@@ -238,6 +238,15 @@ class listener(object):
         logger.debug('ReportPortal - End Keyword: {0}'.format(kwd.attributes))
         self.service.finish_keyword(keyword=kwd, ts=ts)
 
+    def log_file(self, log_path):
+        """Attach HTML log file created by Robot Framework to RP launch.
+
+        :param log_path: Path to the log file
+        """
+        if self.variables.attach_log:
+            message = {'message': 'Execution log', 'level': 'INFO'}
+            self.log_message_with_image(message, log_path)
+
     def report_file(self, report_path):
         """Attach HTML report created by Robot Framework to RP launch.
 
@@ -246,6 +255,15 @@ class listener(object):
         if self.variables.attach_report:
             message = {'message': 'Execution report', 'level': 'INFO'}
             self.log_message_with_image(message, report_path)
+
+    def xunit_file(self, xunit_path):
+        """Attach XUnit file created by Robot Framework to RP launch.
+
+        :param xunit_path: Path to the XUnit file
+        """
+        if self.variables.attach_xunit:
+            message = {'message': 'XUnit result file', 'level': 'INFO'}
+            self.log_message_with_image(message, xunit_path)
 
     def close(self):
         """Call service terminate when the whole test execution is done."""
