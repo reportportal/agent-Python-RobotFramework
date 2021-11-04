@@ -263,7 +263,7 @@ class RobotService(object):
         sl_rq = {
             'attachment': message.attachment,
             'item_id': message.item_id,
-            'level': LOG_LEVEL_MAPPING[message.level],
+            'level': LOG_LEVEL_MAPPING.get(message.level, 'INFO'),
             'message': message.message,
             'time': ts or timestamp()
         }
