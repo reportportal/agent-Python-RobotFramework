@@ -80,6 +80,9 @@ NOT REQUIRED:
 --variable RP_ATTACH_XUNIT:"True"
     - Default value is "False", attaches Robot Framework XUnit result file to
       the launch.
+--variable RP_VERIFY_SSL:"True"
+    - Default value is "True", disables SSL verification for HTTP requests.
+      Also, you can specify a full path to your certificate as the value.
 ```
 
 Custom logger which supports attachments can be used in Python keywords.

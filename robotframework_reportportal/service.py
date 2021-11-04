@@ -68,7 +68,7 @@ class RobotService(object):
         return attributes + _dict_to_payload(system_attributes)
 
     def init_service(self, endpoint, project, uuid, log_batch_size, pool_size,
-                     skipped_issue=True):
+                     skipped_issue=True, verify_ssl=True):
         """Initialize common reportportal client.
 
         :param endpoint:       Report Portal API endpoint
@@ -78,6 +78,7 @@ class RobotService(object):
         :param pool_size:      HTTPAdapter max pool size
         :param skipped_issue   Mark skipped test items with 'To Investigate',
                                default value 'True'
+        :param verify_ssl:     Disable SSL verification
         """
         if self.rp is None:
             logger.debug(
@@ -90,7 +91,9 @@ class RobotService(object):
                 token=uuid,
                 log_batch_size=log_batch_size,
                 max_pool_size=pool_size,
-                is_skipped_an_issue=skipped_issue)
+                is_skipped_an_issue=skipped_issue,
+                verify_ssl=verify_ssl
+            )
         else:
             raise RobotServiceException(
                 'RobotFrameworkService is already initialized.')

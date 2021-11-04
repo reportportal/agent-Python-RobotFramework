@@ -12,7 +12,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from os import getenv
+from os import getenv, path
 from distutils.util import strtobool
 
 from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
@@ -145,3 +145,11 @@ class Variables(object):
                 'Missing parameter RP_UUID for robot run\n'
                 'You should pass -v RP_UUID:<uuid_value>')
         return self._uuid
+
+    @property
+    def verify_ssl(self):
+        """Get value of the verify_ssl parameter for the client."""
+        verify_ssl = get_variable('RP_VERIFY_SSL', default='True')
+        if path.exists(verify_ssl):
+            return verify_ssl
+        return bool(strtobool(verify_ssl))
