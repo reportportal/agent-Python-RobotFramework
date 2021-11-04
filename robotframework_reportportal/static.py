@@ -20,7 +20,8 @@ LOG_LEVEL_MAPPING = {
     'DEBUG': 'DEBUG',
     'HTML': 'INFO',
     'WARN': 'WARN',
-    'ERROR': 'ERROR'
+    'ERROR': 'ERROR',
+    'SKIP': 'INFO'
 }
 MAIN_SUITE_ID = 's1'
 PABOT_WIHOUT_LAUNCH_ID_MSG = (
