@@ -47,7 +47,7 @@ class listener(object):
         else:
             msg = LogMessage(message['message'])
             msg.level = message['level']
-        if not getattr(msg, 'launch_log', False):
+        if not msg.launch_log:
             msg.item_id = getattr(self.current_item, 'rp_item_id', None)
         return msg
 
@@ -209,12 +209,15 @@ class listener(object):
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
-        test = self._finish_current_item().update(attributes)
+        test = self.current_item.update(attributes)
         test.attributes = gen_attributes(
             self.variables.test_attributes + test.tags)
         if not test.critical and test.status == 'FAIL':
             test.status = 'SKIP'
+        if test.message:
+            self.log_message({'message': test.message, 'level': 'DEBUG'})
         logger.debug('ReportPortal - End Test: {0}'.format(test.attributes))
+        self._finish_current_item()
         self.service.finish_test(test=test, ts=ts)
 
     def start_keyword(self, name, attributes, ts=None):
