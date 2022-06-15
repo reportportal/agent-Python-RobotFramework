@@ -13,10 +13,15 @@ See the License for the specific language governing permissions and
 limitations under the License
 """
 
+import re
 from tests.helpers import utils
 from six.moves import mock
 
 from tests import REPORT_PORTAL_SERVICE
+
+
+NO_KEYWORDS_MESSAGE_PATTERN = \
+    re.compile(r'Test (?:case )?contains no keywords\.')
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
@@ -31,7 +36,7 @@ def test_no_keyword_message(mock_client_init):
     assert len(log_calls) == 1
 
     log_call = log_calls[0][1]
-    assert log_call['message'] == 'Test case contains no keywords.'
+    assert NO_KEYWORDS_MESSAGE_PATTERN.match(log_call['message'])
     assert log_call['item_id'].startswith('No keyword test case')
 
     item_start_calls = mock_client.start_test_item.call_args_list
