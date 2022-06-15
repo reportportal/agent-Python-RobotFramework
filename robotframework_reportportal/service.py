@@ -30,6 +30,8 @@ from .static import LOG_LEVEL_MAPPING, STATUS_MAPPING
 
 logger = logging.getLogger(__name__)
 
+TOP_LEVEL_ITEMS = {'BEFORE_SUITE', 'AFTER_SUITE'}
+
 
 def to_epoch(date):
     """Convert Robot Framework timestamp to UTC timestamp."""
@@ -230,7 +232,7 @@ class RobotService(object):
         """
         start_rq = {
             'description': keyword.doc,
-            'has_stats': False,
+            'has_stats': keyword.get_type() in TOP_LEVEL_ITEMS,
             'item_type': keyword.get_type(),
             'name': keyword.get_name(),
             'parent_item_id': keyword.rp_parent_item_id,
