@@ -13,6 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License
 """
+import time
+import random
 
 from robot.run import RobotFramework
 
@@ -47,3 +49,8 @@ def run_robot_tests(tests, listener='robotframework_reportportal.listener',
 def get_launch_log_calls(mock):
     return [e for e in mock.log.call_args_list
             if 'item_id' in e[1] and e[1]['item_id'] is None]
+
+
+def item_id_gen(**kwargs):
+    return "{}-{}-{}".format(kwargs['name'], str(round(time.time() * 1000)),
+                             random.randint(0, 9999))
