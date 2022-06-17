@@ -1,10 +1,10 @@
 """This module includes Robot service for reporting results to Report Portal.
 
-Copyright (c) 2021 http://reportportal.io .
+Copyright (c) 2021 https://reportportal.io .
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-http://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -29,6 +29,8 @@ from .exception import RobotServiceException
 from .static import LOG_LEVEL_MAPPING, STATUS_MAPPING
 
 logger = logging.getLogger(__name__)
+
+TOP_LEVEL_ITEMS = {'BEFORE_SUITE', 'AFTER_SUITE'}
 
 
 def to_epoch(date):
@@ -230,7 +232,7 @@ class RobotService(object):
         """
         start_rq = {
             'description': keyword.doc,
-            'has_stats': False,
+            'has_stats': keyword.get_type() in TOP_LEVEL_ITEMS,
             'item_type': keyword.get_type(),
             'name': keyword.get_name(),
             'parent_item_id': keyword.rp_parent_item_id,
