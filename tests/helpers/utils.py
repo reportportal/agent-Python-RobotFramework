@@ -13,8 +13,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License
 """
-import time
 import random
+import time
 
 from robot.run import RobotFramework
 
@@ -28,22 +28,27 @@ DEFAULT_VARIABLES = {
 
 
 def run_robot_tests(tests, listener='robotframework_reportportal.listener',
-                    variables=None):
+                    variables=None, arguments=None):
+    cmd_arguments = ['--listener', listener]
+    if arguments:
+        for k, v in arguments.items():
+            cmd_arguments.append(k)
+            cmd_arguments.append(v)
+
     if variables is None:
         variables = DEFAULT_VARIABLES
 
-    arguments = ['--listener', listener]
     for k, v in variables.items():
-        arguments.append('--variable')
+        cmd_arguments.append('--variable')
         if type(v) is str:
-            arguments.append(k + ':' + '"' + v + '"')
+            cmd_arguments.append(k + ':' + '"' + v + '"')
         else:
-            arguments.append(k + ':' + str(v))
+            cmd_arguments.append(k + ':' + str(v))
 
     for t in tests:
-        arguments.append(t)
+        cmd_arguments.append(t)
 
-    return RobotFramework().execute_cli(arguments, False)
+    return RobotFramework().execute_cli(cmd_arguments, False)
 
 
 def get_launch_log_calls(mock):
