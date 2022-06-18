@@ -19,12 +19,7 @@ from tests import REPORT_PORTAL_SERVICE
 from tests.helpers import utils
 
 
-@mock.patch(REPORT_PORTAL_SERVICE)
-def test_agent_attaches_report(mock_client_init):
-    variables = utils.DEFAULT_VARIABLES.copy()
-    variables['RP_ATTACH_REPORT'] = True
-    result = utils.run_robot_tests(['examples/templates/settings.robot'],
-                                   variables=variables)
+def verify_attachment(mock_client_init, result, message, name, content_type):
     assert result == 0  # the test successfully passed
 
     mock_client = mock_client_init.return_value
@@ -32,21 +27,30 @@ def test_agent_attaches_report(mock_client_init):
     assert len(calls) == 1
 
     call_params = calls[0][1]
-
     expect('attachment' in call_params.keys(),
            'log entry does not contain attachment')
     expect('level' in call_params.keys(),
            'log entry does not contain level')
     expect('message' in call_params.keys(),
            'log entry does not contain message')
-    assert_expectations()
 
+    assert_expectations()
     expect(call_params['level'] == 'INFO')
-    expect(call_params['message'] == 'Execution report')
-    expect(call_params['attachment']['name'] == 'report.html')
-    expect(call_params['attachment']['mime'] == 'text/html')
+    expect(call_params['message'] == message)
+    expect(call_params['attachment']['name'] == name)
+    expect(call_params['attachment']['mime'] == content_type)
     expect(len(call_params['attachment']['data']) > 0)
     assert_expectations()
+
+
+@mock.patch(REPORT_PORTAL_SERVICE)
+def test_agent_attaches_report(mock_client_init):
+    variables = utils.DEFAULT_VARIABLES.copy()
+    variables['RP_ATTACH_REPORT'] = True
+    result = utils.run_robot_tests(['examples/templates/settings.robot'],
+                                   variables=variables)
+    verify_attachment(mock_client_init, result, 'Execution report',
+                      'report.html', 'text/html')
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
@@ -55,28 +59,9 @@ def test_agent_attaches_log(mock_client_init):
     variables['RP_ATTACH_LOG'] = True
     result = utils.run_robot_tests(['examples/templates/settings.robot'],
                                    variables=variables)
+    verify_attachment(mock_client_init, result, 'Execution log',
+                      'log.html', 'text/html')
     assert result == 0  # the test successfully passed
-
-    mock_client = mock_client_init.return_value
-    calls = utils.get_launch_log_calls(mock_client)
-    assert len(calls) == 1
-
-    call_params = calls[0][1]
-
-    expect('attachment' in call_params.keys(),
-           'log entry does not contain attachment')
-    expect('level' in call_params.keys(),
-           'log entry does not contain level')
-    expect('message' in call_params.keys(),
-           'log entry does not contain message')
-    assert_expectations()
-
-    expect(call_params['level'] == 'INFO')
-    expect(call_params['message'] == 'Execution log')
-    expect(call_params['attachment']['name'] == 'log.html')
-    expect(call_params['attachment']['mime'] == 'text/html')
-    expect(len(call_params['attachment']['data']) > 0)
-    assert_expectations()
 
 
 XUNIT_FILE_NAME = 'xunit.xml'
@@ -89,25 +74,5 @@ def test_agent_attaches_xunit(mock_client_init):
     result = utils.run_robot_tests(['examples/templates/settings.robot'],
                                    variables=variables,
                                    arguments={'-x': XUNIT_FILE_NAME})
-    assert result == 0  # the test successfully passed
-
-    mock_client = mock_client_init.return_value
-    calls = utils.get_launch_log_calls(mock_client)
-    assert len(calls) == 1
-
-    call_params = calls[0][1]
-
-    expect('attachment' in call_params.keys(),
-           'log entry does not contain attachment')
-    expect('level' in call_params.keys(),
-           'log entry does not contain level')
-    expect('message' in call_params.keys(),
-           'log entry does not contain message')
-    assert_expectations()
-
-    expect(call_params['level'] == 'INFO')
-    expect(call_params['message'] == 'XUnit result file')
-    expect(call_params['attachment']['name'] == XUNIT_FILE_NAME)
-    expect(call_params['attachment']['mime'] == 'application/xml')
-    expect(len(call_params['attachment']['data']) > 0)
-    assert_expectations()
+    verify_attachment(mock_client_init, result, 'XUnit result file',
+                      XUNIT_FILE_NAME, 'application/xml')
