@@ -36,7 +36,7 @@ CUSTOM_TEST_CASE_ID = 'examples/custom_test_case_id.robot'
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
-def test_case_id_simple(mock_client_init):
+def test_case_id_custom_definition(mock_client_init):
     result = utils.run_robot_tests([CUSTOM_TEST_CASE_ID])
     assert result == 0  # the test successfully passed
 
