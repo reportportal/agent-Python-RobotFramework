@@ -18,5 +18,4 @@ from six import add_move, MovedModule
 
 add_move(MovedModule('mock', 'mock', 'unittest.mock'))
 
-REPORT_PORTAL_SERVICE = (
-    'robotframework_reportportal.service.ReportPortalService')
+REPORT_PORTAL_SERVICE = 'robotframework_reportportal.service.RPClient'
