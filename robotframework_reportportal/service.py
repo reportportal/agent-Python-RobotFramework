@@ -11,19 +11,19 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+
 from dateutil.parser import parse
 import logging
 
+from reportportal_client.core.log_manager import MAX_LOG_BATCH_PAYLOAD_SIZE
 from reportportal_client.external.google_analytics import send_event
 from reportportal_client.helpers import (
+    dict_to_payload,
     get_launch_sys_attrs,
     get_package_version,
     timestamp
 )
-from reportportal_client.service import (
-    _dict_to_payload,
-    ReportPortalService
-)
+from reportportal_client.client import RPClient
 
 from .exception import RobotServiceException
 from .static import LOG_LEVEL_MAPPING, STATUS_MAPPING
@@ -67,35 +67,42 @@ class RobotService(object):
         system_attributes = get_launch_sys_attrs()
         system_attributes['agent'] = (
             '{}-{}'.format(self.agent_name, self.agent_version))
-        return attributes + _dict_to_payload(system_attributes)
+        return attributes + dict_to_payload(system_attributes)
 
     def init_service(self, endpoint, project, uuid, log_batch_size, pool_size,
-                     skipped_issue=True, verify_ssl=True):
-        """Initialize common reportportal client.
+                     skipped_issue=True, verify_ssl=True,
+                     log_batch_payload_size=MAX_LOG_BATCH_PAYLOAD_SIZE):
+        """Initialize common Report Portal client.
 
-        :param endpoint:       Report Portal API endpoint
-        :param project:        Report Portal project
-        :param uuid:           API token
-        :param log_batch_size: Number of logs to be sent within one batch
-        :param pool_size:      HTTPAdapter max pool size
-        :param skipped_issue   Mark skipped test items with 'To Investigate',
-                               default value 'True'
-        :param verify_ssl:     Disable SSL verification
+        :param endpoint:               Report Portal API endpoint
+        :param project:                Report Portal project
+        :param uuid:                   API token
+        :param log_batch_size:         Number of logs to be sent within one
+                                       batch
+        :param pool_size:              HTTPAdapter max pool size
+        :param skipped_issue:          Mark skipped test items with
+                                       'To Investigate', default value 'True'
+        :param verify_ssl:             Disable SSL verification.
+        :param log_batch_payload_size: Maximum size of logs to be sent within
+                                       one batch
         """
         if self.rp is None:
             logger.debug(
                 'ReportPortal - Init service: '
                 'endpoint={0}, project={1}, uuid={2}'
                 .format(endpoint, project, uuid))
-            self.rp = ReportPortalService(
+            self.rp = RPClient(
                 endpoint=endpoint,
                 project=project,
                 token=uuid,
-                log_batch_size=log_batch_size,
-                max_pool_size=pool_size,
                 is_skipped_an_issue=skipped_issue,
-                verify_ssl=verify_ssl
+                log_batch_size=log_batch_size,
+                retries=True,
+                verify_ssl=verify_ssl,
+                max_pool_size=pool_size,
+                log_batch_payload_size=log_batch_payload_size
             )
+            self.rp.start()
         else:
             raise RobotServiceException(
                 'RobotFrameworkService is already initialized.')
@@ -124,7 +131,7 @@ class RobotService(object):
             'name': launch.name,
             'mode': mode,
             'rerun': rerun,
-            'rerunOf': rerun_of,
+            'rerun_of': rerun_of,
             'start_time': ts or to_epoch(launch.start_time) or timestamp()
         }
         logger.debug(

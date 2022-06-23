@@ -1,10 +1,10 @@
 """This module contains model that stores Robot Framework variables.
 
-Copyright (c) 2021 http://reportportal.io .
+Copyright (c) 2021 https://reportportal.io .
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-http://www.apache.org/licenses/LICENSE-2.0
+https://www.apache.org/licenses/LICENSE-2.0
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -12,9 +12,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-from os import getenv, path
 from distutils.util import strtobool
+from os import getenv, path
 
+from reportportal_client.core.log_manager import MAX_LOG_BATCH_PAYLOAD_SIZE
 from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
 
 from .exception import RobotServiceException
@@ -47,12 +48,12 @@ class Variables(object):
         self._pabot_used = None
         self._project = None
         self._uuid = None
-        self.attach_log = strtobool(get_variable(
-            'RP_ATTACH_LOG', default='False'))
-        self.attach_report = strtobool(get_variable(
-            'RP_ATTACH_REPORT', default='False'))
-        self.attach_xunit = strtobool(get_variable(
-            'RP_ATTACH_XUNIT', default='False'))
+        self.attach_log = bool(strtobool(get_variable(
+            'RP_ATTACH_LOG', default='False')))
+        self.attach_report = bool(strtobool(get_variable(
+            'RP_ATTACH_REPORT', default='False')))
+        self.attach_xunit = bool(strtobool(get_variable(
+            'RP_ATTACH_XUNIT', default='False')))
         self.launch_attributes = get_variable(
             'RP_LAUNCH_ATTRIBUTES', default='').split()
         self.launch_id = get_variable('RP_LAUNCH_UUID')
@@ -61,14 +62,17 @@ class Variables(object):
             'RP_LOG_BATCH_SIZE', default='20'))
         self.mode = get_variable('RP_MODE')
         self.pool_size = int(get_variable('RP_MAX_POOL_SIZE', default='50'))
-        self.rerun = strtobool(get_variable(
-            'RP_RERUN', default='False'))
+        self.rerun = bool(strtobool(get_variable(
+            'RP_RERUN', default='False')))
         self.rerun_of = get_variable('RP_RERUN_OF', default=None)
         self.skip_analytics = getenv('AGENT_NO_ANALYTICS')
-        self.skipped_issue = strtobool(get_variable(
-            'RP_SKIPPED_ISSUE', default='True'))
+        self.skipped_issue = bool(strtobool(get_variable(
+            'RP_SKIPPED_ISSUE', default='True')))
         self.test_attributes = get_variable(
             'RP_TEST_ATTRIBUTES', default='').split()
+        self.log_batch_payload_size = int(get_variable(
+            "RP_LOG_BATCH_PAYLOAD_SIZE",
+            default=str(MAX_LOG_BATCH_PAYLOAD_SIZE)))
 
     @property
     def endpoint(self):

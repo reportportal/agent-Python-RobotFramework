@@ -11,6 +11,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 """
+
 import logging
 import os
 from mimetypes import guess_type
@@ -104,7 +105,8 @@ class listener(object):
                 log_batch_size=self.variables.log_batch_size,
                 pool_size=self.variables.pool_size,
                 skipped_issue=self.variables.skipped_issue,
-                verify_ssl=self.variables.verify_ssl
+                verify_ssl=self.variables.verify_ssl,
+                log_batch_payload_size=self.variables.log_batch_payload_size
             )
         return self._service
 

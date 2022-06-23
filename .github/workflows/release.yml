@@ -6,7 +6,7 @@ on:
     paths-ignore:
       - '.github/**'
       - CHANGELOG.md
-      - README.rst
+      - README.md
       - CONTRIBUTING.rst
 
 env:
@@ -60,6 +60,12 @@ jobs:
         with:
           user: ${{ secrets.PYPI_USERNAME }}
           password: ${{ secrets.PYPI_PASSWORD }}
+
+      - name: Checkout develop branch
+        uses: actions/checkout@v2
+        with:
+          ref: 'develop'
+          fetch-depth: 0
 
       - name: Update CHANGELOG.md
         id: changelogUpdate
