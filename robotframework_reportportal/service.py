@@ -15,6 +15,7 @@ limitations under the License.
 from dateutil.parser import parse
 import logging
 
+from reportportal_client.core.log_manager import MAX_LOG_BATCH_PAYLOAD_SIZE
 from reportportal_client.external.google_analytics import send_event
 from reportportal_client.helpers import (
     dict_to_payload,
@@ -69,17 +70,21 @@ class RobotService(object):
         return attributes + dict_to_payload(system_attributes)
 
     def init_service(self, endpoint, project, uuid, log_batch_size, pool_size,
-                     skipped_issue=True, verify_ssl=True):
-        """Initialize common reportportal client.
+                     skipped_issue=True, verify_ssl=True,
+                     log_batch_payload_size=MAX_LOG_BATCH_PAYLOAD_SIZE):
+        """Initialize common Report Portal client.
 
-        :param endpoint:       Report Portal API endpoint
-        :param project:        Report Portal project
-        :param uuid:           API token
-        :param log_batch_size: Number of logs to be sent within one batch
-        :param pool_size:      HTTPAdapter max pool size
-        :param skipped_issue   Mark skipped test items with 'To Investigate',
-                               default value 'True'
-        :param verify_ssl:     Disable SSL verification
+        :param endpoint:               Report Portal API endpoint
+        :param project:                Report Portal project
+        :param uuid:                   API token
+        :param log_batch_size:         Number of logs to be sent within one
+                                       batch
+        :param pool_size:              HTTPAdapter max pool size
+        :param skipped_issue:          Mark skipped test items with
+                                       'To Investigate', default value 'True'
+        :param verify_ssl:             Disable SSL verification.
+        :param log_batch_payload_size: Maximum size of logs to be sent within
+                                       one batch
         """
         if self.rp is None:
             logger.debug(
@@ -94,7 +99,8 @@ class RobotService(object):
                 log_batch_size=log_batch_size,
                 retries=True,
                 verify_ssl=verify_ssl,
-                max_pool_size=pool_size
+                max_pool_size=pool_size,
+                log_batch_payload_size=log_batch_payload_size
             )
             self.rp.start()
         else:
