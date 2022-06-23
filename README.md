@@ -64,6 +64,9 @@ NOT REQUIRED:
     - Space-separated list of tags/attributes for the tests
 --variable RP_LOG_BATCH_SIZE:"10"
     - Default value is "20", affects size of async batch log requests
+--variable RP_LOG_BATCH_PAYLOAD_SIZE:"10240000"
+    - Default value is "65000000", maximum payload size of async batch log
+      requests
 --variable RP_RERUN:"True"
     - Default is "False". Enables rerun mode for the last launch.
 --variable RP_RERUN_OF:"xxxxx-xxxx-xxxx-lauch-uuid"
