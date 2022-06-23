@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [5.3.0]
 ### Added
 - `RP_LOG_BATCH_PAYLOAD_SIZE` parameter, by @HardNorth
 ### Changed
