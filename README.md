@@ -42,6 +42,8 @@ The master branch will store the code base for the agent for Report Portal versi
 
 ## Usage
 
+### Properties
+
 For reporting results to ReportPortal you need to pass some variables to pybot run:
 
 REQUIRED:
@@ -87,6 +89,8 @@ NOT REQUIRED:
     - Default value is "True", disables SSL verification for HTTP requests.
       Also, you can specify a full path to your certificate as the value.
 ```
+
+### Logging
 
 Custom logger which supports attachments can be used in Python keywords.
 Usage of this logger is similar to the standard robot.api.logger with addition
