@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [5.3.1]
 ### Fixed
 - Issue [#160](https://github.com/reportportal/agent-Python-RobotFramework/issues/160) `RP_LAUNCH_UUID` variable passing to th Client, by @HardNorth
 
