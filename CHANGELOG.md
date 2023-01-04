@@ -1,6 +1,10 @@
 # Changelog
 
 ## [Unreleased]
+### Fixed
+- Issue [#160](https://github.com/reportportal/agent-Python-RobotFramework/issues/160) `RP_LAUNCH_UUID` variable passing to th Client, by @HardNorth
+
+## [5.3.0]
 ### Added
 - `RP_LOG_BATCH_PAYLOAD_SIZE` parameter, by @HardNorth
 ### Changed

@@ -4,6 +4,9 @@
 [![Python versions](https://img.shields.io/pypi/pyversions/robotframework-reportportal.svg)](https://pypi.org/project/robotframework-reportportal)
 [![Build Status](https://github.com/reportportal/agent-Python-RobotFramework/actions/workflows/tests.yml/badge.svg)](https://github.com/reportportal/agent-Python-RobotFramework/actions/workflows/tests.yml)
 [![codecov.io](https://codecov.io/gh/reportportal/agent-Python-RobotFramework/branch/master/graph/badge.svg)](https://codecov.io/gh/reportportal/agent-Python-RobotFramework)
+[![Join Slack chat!](https://slack.epmrpp.reportportal.io/badge.svg)](https://slack.epmrpp.reportportal.io/)
+[![stackoverflow](https://img.shields.io/badge/reportportal-stackoverflow-orange.svg?style=flat)](http://stackoverflow.com/questions/tagged/reportportal)
+[![Build with Love](https://img.shields.io/badge/build%20with-❤%EF%B8%8F%E2%80%8D-lightgrey.svg)](http://reportportal.io?style=flat)
 
 Listener for RobotFramework to report results to ReportPortal
 
@@ -41,6 +44,8 @@ The master branch will store the code base for the agent for Report Portal versi
 
 
 ## Usage
+
+### Properties
 
 For reporting results to ReportPortal you need to pass some variables to pybot run:
 
@@ -87,6 +92,8 @@ NOT REQUIRED:
     - Default value is "True", disables SSL verification for HTTP requests.
       Also, you can specify a full path to your certificate as the value.
 ```
+
+### Logging
 
 Custom logger which supports attachments can be used in Python keywords.
 Usage of this logger is similar to the standard robot.api.logger with addition

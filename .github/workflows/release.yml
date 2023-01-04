@@ -22,17 +22,18 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
       - name: Generate versions
-        uses: HardNorth/github-version-generate@v1.1.2
+        uses: HardNorth/github-version-generate@v1
         with:
           version-source: file
           version-file: ${{ env.VERSION_FILE }}
           version-file-extraction-pattern: ${{ env.VERSION_EXTRACT_PATTERN }}
 
       - name: Setup git credentials
-        uses: oleksiyrudenko/gha-git-credentials@v2
+        uses: oleksiyrudenko/gha-git-credentials@v2.1.1
         with:
           name: 'reportportal.io'
           email: 'support@reportportal.io'
@@ -45,9 +46,9 @@ jobs:
           git push --tags
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.6'
+          python-version: '3.8'
 
       - name: Install dependencies
         run: python -m pip install --upgrade pip setuptools wheel
