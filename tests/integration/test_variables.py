@@ -31,3 +31,21 @@ def test_agent_pass_batch_payload_size_variable(mock_client_init):
     assert payload_variable in mock_client_init.call_args_list[0][1]
     assert mock_client_init.call_args_list[0][1][
                payload_variable] == payload_size
+
+
+@mock.patch(REPORT_PORTAL_SERVICE)
+def test_agent_pass_launch_uuid_variable(mock_client_init):
+    variables = utils.DEFAULT_VARIABLES.copy()
+    test_launch_id = 'my_test_launch'
+    variables['RP_LAUNCH_UUID'] = test_launch_id
+    result = utils.run_robot_tests(['examples/simple.robot'],
+                                   variables=variables)
+    assert result == 0  # the test successfully passed
+
+    launch_id_variable = 'launch_id'
+    assert launch_id_variable in mock_client_init.call_args_list[0][1]
+    assert mock_client_init.call_args_list[0][1][
+               launch_id_variable] == test_launch_id
+
+    mock_client = mock_client_init.return_value
+    assert mock_client.start_launch.call_count == 0

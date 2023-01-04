@@ -20,9 +20,9 @@ from robot.run import RobotFramework
 
 DEFAULT_VARIABLES = {
     'RP_LAUNCH': 'Robot Framework',
-    'RP_ENDPOINT': "http://localhost:8080",
-    'RP_PROJECT': "default_personal",
-    'RP_UUID': "test_uuid",
+    'RP_ENDPOINT': 'http://localhost:8080',
+    'RP_PROJECT': 'default_personal',
+    'RP_UUID': 'test_uuid',
     'RP_ATTACH_REPORT': False
 }
 
@@ -40,10 +40,9 @@ def run_robot_tests(tests, listener='robotframework_reportportal.listener',
 
     for k, v in variables.items():
         cmd_arguments.append('--variable')
-        if type(v) is str:
-            cmd_arguments.append(k + ':' + '"' + v + '"')
-        else:
-            cmd_arguments.append(k + ':' + str(v))
+        if type(v) is not str:
+            v = str(v)
+        cmd_arguments.append(f'{k}:{v}')
 
     for t in tests:
         cmd_arguments.append(t)
