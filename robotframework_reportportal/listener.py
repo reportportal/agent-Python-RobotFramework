@@ -106,7 +106,8 @@ class listener(object):
                 pool_size=self.variables.pool_size,
                 skipped_issue=self.variables.skipped_issue,
                 verify_ssl=self.variables.verify_ssl,
-                log_batch_payload_size=self.variables.log_batch_payload_size
+                log_batch_payload_size=self.variables.log_batch_payload_size,
+                launch_id=self.variables.launch_id,
             )
         return self._service
 

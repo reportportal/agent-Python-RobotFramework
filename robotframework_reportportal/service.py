@@ -71,7 +71,8 @@ class RobotService(object):
 
     def init_service(self, endpoint, project, uuid, log_batch_size, pool_size,
                      skipped_issue=True, verify_ssl=True,
-                     log_batch_payload_size=MAX_LOG_BATCH_PAYLOAD_SIZE):
+                     log_batch_payload_size=MAX_LOG_BATCH_PAYLOAD_SIZE,
+                     launch_id=None):
         """Initialize common Report Portal client.
 
         :param endpoint:               Report Portal API endpoint
@@ -85,6 +86,8 @@ class RobotService(object):
         :param verify_ssl:             Disable SSL verification.
         :param log_batch_payload_size: Maximum size of logs to be sent within
                                        one batch
+        :param launch_id:              a launch id to use instead of starting
+                                       own one
         """
         if self.rp is None:
             logger.debug(
@@ -100,7 +103,8 @@ class RobotService(object):
                 retries=True,
                 verify_ssl=verify_ssl,
                 max_pool_size=pool_size,
-                log_batch_payload_size=log_batch_payload_size
+                log_batch_payload_size=log_batch_payload_size,
+                launch_id=launch_id
             )
             self.rp.start()
         else:
