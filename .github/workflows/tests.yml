@@ -5,6 +5,12 @@ on:
     branches:
       - '*'
       - '!master'
+
+    paths-ignore:
+      - README.md
+      - README_TEMPLATE.md
+      - CHANGELOG.md
+
   pull_request:
     branches:
       - 'master'
