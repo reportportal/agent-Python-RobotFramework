@@ -42,7 +42,7 @@ def run_robot_tests(tests, listener='robotframework_reportportal.listener',
         cmd_arguments.append('--variable')
         if type(v) is not str:
             v = str(v)
-        cmd_arguments.append(f'{k}:{v}')
+        cmd_arguments.append(k + ':' + v)
 
     for t in tests:
         cmd_arguments.append(t)
