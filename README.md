@@ -8,7 +8,7 @@
 [![stackoverflow](https://img.shields.io/badge/reportportal-stackoverflow-orange.svg?style=flat)](http://stackoverflow.com/questions/tagged/reportportal)
 [![Build with Love](https://img.shields.io/badge/build%20with-❤%EF%B8%8F%E2%80%8D-lightgrey.svg)](http://reportportal.io?style=flat)
 
-Listener for RobotFramework to report results to ReportPortal
+Listener for RobotFramework to report results to Report Portal
 
 * [Installation](https://github.com/reportportal/agent-Python-RobotFramework#installation)
 * [Usage](https://github.com/reportportal/agent-Python-RobotFramework#usage)
@@ -50,7 +50,7 @@ versions 5 and above.
 
 ### Properties
 
-For reporting results to ReportPortal you need to pass some variables
+For reporting results to Report Portal you need to pass some variables
 to `robot` run:
 
 REQUIRED:
@@ -127,19 +127,19 @@ def log_free_memory():
 
 It's possible to tag tests the following way `test_case_id:12345` using default
 Robot Framework tagging functionality. ID specified after `:` will be sent to
-ReportPortal.
+Report Portal.
 
-## Send attachement (screenshots)
+## Send attachment (screenshots)
 
 https://github.com/reportportal/client-Python#send-attachement-screenshots
 
 ## Integration with GA
 
-ReportPortal is now supporting integrations with more than 15 test frameworks
+Report Portal is now supporting integrations with more than 15 test frameworks
 simultaneously. In order to define the most popular agents and plan the team
 workload accordingly, we are using Google analytics.
 
-ReportPortal collects information about agent name and its version only. This
+Report Portal collects information about agent name and its version only. This
 information is sent to Google analytics on the launch start. Please help us to
 make our work effective.
 If you still want to switch Off Google analytics, please change env variable
