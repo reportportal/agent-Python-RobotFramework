@@ -23,7 +23,7 @@ setup(
     version=__version__,
     description='Agent for reporting RobotFramework test results to '
                 'Report Portal',
-    long_description=open('README.md').read(),
+    long_description=read_file('README.md'),
     long_description_content_type='text/markdown',
     author_email='SupportEPMC-TSTReportPortal@epam.com',
     url='https://github.com/reportportal/agent-Python-RobotFramework',
