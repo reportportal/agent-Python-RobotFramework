@@ -25,24 +25,26 @@ setup(
                 'Report Portal',
     long_description=read_file('README.md'),
     long_description_content_type='text/markdown',
-    author_email='SupportEPMC-TSTReportPortal@epam.com',
+    author_email='support@reportportal.io',
     url='https://github.com/reportportal/agent-Python-RobotFramework',
     download_url=(
         'https://github.com/reportportal/agent-Python-RobotFramework/'
         'tarball/{version}'.format(version=__version__)),
-    keywords=['testing', 'reporting', 'robot framework', 'reportportal'],
+    keywords=['testing', 'reporting', 'robot framework', 'reportportal',
+              'agent'],
     classifiers=[
         'Framework :: Robot Framework',
         'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.5',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
-        'Programming Language :: Python :: 3.8'
+        'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
+        'Programming Language :: Python :: 3.10',
         ],
     install_requires=read_file('requirements.txt').splitlines(),
     entry_points={
         'console_scripts': [
             'post_report=robotframework_reportportal.post_report:main'
         ]
-    }
+    },
 )
