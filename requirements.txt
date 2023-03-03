@@ -1,4 +1,4 @@
 python-dateutil>=2.8.1
-reportportal-client>=5.2.4
+reportportal-client==5.2.5
 robotframework
 six>=1.15.0
