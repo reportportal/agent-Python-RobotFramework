@@ -1,20 +1,21 @@
-"""This module contains models representing Robot Framework test items.
+"""This module contains models representing Robot Framework test items."""
 
-Copyright (c) 2021 https://reportportal.io .
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-https://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
+#  Copyright (c) 2023 EPAM Systems
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#  https://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License
 
 import os
 
-from reportportal_client.service import _convert_string
+from reportportal_client.helpers import convert_string
 from six import text_type
 
 
@@ -72,6 +73,7 @@ class Launch(Suite):
         :param name:       Launch name
         :param attributes: Suite attributes passed through the listener
         """
+        # noinspection PySuperArguments
         super(Launch, self).__init__(name, attributes)
         self.type = 'LAUNCH'
 
@@ -182,13 +184,13 @@ class Keyword(object):
 
     def get_name(self):
         """Get name of the keyword suitable for Report Portal."""
-        assign = _convert_string(', '.join(self.assign))
+        assign = convert_string(', '.join(self.assign))
         assignment = '{0} = '.format(assign) if self.assign else ''
         arguments = ', '.join(self.args)
         full_name = '{0}{1} ({2})'.format(
             assignment,
-            _convert_string(self.name),
-            _convert_string(arguments)
+            convert_string(self.name),
+            convert_string(arguments)
         )
         return full_name[:256]
 

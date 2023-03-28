@@ -1,5 +1,4 @@
-#  Copyright 2022 EPAM Systems
-#
+#  Copyright (c) 2023 EPAM Systems
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -10,7 +9,7 @@
 #  distributed under the License is distributed on an "AS IS" BASIS,
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
-#  limitations under the License.
+#  limitations under the License
 
 from typing import Dict, List, Optional, Text, Union
 
@@ -39,7 +38,6 @@ class Variables:
     pool_size: Optional[int] = ...
     rerun: bool = ...
     rerun_of: Optional[Text] = ...
-    skip_analytics: Optional[Text] = ...
     test_attributes: Optional[List] = ...
     skipped_issue: bool = ...
     log_batch_payload_size: int = ...

@@ -44,8 +44,8 @@ class RobotService:
 
     def start_launch(self, launch: Launch, mode: Optional[Text] = ...,
                      rerun: bool = ...,
-                     rerun_of: Optional[Text] = ..., ts: Optional[Text] = ...,
-                     skip_analytics: Optional[bool] = ...) -> Text: ...
+                     rerun_of: Optional[Text] = ...,
+                     ts: Optional[Text] = ...) -> Text: ...
 
     def finish_launch(self, launch: Launch,
                       ts: Optional[Text] = None) -> None: ...

@@ -139,8 +139,7 @@ class listener(object):
                 mode=self.variables.mode,
                 ts=ts,
                 rerun=self.variables.rerun,
-                rerun_of=self.variables.rerun_of,
-                skip_analytics=self.variables.skip_analytics)
+                rerun_of=self.variables.rerun_of)
         else:
             self.service.rp.launch_id = self.variables.launch_id
 

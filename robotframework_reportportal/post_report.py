@@ -49,6 +49,7 @@ from robot.api import ExecutionResult
 
 from robotframework_reportportal.result_visitor import RobotResultsVisitor
 from robotframework_reportportal.time_visitor import TimeVisitor, corrections
+# noinspection PyUnresolvedReferences
 from robotframework_reportportal.variables import _variables
 
 
