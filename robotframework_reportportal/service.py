@@ -1,22 +1,22 @@
-"""This module includes Robot service for reporting results to Report Portal.
+"""This module is a Robot service for reporting results to Report Portal."""
 
-Copyright (c) 2021 https://reportportal.io .
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-https://www.apache.org/licenses/LICENSE-2.0
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-"""
+#  Copyright (c) 2023 EPAM Systems
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  you may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#  https://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License
 
 from dateutil.parser import parse
 import logging
 
-from reportportal_client.core.log_manager import MAX_LOG_BATCH_PAYLOAD_SIZE
-from reportportal_client.external.google_analytics import send_event
+from reportportal_client.logs.log_manager import MAX_LOG_BATCH_PAYLOAD_SIZE
 from reportportal_client.helpers import (
     dict_to_payload,
     get_launch_sys_attrs,
@@ -66,7 +66,7 @@ class RobotService(object):
         attributes = cmd_attrs or []
         system_attributes = get_launch_sys_attrs()
         system_attributes['agent'] = (
-            '{}-{}'.format(self.agent_name, self.agent_version))
+            '{}|{}'.format(self.agent_name, self.agent_version))
         return attributes + dict_to_payload(system_attributes)
 
     def init_service(self, endpoint, project, uuid, log_batch_size, pool_size,
@@ -117,7 +117,7 @@ class RobotService(object):
             self.rp.terminate()
 
     def start_launch(self, launch, mode=None, rerun=False, rerun_of=None,
-                     ts=None, skip_analytics=False):
+                     ts=None):
         """Call start_launch method of the common client.
 
         :param launch:         Instance of the Launch class
@@ -126,7 +126,6 @@ class RobotService(object):
         :param rerun_of:       Rerun mode. Specifies launch to be re-runned.
                                Should be used with the 'rerun' option.
         :param ts:             Start time
-        :param skip_analytics: Skip reporting of agent name and version to GA?
         :return:               launch UUID
         """
         sl_pt = {
@@ -140,8 +139,6 @@ class RobotService(object):
         }
         logger.debug(
             'ReportPortal - Start launch: request_body={0}'.format(sl_pt))
-        if not skip_analytics:
-            send_event(self.agent_name, self.agent_version)
         return self.rp.start_launch(**sl_pt)
 
     def finish_launch(self, launch, ts=None):
