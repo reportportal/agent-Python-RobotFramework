@@ -69,7 +69,7 @@ class RobotService(object):
             '{}|{}'.format(self.agent_name, self.agent_version))
         return attributes + dict_to_payload(system_attributes)
 
-    def init_service(self, endpoint, project, uuid, log_batch_size, pool_size,
+    def init_service(self, endpoint, project, api_key, log_batch_size, pool_size,
                      skipped_issue=True, verify_ssl=True,
                      log_batch_payload_size=MAX_LOG_BATCH_PAYLOAD_SIZE,
                      launch_id=None):
@@ -77,7 +77,7 @@ class RobotService(object):
 
         :param endpoint:               Report Portal API endpoint
         :param project:                Report Portal project
-        :param uuid:                   API token
+        :param api_key:                API key
         :param log_batch_size:         Number of logs to be sent within one
                                        batch
         :param pool_size:              HTTPAdapter max pool size
@@ -93,11 +93,11 @@ class RobotService(object):
             logger.debug(
                 'ReportPortal - Init service: '
                 'endpoint={0}, project={1}, uuid={2}'
-                .format(endpoint, project, uuid))
+                .format(endpoint, project, api_key))
             self.rp = RPClient(
                 endpoint=endpoint,
                 project=project,
-                token=uuid,
+                api_key=api_key,
                 is_skipped_an_issue=skipped_issue,
                 log_batch_size=log_batch_size,
                 retries=True,

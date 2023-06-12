@@ -15,11 +15,10 @@
 
 from distutils.util import strtobool
 from os import path
+from warnings import warn
 
 from reportportal_client.logs.log_manager import MAX_LOG_BATCH_PAYLOAD_SIZE
 from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
-
-from .exception import RobotServiceException
 
 # This is a storage for the result visitor
 _variables = {}
@@ -43,12 +42,13 @@ class Variables(object):
 
     def __init__(self):
         """Initialize instance attributes."""
-        self._endpoint = None
-        self._launch_name = None
+        self.endpoint = get_variable('RP_ENDPOINT')
+        self.launch_name = get_variable('RP_LAUNCH')
+        self.project = get_variable('RP_PROJECT')
+        self.uuid = get_variable('RP_UUID')
+
         self._pabot_pool_id = None
         self._pabot_used = None
-        self._project = None
-        self._uuid = None
         self.attach_log = bool(strtobool(get_variable(
             'RP_ATTACH_LOG', default='False')))
         self.attach_report = bool(strtobool(get_variable(
@@ -74,33 +74,15 @@ class Variables(object):
             "RP_LOG_BATCH_PAYLOAD_SIZE",
             default=str(MAX_LOG_BATCH_PAYLOAD_SIZE)))
 
-    @property
-    def endpoint(self):
-        """Get Report Portal API endpoint.
-
-        :raises: RobotServiceException if it is None
-        :return: Report Portal API endpoint
-        """
-        self._endpoint = self._endpoint or get_variable('RP_ENDPOINT')
-        if self._endpoint is None:
-            raise RobotServiceException(
-                'Missing parameter RP_ENDPOINT for robot run\n'
-                'You should pass -v RP_ENDPOINT:<endpoint_value>')
-        return self._endpoint
-
-    @property
-    def launch_name(self):
-        """Get Report Portal launch name.
-
-        :raises: RobotServiceException if it is None
-        :return: Report Portal launch name
-        """
-        self._launch_name = self._launch_name or get_variable('RP_LAUNCH')
-        if self._launch_name is None:
-            raise RobotServiceException(
-                'Missing parameter RP_LAUNCH for robot run\n'
-                'You should pass -v RP_LAUNCH:<launch_name_value>')
-        return self._launch_name
+        cond = (self.endpoint, self.launch_name, self.project, self.uuid)
+        self.enabled = all(cond)
+        if not self.enabled:
+            warn(
+                'One or required parameter is missing, Report Portal listener '
+                'will be disabled. Please check agent documentation.',
+                RuntimeWarning,
+                2
+            )
 
     @property
     def pabot_pool_id(self):
@@ -121,34 +103,6 @@ class Variables(object):
         if not self._pabot_used:
             self._pabot_used = get_variable(name='PABOTLIBURI')
         return self._pabot_used
-
-    @property
-    def project(self):
-        """Get Report Portal project name.
-
-        :raises: RobotServiceException if it is None
-        :return: Report Portal project name
-        """
-        self._project = self._project or get_variable('RP_PROJECT')
-        if self._project is None:
-            raise RobotServiceException(
-                'Missing parameter RP_PROJECT for robot run\n'
-                'You should pass -v RP_PROJECT:<project_name_value>')
-        return self._project
-
-    @property
-    def uuid(self):
-        """Get Report Portal API token UUID.
-
-        :raises: RobotServiceException if it is None
-        :return: Report Portal token UUID
-        """
-        self._uuid = self._uuid or get_variable('RP_UUID')
-        if self._uuid is None:
-            raise RobotServiceException(
-                'Missing parameter RP_UUID for robot run\n'
-                'You should pass -v RP_UUID:<uuid_value>')
-        return self._uuid
 
     @property
     def verify_ssl(self):
