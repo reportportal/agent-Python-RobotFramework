@@ -69,8 +69,8 @@ class RobotService(object):
             '{}|{}'.format(self.agent_name, self.agent_version))
         return attributes + dict_to_payload(system_attributes)
 
-    def init_service(self, endpoint, project, api_key, log_batch_size, pool_size,
-                     skipped_issue=True, verify_ssl=True,
+    def init_service(self, endpoint, project, api_key, log_batch_size,
+                     pool_size, skipped_issue=True, verify_ssl=True,
                      log_batch_payload_size=MAX_LOG_BATCH_PAYLOAD_SIZE,
                      launch_id=None):
         """Initialize common Report Portal client.

@@ -45,7 +45,8 @@ def pytest_generate_tests(metafunc):
              SETTINGS_EXPECTED_CODE_REF_SUFFIXES)]
         if sys.version_info >= (3, 6):
             pass
-            # TODO: Uncomment as soon as DataDriver fix its compatibility with Robot 6.1
+            # TODO: Uncomment as soon as DataDriver fix its compatibility with
+            #  Robot 6.1
             # option_args.append(('examples/templates/datadriver.robot',
             #                     DATADRIVER_EXPECTED_TEST_NAMES,
             #                     DATADRIVER_EXPECTED_CODE_REF_SUFFIXES))
