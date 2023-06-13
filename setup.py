@@ -1,7 +1,7 @@
 """Setup instructions for the package."""
 
 import os
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
 __version__ = '5.3.3'
