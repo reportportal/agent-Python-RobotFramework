@@ -58,7 +58,7 @@ def test_agent_pass_launch_uuid_variable(mock_client_init):
 @mock.patch(REPORT_PORTAL_SERVICE)
 def test_no_required_variable_warning(mock_client_init, variable):
     variables = utils.DEFAULT_VARIABLES.copy()
-    del variables['RP_PROJECT']
+    del variables[variable]
 
     with warnings.catch_warnings(record=True) as w:
         result = utils.run_robot_tests(['examples/simple.robot'],
