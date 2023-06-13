@@ -35,7 +35,7 @@ class RobotService:
 
     def _get_launch_attributes(self, cmd_attrs: List) -> List: ...
 
-    def init_service(self, endpoint: Text, project: Text, uuid: Text,
+    def init_service(self, endpoint: Text, project: Text, api_key: Text,
                      log_batch_size: int, pool_size: int, skipped_issue: bool,
                      verify_ssl: Union[Text, bool],
                      log_batch_payload_size: int, launch_id: str) -> None: ...

@@ -22,7 +22,7 @@ DEFAULT_VARIABLES = {
     'RP_LAUNCH': 'Robot Framework',
     'RP_ENDPOINT': 'http://localhost:8080',
     'RP_PROJECT': 'default_personal',
-    'RP_UUID': 'test_uuid',
+    'RP_API_KEY': 'test_api_key',
     'RP_ATTACH_REPORT': False
 }
 

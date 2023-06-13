@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 ### Changed
+- Client version updated on [5.3.5](https://github.com/reportportal/client-Python/releases/tag/5.3.5), by @HardNorth
+- The Agent publish a warning and does not report anything in case of a missed required variable now,  by @HardNorth
+- `RP_UUID` configuration parameter was renamed to `RP_API_KEY` to maintain common convention, by @HardNorth
+
+## [5.3.2]
+### Changed
 - Client version updated on [5.3.0](https://github.com/reportportal/client-Python/releases/tag/5.3.0), by @HardNorth
 
 ## [5.3.1]

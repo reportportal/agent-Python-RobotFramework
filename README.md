@@ -57,7 +57,7 @@ REQUIRED:
 
 ```
 --listener robotframework_reportportal.listener
---variable RP_UUID:"your_user_uuid"
+--variable RP_API_KEY:"your_user_api_key"
 --variable RP_ENDPOINT:"your_reportportal_url"
 --variable RP_LAUNCH:"launch_name"
 --variable RP_PROJECT:"reportportal_project_name"

@@ -1,10 +1,10 @@
 """Setup instructions for the package."""
 
 import os
-from setuptools import setup, find_packages
+from setuptools import setup
 
 
-__version__ = '5.3.2'
+__version__ = '5.3.3'
 
 
 def read_file(fname):
@@ -19,12 +19,14 @@ def read_file(fname):
 
 setup(
     name='robotframework-reportportal',
-    packages=find_packages(exclude=('tests', 'tests.*')),
+    packages=['robotframework_reportportal'],
+    package_data={'robotframework_reportportal': ['*.pyi']},
     version=__version__,
     description='Agent for reporting RobotFramework test results to '
                 'Report Portal',
     long_description=read_file('README.md'),
     long_description_content_type='text/markdown',
+    author='Report Portal Team',
     author_email='support@reportportal.io',
     url='https://github.com/reportportal/agent-Python-RobotFramework',
     download_url=(

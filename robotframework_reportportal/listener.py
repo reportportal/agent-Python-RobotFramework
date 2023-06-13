@@ -16,6 +16,7 @@
 
 import logging
 import os
+from functools import wraps
 from mimetypes import guess_type
 
 from reportportal_client.helpers import gen_attributes
@@ -27,6 +28,17 @@ from .static import MAIN_SUITE_ID, PABOT_WIHOUT_LAUNCH_ID_MSG
 from .variables import Variables
 
 logger = logging.getLogger(__name__)
+
+
+def check_rp_enabled(func):
+    """Verify is RP is enabled in config."""
+    @wraps(func)
+    def wrap(*args, **kwargs):
+        if args and isinstance(args[0], listener):
+            if not args[0].service:
+                return
+        func(*args, **kwargs)
+    return wrap
 
 
 class listener(object):
@@ -64,6 +76,7 @@ class listener(object):
         if self._items:
             return self._items[-1]
 
+    @check_rp_enabled
     def log_message(self, message):
         """Send log message to the Report Portal.
 
@@ -73,6 +86,7 @@ class listener(object):
         logger.debug('ReportPortal - Log Message: {0}'.format(message))
         self.service.log(message=msg)
 
+    @check_rp_enabled
     def log_message_with_image(self, msg, image):
         """Send log message to the Report Portal.
 
@@ -98,12 +112,12 @@ class listener(object):
     @property
     def service(self):
         """Initialize instance of the RobotService."""
-        if self._service is None:
+        if self.variables.enabled and self._service is None:
             self._service = RobotService()
             self._service.init_service(
                 endpoint=self.variables.endpoint,
                 project=self.variables.project,
-                uuid=self.variables.uuid,
+                api_key=self.variables.api_key,
                 log_batch_size=self.variables.log_batch_size,
                 pool_size=self.variables.pool_size,
                 skipped_issue=self.variables.skipped_issue,
@@ -120,6 +134,7 @@ class listener(object):
             self._variables = Variables()
         return self._variables
 
+    @check_rp_enabled
     def start_launch(self, attributes, ts=None):
         """Start a new launch at the Report Portal.
 
@@ -143,6 +158,7 @@ class listener(object):
         else:
             self.service.rp.launch_id = self.variables.launch_id
 
+    @check_rp_enabled
     def start_suite(self, name, attributes, ts=None):
         """Start a new test suite at the Report Portal.
 
@@ -167,6 +183,7 @@ class listener(object):
             suite.rp_item_id = self.service.start_suite(suite=suite, ts=ts)
             self._items.append(suite)
 
+    @check_rp_enabled
     def end_suite(self, _, attributes, ts=None):
         """Finish started test suite at the Report Portal.
 
@@ -188,6 +205,7 @@ class listener(object):
                 'ReportPortal - End Suite: {0}'.format(suite.attributes))
             self.service.finish_suite(suite=suite, ts=ts)
 
+    @check_rp_enabled
     def start_test(self, name, attributes, ts=None):
         """Start a new test case at the Report Portal.
 
@@ -207,6 +225,7 @@ class listener(object):
         test.rp_item_id = self.service.start_test(test=test, ts=ts)
         self._items.append(test)
 
+    @check_rp_enabled
     def end_test(self, _, attributes, ts=None):
         """Finish started test case at the Report Portal.
 
@@ -224,6 +243,7 @@ class listener(object):
         self._finish_current_item()
         self.service.finish_test(test=test, ts=ts)
 
+    @check_rp_enabled
     def start_keyword(self, name, attributes, ts=None):
         """Start a new keyword(test step) at the Report Portal.
 
@@ -238,6 +258,7 @@ class listener(object):
         kwd.rp_item_id = self.service.start_keyword(keyword=kwd, ts=ts)
         self._items.append(kwd)
 
+    @check_rp_enabled
     def end_keyword(self, _, attributes, ts=None):
         """Finish started keyword at the Report Portal.
 
@@ -275,6 +296,7 @@ class listener(object):
             message = {'message': 'XUnit result file', 'level': 'INFO'}
             self.log_message_with_image(message, xunit_path)
 
+    @check_rp_enabled
     def close(self):
         """Call service terminate when the whole test execution is done."""
         self.service.terminate_service()

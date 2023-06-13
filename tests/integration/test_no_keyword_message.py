@@ -21,7 +21,7 @@ from tests import REPORT_PORTAL_SERVICE
 
 
 NO_KEYWORDS_MESSAGE_PATTERN = \
-    re.compile(r'Test (?:case )?contains no keywords\.')
+    re.compile(r'Test(?: case)? (?:contains no keywords|cannot be empty)\.')
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
