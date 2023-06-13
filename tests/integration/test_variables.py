@@ -67,8 +67,9 @@ def test_no_required_variable_warning(mock_client_init, variable):
 
         assert len(w) == 1
         assert w[0].category == RuntimeWarning
-        mock_client = mock_client_init.return_value
-        assert mock_client.start_launch.call_count == 0
-        assert mock_client.start_test_item.call_count == 0
-        assert mock_client.finish_test_item.call_count == 0
-        assert mock_client.finish_launch.call_count == 0
+
+    mock_client = mock_client_init.return_value
+    assert mock_client.start_launch.call_count == 0
+    assert mock_client.start_test_item.call_count == 0
+    assert mock_client.finish_test_item.call_count == 0
+    assert mock_client.finish_launch.call_count == 0
