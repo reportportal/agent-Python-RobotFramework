@@ -45,7 +45,6 @@ class Variables(object):
         self.endpoint = get_variable('RP_ENDPOINT')
         self.launch_name = get_variable('RP_LAUNCH')
         self.project = get_variable('RP_PROJECT')
-        self.uuid = get_variable('RP_UUID')
 
         self._pabot_pool_id = None
         self._pabot_used = None
@@ -74,7 +73,29 @@ class Variables(object):
             "RP_LOG_BATCH_PAYLOAD_SIZE",
             default=str(MAX_LOG_BATCH_PAYLOAD_SIZE)))
 
-        cond = (self.endpoint, self.launch_name, self.project, self.uuid)
+        self.api_key = get_variable('RP_API_KEY')
+        if not self.api_key:
+            token = get_variable('RP_UUID')
+            if token:
+                warn(
+                    message="Argument `token` is deprecated since 2.0.4 and "
+                            "will be subject for removing in the next major "
+                            "version. Use `api_key` argument instead.",
+                    category=DeprecationWarning,
+                    stacklevel=2
+                )
+                self.api_key = token
+            else:
+                warn(
+                    message="Argument `api_key` is `None` or empty string, "
+                            "that's not supposed to happen because Report "
+                            "Portal is usually requires an authorization key. "
+                            "Please check your code.",
+                    category=RuntimeWarning,
+                    stacklevel=2
+                )
+
+        cond = (self.endpoint, self.launch_name, self.project, self.api_key)
         self.enabled = all(cond)
         if not self.enabled:
             warn(

@@ -33,10 +33,10 @@ def visitor():
 @fixture()
 def mock_variables():
     mock_variables = Variables()
-    mock_variables.endpoint = "http://localhost:8080"
-    mock_variables.launch_name = "Robot"
-    mock_variables.project = "default_personal"
-    mock_variables.uuid = "test_uuid"
+    mock_variables.endpoint = 'http://localhost:8080'
+    mock_variables.launch_name = 'Robot'
+    mock_variables.project = 'default_personal'
+    mock_variables.api_key = 'test_api_key'
     mock_variables.launch_attributes = ''
     mock_variables.launch_id = None
     mock_variables.launch_doc = None

@@ -117,7 +117,7 @@ class listener(object):
             self._service.init_service(
                 endpoint=self.variables.endpoint,
                 project=self.variables.project,
-                api_key=self.variables.uuid,
+                api_key=self.variables.api_key,
                 log_batch_size=self.variables.log_batch_size,
                 pool_size=self.variables.pool_size,
                 skipped_issue=self.variables.skipped_issue,

@@ -23,7 +23,7 @@ multiple parallel robot testing (eg. by using pabot).
 
 Command-line usage:
 
-    post_report --variable RP_UUID:"your_user_uuid"
+    post_report --variable RP_API_KEY:"your_user_api_key"
                 --variable RP_ENDPOINT:"your_reportportal_url"
                 --variable RP_PROJECT:"reportportal_project_name"
                 [--variable RP_LAUNCH:"launch_name"]

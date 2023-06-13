@@ -92,7 +92,7 @@ class RobotService(object):
         if self.rp is None:
             logger.debug(
                 'ReportPortal - Init service: '
-                'endpoint={0}, project={1}, uuid={2}'
+                'endpoint={0}, project={1}, api_key={2}'
                 .format(endpoint, project, api_key))
             self.rp = RPClient(
                 endpoint=endpoint,

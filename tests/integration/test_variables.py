@@ -12,10 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 import sys
-
-import pytest
 import warnings
 
+import pytest
 from six.moves import mock
 
 from tests import REPORT_PORTAL_SERVICE
@@ -58,10 +57,11 @@ def test_agent_pass_launch_uuid_variable(mock_client_init):
 @pytest.mark.skipif(sys.version_info < (3, 6),
                     reason='For some reasons the test passes only for the '
                            'first variable for Python 2.7')
-@pytest.mark.parametrize('variable', ['RP_PROJECT', 'RP_UUID', 'RP_ENDPOINT',
-                                      'RP_LAUNCH'])
+@pytest.mark.parametrize('variable, warn_num',
+                         [('RP_PROJECT', 1), ('RP_API_KEY', 2),
+                          ('RP_ENDPOINT', 1), ('RP_LAUNCH', 1)])
 @mock.patch(REPORT_PORTAL_SERVICE)
-def test_no_required_variable_warning(mock_client_init, variable):
+def test_no_required_variable_warning(mock_client_init, variable, warn_num):
     variables = utils.DEFAULT_VARIABLES.copy()
     del variables[variable]
 
@@ -70,7 +70,7 @@ def test_no_required_variable_warning(mock_client_init, variable):
                                        variables=variables)
         assert result == 0  # the test successfully passed
 
-        assert len(w) == 1
+        assert len(w) == warn_num
         assert w[0].category == RuntimeWarning
 
     mock_client = mock_client_init.return_value
@@ -78,3 +78,90 @@ def test_no_required_variable_warning(mock_client_init, variable):
     assert mock_client.start_test_item.call_count == 0
     assert mock_client.finish_test_item.call_count == 0
     assert mock_client.finish_launch.call_count == 0
+
+
+def filter_agent_call(warn):
+    category = getattr(warn, 'category', None)
+    if category:
+        return category.__name__ == 'DeprecationWarning' \
+            or category.__name__ == 'RuntimeWarning'
+    return False
+
+
+def filter_agent_calls(warning_list):
+    return list(
+        filter(
+            lambda call: filter_agent_call(call),
+            warning_list
+        )
+    )
+
+
+@mock.patch(REPORT_PORTAL_SERVICE)
+def test_rp_api_key(mock_client_init):
+    api_key = 'rp_api_key'
+    variables = dict(utils.DEFAULT_VARIABLES)
+    variables.update({'RP_API_KEY': api_key}.items())
+
+    with warnings.catch_warnings(record=True) as w:
+        result = utils.run_robot_tests(['examples/simple.robot'],
+                                       variables=variables)
+        assert int(result) == 0, 'Exit code should be 0 (no errors)'
+
+        assert mock_client_init.call_count == 1
+
+        constructor_args = mock_client_init.call_args_list[0][1]
+        assert constructor_args['api_key'] == api_key
+        assert len(filter_agent_calls(w)) == 0
+
+
+@mock.patch(REPORT_PORTAL_SERVICE)
+def test_rp_uuid(mock_client_init):
+    api_key = 'rp_api_key'
+    variables = dict(utils.DEFAULT_VARIABLES)
+    del variables['RP_API_KEY']
+    variables.update({'RP_UUID': api_key}.items())
+
+    with warnings.catch_warnings(record=True) as w:
+        result = utils.run_robot_tests(['examples/simple.robot'],
+                                       variables=variables)
+        assert int(result) == 0, 'Exit code should be 0 (no errors)'
+
+        assert mock_client_init.call_count == 1
+
+        constructor_args = mock_client_init.call_args_list[0][1]
+        assert constructor_args['api_key'] == api_key
+        assert len(filter_agent_calls(w)) == 1
+
+
+@mock.patch(REPORT_PORTAL_SERVICE)
+def test_rp_api_key_priority(mock_client_init):
+    api_key = 'rp_api_key'
+    variables = dict(utils.DEFAULT_VARIABLES)
+    variables.update({'RP_API_KEY': api_key, 'RP_UUID': 'rp_uuid'}.items())
+
+    with warnings.catch_warnings(record=True) as w:
+        result = utils.run_robot_tests(['examples/simple.robot'],
+                                       variables=variables)
+        assert int(result) == 0, 'Exit code should be 0 (no errors)'
+
+        assert mock_client_init.call_count == 1
+
+        constructor_args = mock_client_init.call_args_list[0][1]
+        assert constructor_args['api_key'] == api_key
+        assert len(filter_agent_calls(w)) == 0
+
+
+@mock.patch(REPORT_PORTAL_SERVICE)
+def test_rp_api_key_empty(mock_client_init):
+    api_key = ''
+    variables = dict(utils.DEFAULT_VARIABLES)
+    variables.update({'RP_API_KEY': api_key}.items())
+
+    with warnings.catch_warnings(record=True) as w:
+        result = utils.run_robot_tests(['examples/simple.robot'],
+                                       variables=variables)
+        assert int(result) == 0, 'Exit code should be 0 (no errors)'
+
+        assert mock_client_init.call_count == 0
+        assert len(filter_agent_calls(w)) == 2
