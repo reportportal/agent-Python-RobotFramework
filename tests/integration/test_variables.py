@@ -11,6 +11,7 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+import sys
 
 import pytest
 import warnings
@@ -54,6 +55,7 @@ def test_agent_pass_launch_uuid_variable(mock_client_init):
     assert mock_client.start_launch.call_count == 0
 
 
+@pytest.mark.skipif(sys.version_info < (3, 6))
 @pytest.mark.parametrize('variable', ['RP_PROJECT', 'RP_UUID', 'RP_ENDPOINT', 'RP_LAUNCH'])
 @mock.patch(REPORT_PORTAL_SERVICE)
 def test_no_required_variable_warning(mock_client_init, variable):

@@ -77,7 +77,6 @@ class Variables(object):
         cond = (self.endpoint, self.launch_name, self.project, self.uuid)
         self.enabled = all(cond)
         if not self.enabled:
-            simplefilter('default')
             warn(
                 'One or required parameter is missing, Report Portal listener '
                 'will be disabled. Please check agent documentation.',
