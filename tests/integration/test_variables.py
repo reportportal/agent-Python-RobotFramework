@@ -12,6 +12,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import pytest
+import warnings
+
 from six.moves import mock
 
 from tests import REPORT_PORTAL_SERVICE
@@ -49,3 +52,23 @@ def test_agent_pass_launch_uuid_variable(mock_client_init):
 
     mock_client = mock_client_init.return_value
     assert mock_client.start_launch.call_count == 0
+
+
+@pytest.mark.parametrize('variable', ['RP_PROJECT', 'RP_UUID', 'RP_ENDPOINT', 'RP_LAUNCH'])
+@mock.patch(REPORT_PORTAL_SERVICE)
+def test_no_required_variable_warning(mock_client_init, variable):
+    variables = utils.DEFAULT_VARIABLES.copy()
+    del variables['RP_PROJECT']
+
+    with warnings.catch_warnings(record=True) as w:
+        result = utils.run_robot_tests(['examples/simple.robot'],
+                                       variables=variables)
+        assert result == 0  # the test successfully passed
+
+        assert len(w) == 1
+        assert w[0].category == RuntimeWarning
+        mock_client = mock_client_init.return_value
+        assert mock_client.start_launch.call_count == 0
+        assert mock_client.start_test_item.call_count == 0
+        assert mock_client.finish_test_item.call_count == 0
+        assert mock_client.finish_launch.call_count == 0
