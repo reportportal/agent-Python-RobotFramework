@@ -58,7 +58,8 @@ def test_agent_pass_launch_uuid_variable(mock_client_init):
 @pytest.mark.skipif(sys.version_info < (3, 6),
                     reason='For some reasons the test passes only for the '
                            'first variable for Python 2.7')
-@pytest.mark.parametrize('variable', ['RP_PROJECT', 'RP_UUID', 'RP_ENDPOINT', 'RP_LAUNCH'])
+@pytest.mark.parametrize('variable', ['RP_PROJECT', 'RP_UUID', 'RP_ENDPOINT',
+                                      'RP_LAUNCH'])
 @mock.patch(REPORT_PORTAL_SERVICE)
 def test_no_required_variable_warning(mock_client_init, variable):
     variables = utils.DEFAULT_VARIABLES.copy()

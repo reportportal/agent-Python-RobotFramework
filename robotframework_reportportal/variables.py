@@ -15,7 +15,7 @@
 
 from distutils.util import strtobool
 from os import path
-from warnings import warn, simplefilter
+from warnings import warn
 
 from reportportal_client.logs.log_manager import MAX_LOG_BATCH_PAYLOAD_SIZE
 from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
