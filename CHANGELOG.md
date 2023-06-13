@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [5.3.3]
 ### Changed
 - Client version updated on [5.3.5](https://github.com/reportportal/client-Python/releases/tag/5.3.5), by @HardNorth
 - The Agent publish a warning and does not report anything in case of a missed required variable now,  by @HardNorth
