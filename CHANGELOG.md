@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Removed
+- `Python 2.7` support, by @HardNorth
 
 ## [5.3.3]
 ### Changed

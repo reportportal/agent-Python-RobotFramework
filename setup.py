@@ -4,7 +4,7 @@ import os
 from setuptools import setup
 
 
-__version__ = '5.3.4'
+__version__ = '5.4.0'
 
 
 def read_file(fname):
@@ -36,12 +36,11 @@ setup(
               'agent'],
     classifiers=[
         'Framework :: Robot Framework',
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
+        'Programming Language :: Python :: 3.11',
         ],
     install_requires=read_file('requirements.txt').splitlines(),
     entry_points={

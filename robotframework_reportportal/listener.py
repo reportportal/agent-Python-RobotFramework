@@ -18,6 +18,7 @@ import logging
 import os
 from functools import wraps
 from mimetypes import guess_type
+from typing import List, Optional, Dict, Union, Any
 
 from reportportal_client.helpers import gen_attributes
 
@@ -41,18 +42,21 @@ def check_rp_enabled(func):
     return wrap
 
 
-class listener(object):
+class listener:
     """Robot Framework listener interface for reporting to Report Portal."""
 
+    _items: List = ...
+    _service: Optional[RobotService] = ...
+    _variables: Optional[Variables] = ...
     ROBOT_LISTENER_API_VERSION = 2
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize listener attributes."""
         self._items = []
         self._service = None
         self._variables = None
 
-    def _build_msg_struct(self, message):
+    def _build_msg_struct(self, message: Dict) -> LogMessage:
         """Check if the given message comes from our custom logger or not.
 
         :param message: Message passed by the Robot Framework
@@ -66,18 +70,18 @@ class listener(object):
             msg.item_id = getattr(self.current_item, 'rp_item_id', None)
         return msg
 
-    def _finish_current_item(self):
+    def _finish_current_item(self) -> Union[Keyword, Launch, Suite, Test]:
         """Remove the last item from the self._items list."""
         return self._items.pop()
 
     @property
-    def current_item(self):
+    def current_item(self) -> Optional[Union[Keyword, Launch, Suite, Test]]:
         """Get the last item from the self._items list."""
         if self._items:
             return self._items[-1]
 
     @check_rp_enabled
-    def log_message(self, message):
+    def log_message(self, message: Dict) -> None:
         """Send log message to the Report Portal.
 
         :param message: Message passed by the Robot Framework
@@ -87,7 +91,7 @@ class listener(object):
         self.service.log(message=msg)
 
     @check_rp_enabled
-    def log_message_with_image(self, msg, image):
+    def log_message_with_image(self, msg: Dict, image: str):
         """Send log message to the Report Portal.
 
         :param msg:   Message passed by the Robot Framework
@@ -105,12 +109,12 @@ class listener(object):
         self.service.log(message=mes)
 
     @property
-    def parent_id(self):
+    def parent_id(self) -> Optional[str]:
         """Get rp_item_id attribute of the current item."""
         return getattr(self.current_item, 'rp_item_id', None)
 
     @property
-    def service(self):
+    def service(self) -> RobotService:
         """Initialize instance of the RobotService."""
         if self.variables.enabled and self._service is None:
             self._service = RobotService()
@@ -128,14 +132,14 @@ class listener(object):
         return self._service
 
     @property
-    def variables(self):
+    def variables(self) -> Variables:
         """Get instance of the variables.Variables class."""
         if not self._variables:
             self._variables = Variables()
         return self._variables
 
     @check_rp_enabled
-    def start_launch(self, attributes, ts=None):
+    def start_launch(self, attributes: Dict, ts: Optional[Any] = None) -> None:
         """Start a new launch at the Report Portal.
 
         :param attributes: Dictionary passed by the Robot Framework
@@ -159,7 +163,7 @@ class listener(object):
             self.service.rp.launch_id = self.variables.launch_id
 
     @check_rp_enabled
-    def start_suite(self, name, attributes, ts=None):
+    def start_suite(self, name: str, attributes: Dict, ts: Optional[Any] = None) -> None:
         """Start a new test suite at the Report Portal.
 
         :param name:       Test suite name
@@ -184,7 +188,7 @@ class listener(object):
             self._items.append(suite)
 
     @check_rp_enabled
-    def end_suite(self, _, attributes, ts=None):
+    def end_suite(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
         """Finish started test suite at the Report Portal.
 
         :param attributes: Dictionary passed by the Robot Framework
@@ -206,7 +210,7 @@ class listener(object):
             self.service.finish_suite(suite=suite, ts=ts)
 
     @check_rp_enabled
-    def start_test(self, name, attributes, ts=None):
+    def start_test(self, name: str, attributes: Dict, ts: Optional[Any] = None) -> None:
         """Start a new test case at the Report Portal.
 
         :param name:       Test case name
@@ -226,7 +230,7 @@ class listener(object):
         self._items.append(test)
 
     @check_rp_enabled
-    def end_test(self, _, attributes, ts=None):
+    def end_test(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
         """Finish started test case at the Report Portal.
 
         :param attributes: Dictionary passed by the Robot Framework
@@ -244,7 +248,7 @@ class listener(object):
         self.service.finish_test(test=test, ts=ts)
 
     @check_rp_enabled
-    def start_keyword(self, name, attributes, ts=None):
+    def start_keyword(self, name: str, attributes: Dict, ts: Optional[Any] = None) -> None:
         """Start a new keyword(test step) at the Report Portal.
 
         :param name:       Keyword name
@@ -259,7 +263,7 @@ class listener(object):
         self._items.append(kwd)
 
     @check_rp_enabled
-    def end_keyword(self, _, attributes, ts=None):
+    def end_keyword(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
         """Finish started keyword at the Report Portal.
 
         :param attributes: Dictionary passed by the Robot Framework
@@ -269,7 +273,7 @@ class listener(object):
         logger.debug('ReportPortal - End Keyword: {0}'.format(kwd.attributes))
         self.service.finish_keyword(keyword=kwd, ts=ts)
 
-    def log_file(self, log_path):
+    def log_file(self, log_path: str) -> None:
         """Attach HTML log file created by Robot Framework to RP launch.
 
         :param log_path: Path to the log file
@@ -278,7 +282,7 @@ class listener(object):
             message = {'message': 'Execution log', 'level': 'INFO'}
             self.log_message_with_image(message, log_path)
 
-    def report_file(self, report_path):
+    def report_file(self, report_path: str) -> None:
         """Attach HTML report created by Robot Framework to RP launch.
 
         :param report_path: Path to the report file
@@ -287,7 +291,7 @@ class listener(object):
             message = {'message': 'Execution report', 'level': 'INFO'}
             self.log_message_with_image(message, report_path)
 
-    def xunit_file(self, xunit_path):
+    def xunit_file(self, xunit_path: str) -> None:
         """Attach XUnit file created by Robot Framework to RP launch.
 
         :param xunit_path: Path to the XUnit file
@@ -297,6 +301,6 @@ class listener(object):
             self.log_message_with_image(message, xunit_path)
 
     @check_rp_enabled
-    def close(self):
+    def close(self) -> None:
         """Call service terminate when the whole test execution is done."""
         self.service.terminate_service()
