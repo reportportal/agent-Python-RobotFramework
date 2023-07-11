@@ -18,7 +18,8 @@ import logging
 import os
 from functools import wraps
 from mimetypes import guess_type
-from typing import List, Optional, Dict, Union, Any
+from typing import Optional, Dict, Union, Any, TypeVar
+from queue import LifoQueue
 
 from reportportal_client.helpers import gen_attributes
 
@@ -29,6 +30,14 @@ from .static import MAIN_SUITE_ID, PABOT_WIHOUT_LAUNCH_ID_MSG
 from .variables import Variables
 
 logger = logging.getLogger(__name__)
+
+_T = TypeVar("_T")
+
+
+class _LifoQueue(LifoQueue[_T]):
+    def last(self) -> _T:
+        with self.mutex:
+            return self.queue[-1]
 
 
 def check_rp_enabled(func):
@@ -42,17 +51,18 @@ def check_rp_enabled(func):
     return wrap
 
 
+# noinspection PyPep8Naming
 class listener:
     """Robot Framework listener interface for reporting to Report Portal."""
 
-    _items: List = ...
+    _items: _LifoQueue = ...
     _service: Optional[RobotService] = ...
     _variables: Optional[Variables] = ...
     ROBOT_LISTENER_API_VERSION = 2
 
     def __init__(self) -> None:
         """Initialize listener attributes."""
-        self._items = []
+        self._items = _LifoQueue()
         self._service = None
         self._variables = None
 
@@ -70,15 +80,18 @@ class listener:
             msg.item_id = getattr(self.current_item, 'rp_item_id', None)
         return msg
 
-    def _finish_current_item(self) -> Union[Keyword, Launch, Suite, Test]:
-        """Remove the last item from the self._items list."""
-        return self._items.pop()
+    def _add_current_item(self, item: Union[Keyword, Launch, Suite, Test]) -> None:
+        """Add the last item from the self._items queue."""
+        self._items.put(item)
+
+    def _remove_current_item(self) -> Union[Keyword, Launch, Suite, Test]:
+        """Remove the last item from the self._items queue."""
+        return self._items.get()
 
     @property
     def current_item(self) -> Optional[Union[Keyword, Launch, Suite, Test]]:
-        """Get the last item from the self._items list."""
-        if self._items:
-            return self._items[-1]
+        """Get the last item from the self._items queue."""
+        return self._items.last()
 
     @check_rp_enabled
     def log_message(self, message: Dict) -> None:
@@ -179,13 +192,13 @@ class listener:
                 .format(attributes))
             suite = Suite(name, attributes)
             suite.rp_item_id = self.service.start_suite(suite=suite, ts=ts)
-            self._items.append(suite)
+            self._add_current_item(suite)
         else:
             logger.debug('ReportPortal - Start Suite: {0}'.format(attributes))
             suite = Suite(name, attributes)
             suite.rp_parent_item_id = self.parent_id
             suite.rp_item_id = self.service.start_suite(suite=suite, ts=ts)
-            self._items.append(suite)
+            self._add_current_item(suite)
 
     @check_rp_enabled
     def end_suite(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
@@ -195,7 +208,7 @@ class listener:
         :param ts:         Timestamp(used by the ResultVisitor)
         """
         if attributes['id'] == MAIN_SUITE_ID:
-            suite = self._finish_current_item().update(attributes)
+            suite = self._remove_current_item().update(attributes)
             logger.debug('ReportPortal - End Suite: {0}'
                          .format(suite.attributes))
             self.service.finish_suite(suite=suite, ts=ts)
@@ -204,7 +217,7 @@ class listener:
                 msg='ReportPortal - End Launch: {0}'.format(attributes))
             self.service.finish_launch(launch=launch, ts=ts)
         else:
-            suite = self._finish_current_item().update(attributes)
+            suite = self._remove_current_item().update(attributes)
             logger.debug(
                 'ReportPortal - End Suite: {0}'.format(suite.attributes))
             self.service.finish_suite(suite=suite, ts=ts)
@@ -227,7 +240,7 @@ class listener:
             self.variables.test_attributes + test.tags)
         test.rp_parent_item_id = self.parent_id
         test.rp_item_id = self.service.start_test(test=test, ts=ts)
-        self._items.append(test)
+        self._add_current_item(test)
 
     @check_rp_enabled
     def end_test(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
@@ -244,7 +257,7 @@ class listener:
         if test.message:
             self.log_message({'message': test.message, 'level': 'DEBUG'})
         logger.debug('ReportPortal - End Test: {0}'.format(test.attributes))
-        self._finish_current_item()
+        self._remove_current_item()
         self.service.finish_test(test=test, ts=ts)
 
     @check_rp_enabled
@@ -260,7 +273,7 @@ class listener:
         kwd.rp_parent_item_id = self.parent_id
         logger.debug('ReportPortal - Start Keyword: {0}'.format(attributes))
         kwd.rp_item_id = self.service.start_keyword(keyword=kwd, ts=ts)
-        self._items.append(kwd)
+        self._add_current_item(kwd)
 
     @check_rp_enabled
     def end_keyword(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
@@ -269,7 +282,7 @@ class listener:
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
-        kwd = self._finish_current_item().update(attributes)
+        kwd = self._remove_current_item().update(attributes)
         logger.debug('ReportPortal - End Keyword: {0}'.format(kwd.attributes))
         self.service.finish_keyword(keyword=kwd, ts=ts)
 

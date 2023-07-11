@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Changed
+- Internal item list was replaced with LifoQueue, by @HardNorth
 ### Removed
 - Python 2.7, 3.6 support, by @HardNorth
 
