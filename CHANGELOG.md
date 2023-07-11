@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [5.4.0]
 ### Added
 - `RP_LAUNCH_UUID_PRINT` and `RP_LAUNCH_UUID_PRINT_OUTPUT` configuration variables, by @HardNorth
 ### Changed
