@@ -35,7 +35,8 @@ logger = logging.getLogger(__name__)
 class _LifoQueue(LifoQueue):
     def last(self):
         with self.mutex:
-            return self.queue[-1]
+            if self._qsize():
+                return self.queue[-1]
 
 
 def check_rp_enabled(func):
