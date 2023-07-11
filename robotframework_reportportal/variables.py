@@ -15,6 +15,7 @@
 
 from distutils.util import strtobool
 from os import path
+from typing import Optional, Union
 from warnings import warn
 
 from reportportal_client.logs.log_manager import MAX_LOG_BATCH_PAYLOAD_SIZE
@@ -24,7 +25,7 @@ from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
 _variables = {}
 
 
-def get_variable(name, default=None):
+def get_variable(name: str, default: Optional[str] = None) -> Optional[str]:
     """Get Robot Framework variable.
 
     :param name:    Name of the variable
@@ -40,7 +41,29 @@ def get_variable(name, default=None):
 class Variables(object):
     """This class stores Robot Framework variables related to Report Portal."""
 
-    def __init__(self):
+    enabled: bool = ...
+    endpoint: Optional[str] = ...
+    launch_name: Optional[str] = ...
+    _pabot_pool_id: Optional[int] = ...
+    _pabot_used: Optional[str] = ...
+    project: Optional[str] = ...
+    api_key: Optional[str] = ...
+    attach_log: bool = ...
+    attach_report: bool = ...
+    attach_xunit: bool = ...
+    launch_attributes: list = ...
+    launch_id: Optional[str] = ...
+    launch_doc: Optional[str] = ...
+    log_batch_size: Optional[int] = ...
+    mode: Optional[str] = ...
+    pool_size: Optional[int] = ...
+    rerun: bool = ...
+    rerun_of: Optional[str] = ...
+    test_attributes: Optional[list] = ...
+    skipped_issue: bool = ...
+    log_batch_payload_size: int = ...
+
+    def __init__(self) -> None:
         """Initialize instance attributes."""
         self.endpoint = get_variable('RP_ENDPOINT')
         self.launch_name = get_variable('RP_LAUNCH')
@@ -106,7 +129,7 @@ class Variables(object):
             )
 
     @property
-    def pabot_pool_id(self):
+    def pabot_pool_id(self) -> int:
         """Get pool id for the current Robot Framework executor.
 
         :return: Pool id for the current Robot Framework executor
@@ -116,7 +139,7 @@ class Variables(object):
         return self._pabot_pool_id
 
     @property
-    def pabot_used(self):
+    def pabot_used(self) -> Optional[str]:
         """Get status of using pabot in test execution.
 
         :return: Cached value of the Pabotlib URI
@@ -126,7 +149,7 @@ class Variables(object):
         return self._pabot_used
 
     @property
-    def verify_ssl(self):
+    def verify_ssl(self) -> Union[bool, str]:
         """Get value of the verify_ssl parameter for the client."""
         verify_ssl = get_variable('RP_VERIFY_SSL', default='True')
         if path.exists(verify_ssl):
