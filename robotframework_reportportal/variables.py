@@ -104,7 +104,7 @@ class Variables:
         self.log_batch_payload_size = int(get_variable(
             'RP_LOG_BATCH_PAYLOAD_SIZE',
             default=str(MAX_LOG_BATCH_PAYLOAD_SIZE)))
-        self.launch_uuid_print = bool(strtobool(get_variable('RP_LAUNCH_UUID_PRINT', default='True')))
+        self.launch_uuid_print = bool(strtobool(get_variable('RP_LAUNCH_UUID_PRINT', default='False')))
         self.launch_uuid_print_output = OUTPUT_TYPES.get(
             get_variable('RP_LAUNCH_UUID_PRINT_OUTPUT', default='stdout').lower(), OUTPUT_TYPES['stdout'])
 

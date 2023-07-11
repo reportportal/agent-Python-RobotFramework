@@ -18,7 +18,7 @@ import logging
 import os
 from functools import wraps
 from mimetypes import guess_type
-from typing import Optional, Dict, Union, Any, TypeVar
+from typing import Optional, Dict, Union, Any
 from queue import LifoQueue
 from warnings import warn
 
@@ -31,11 +31,9 @@ from .variables import Variables
 
 logger = logging.getLogger(__name__)
 
-_T = TypeVar("_T")
 
-
-class _LifoQueue(LifoQueue[_T]):
-    def last(self) -> _T:
+class _LifoQueue(LifoQueue):
+    def last(self):
         with self.mutex:
             return self.queue[-1]
 
