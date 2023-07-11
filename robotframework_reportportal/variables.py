@@ -13,16 +13,23 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License
 
+import sys
+
 from distutils.util import strtobool
 from os import path
-from typing import Optional, Union
+from typing import Optional, Union, Dict, Any, TextIO
 from warnings import warn
 
 from reportportal_client.logs.log_manager import MAX_LOG_BATCH_PAYLOAD_SIZE
 from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
 
 # This is a storage for the result visitor
-_variables = {}
+_variables: Dict[str, Any] = {}
+
+OUTPUT_TYPES: Dict[str, TextIO] = {
+    'stdout': sys.stdout,
+    'stderr': sys.stderr
+}
 
 
 def get_variable(name: str, default: Optional[str] = None) -> Optional[str]:
@@ -38,7 +45,7 @@ def get_variable(name: str, default: Optional[str] = None) -> Optional[str]:
         return _variables.get(name, default)
 
 
-class Variables(object):
+class Variables:
     """This class stores Robot Framework variables related to Report Portal."""
 
     enabled: bool = ...
@@ -62,6 +69,8 @@ class Variables(object):
     test_attributes: Optional[list] = ...
     skipped_issue: bool = ...
     log_batch_payload_size: int = ...
+    launch_uuid_print: bool
+    launch_uuid_print_output: TextIO
 
     def __init__(self) -> None:
         """Initialize instance attributes."""
@@ -93,8 +102,11 @@ class Variables(object):
         self.test_attributes = get_variable(
             'RP_TEST_ATTRIBUTES', default='').split()
         self.log_batch_payload_size = int(get_variable(
-            "RP_LOG_BATCH_PAYLOAD_SIZE",
+            'RP_LOG_BATCH_PAYLOAD_SIZE',
             default=str(MAX_LOG_BATCH_PAYLOAD_SIZE)))
+        self.launch_uuid_print = bool(strtobool(get_variable('RP_LAUNCH_UUID_PRINT', default='True')))
+        self.launch_uuid_print_output = OUTPUT_TYPES.get(
+            get_variable('RP_LAUNCH_UUID_PRINT_OUTPUT', default='stdout').lower(), OUTPUT_TYPES['stdout'])
 
         self.api_key = get_variable('RP_API_KEY')
         if not self.api_key:

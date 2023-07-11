@@ -1,8 +1,11 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- `RP_LAUNCH_UUID_PRINT` and `RP_LAUNCH_UUID_PRINT_OUTPUT` configuration variables, by @HardNorth
 ### Changed
 - Internal item list was replaced with LifoQueue, by @HardNorth
+- Client version updated on [5.4.0](https://github.com/reportportal/client-Python/releases/tag/5.4.0), by @HardNorth
 ### Removed
 - Python 2.7, 3.6 support, by @HardNorth
 

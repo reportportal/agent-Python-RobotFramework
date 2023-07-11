@@ -20,10 +20,10 @@ from functools import wraps
 from mimetypes import guess_type
 from typing import Optional, Dict, Union, Any, TypeVar
 from queue import LifoQueue
+from warnings import warn
 
 from reportportal_client.helpers import gen_attributes
 
-from .exception import RobotServiceException
 from .model import Keyword, Launch, Test, LogMessage, Suite
 from .service import RobotService
 from .static import MAIN_SUITE_ID, PABOT_WIHOUT_LAUNCH_ID_MSG
@@ -129,19 +129,9 @@ class listener:
     @property
     def service(self) -> RobotService:
         """Initialize instance of the RobotService."""
-        if self.variables.enabled and self._service is None:
+        if self.variables.enabled and not self._service:
             self._service = RobotService()
-            self._service.init_service(
-                endpoint=self.variables.endpoint,
-                project=self.variables.project,
-                api_key=self.variables.api_key,
-                log_batch_size=self.variables.log_batch_size,
-                pool_size=self.variables.pool_size,
-                skipped_issue=self.variables.skipped_issue,
-                verify_ssl=self.variables.verify_ssl,
-                log_batch_payload_size=self.variables.log_batch_payload_size,
-                launch_id=self.variables.launch_id,
-            )
+            self._service.init_service(self.variables)
         return self._service
 
     @property
@@ -163,7 +153,7 @@ class listener:
         launch.doc = self.variables.launch_doc or launch.doc
         if not self.variables.launch_id:
             if self.variables.pabot_used:
-                raise RobotServiceException(PABOT_WIHOUT_LAUNCH_ID_MSG)
+                warn(PABOT_WIHOUT_LAUNCH_ID_MSG, stacklevel=2)
             logger.debug('ReportPortal - Start Launch: {0}'.format(
                 launch.attributes))
             self.service.start_launch(

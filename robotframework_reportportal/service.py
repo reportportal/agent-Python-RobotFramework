@@ -1,4 +1,5 @@
 """This module is a Robot service for reporting results to Report Portal."""
+from typing import Optional
 
 #  Copyright (c) 2023 EPAM Systems
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +17,6 @@
 from dateutil.parser import parse
 import logging
 
-from reportportal_client.logs.log_manager import MAX_LOG_BATCH_PAYLOAD_SIZE
 from reportportal_client.helpers import (
     dict_to_payload,
     get_launch_sys_attrs,
@@ -25,7 +25,8 @@ from reportportal_client.helpers import (
 )
 from reportportal_client.client import RPClient
 
-from .exception import RobotServiceException
+from .model import Launch, Suite, Test, Keyword, LogMessage
+from .variables import Variables
 from .static import LOG_LEVEL_MAPPING, STATUS_MAPPING
 
 logger = logging.getLogger(__name__)
@@ -33,7 +34,7 @@ logger = logging.getLogger(__name__)
 TOP_LEVEL_ITEMS = {'BEFORE_SUITE', 'AFTER_SUITE'}
 
 
-def to_epoch(date):
+def to_epoch(date: Optional[str]) -> Optional[str]:
     """Convert Robot Framework timestamp to UTC timestamp."""
     if not date:
         return None
@@ -52,13 +53,17 @@ def to_epoch(date):
 class RobotService(object):
     """Class represents service that sends Robot items to Report Portal."""
 
-    def __init__(self):
+    agent_name: str
+    agent_version: str
+    rp: Optional[RPClient]
+
+    def __init__(self) -> None:
         """Initialize service attributes."""
         self.agent_name = 'robotframework-reportportal'
         self.agent_version = get_package_version(self.agent_name)
         self.rp = None
 
-    def _get_launch_attributes(self, cmd_attrs):
+    def _get_launch_attributes(self, cmd_attrs: list) -> list:
         """Generate launch attributes including both system and user ones.
 
         :param list cmd_attrs: List for attributes from the command line
@@ -69,55 +74,38 @@ class RobotService(object):
             '{}|{}'.format(self.agent_name, self.agent_version))
         return attributes + dict_to_payload(system_attributes)
 
-    def init_service(self, endpoint, project, api_key, log_batch_size,
-                     pool_size, skipped_issue=True, verify_ssl=True,
-                     log_batch_payload_size=MAX_LOG_BATCH_PAYLOAD_SIZE,
-                     launch_id=None):
+    def init_service(self, variables: Variables) -> None:
         """Initialize common Report Portal client.
 
-        :param endpoint:               Report Portal API endpoint
-        :param project:                Report Portal project
-        :param api_key:                API key
-        :param log_batch_size:         Number of logs to be sent within one
-                                       batch
-        :param pool_size:              HTTPAdapter max pool size
-        :param skipped_issue:          Mark skipped test items with
-                                       'To Investigate', default value 'True'
-        :param verify_ssl:             Disable SSL verification.
-        :param log_batch_payload_size: Maximum size of logs to be sent within
-                                       one batch
-        :param launch_id:              a launch id to use instead of starting
-                                       own one
+        :param variables: Report Portal variables
         """
         if self.rp is None:
-            logger.debug(
-                'ReportPortal - Init service: '
-                'endpoint={0}, project={1}, api_key={2}'
-                .format(endpoint, project, api_key))
+            logger.debug(f'ReportPortal - Init service: endpoint={variables.endpoint}, project={variables.project}, '
+                         f'api_key={variables.api_key}')
             self.rp = RPClient(
-                endpoint=endpoint,
-                project=project,
-                api_key=api_key,
-                is_skipped_an_issue=skipped_issue,
-                log_batch_size=log_batch_size,
+                endpoint=variables.endpoint,
+                project=variables.project,
+                api_key=variables.api_key,
+                is_skipped_an_issue=variables.skipped_issue,
+                log_batch_size=variables.log_batch_size,
                 retries=True,
-                verify_ssl=verify_ssl,
-                max_pool_size=pool_size,
-                log_batch_payload_size=log_batch_payload_size,
-                launch_id=launch_id
+                verify_ssl=variables.verify_ssl,
+                max_pool_size=variables.pool_size,
+                log_batch_payload_size=variables.log_batch_payload_size,
+                launch_id=variables.launch_id,
+                launch_uuid_print=variables.launch_uuid_print,
+                print_output=variables.launch_uuid_print_output
             )
             self.rp.start()
-        else:
-            raise RobotServiceException(
-                'RobotFrameworkService is already initialized.')
 
-    def terminate_service(self):
+    def terminate_service(self) -> None:
         """Terminate common reportportal client."""
-        if self.rp is not None:
+        if self.rp:
             self.rp.terminate()
 
-    def start_launch(self, launch, mode=None, rerun=False, rerun_of=None,
-                     ts=None):
+    def start_launch(self, launch: Launch, mode: Optional[str] = None, rerun: bool = False,
+                     rerun_of: Optional[str] = None,
+                     ts: Optional[str] = None) -> Optional[str]:
         """Call start_launch method of the common client.
 
         :param launch:         Instance of the Launch class
@@ -141,7 +129,7 @@ class RobotService(object):
             'ReportPortal - Start launch: request_body={0}'.format(sl_pt))
         return self.rp.start_launch(**sl_pt)
 
-    def finish_launch(self, launch, ts=None):
+    def finish_launch(self, launch: Launch, ts: Optional[str] = None) -> None:
         """Finish started launch.
 
         :param launch: Launch name
@@ -155,7 +143,7 @@ class RobotService(object):
             'ReportPortal - Finish launch: request_body={0}'.format(fl_rq))
         self.rp.finish_launch(**fl_rq)
 
-    def start_suite(self, suite, ts=None):
+    def start_suite(self, suite: Suite, ts: Optional[str] = None) -> Optional[str]:
         """Call start_test method of the common client.
 
         :param suite: model.Suite object
@@ -174,7 +162,8 @@ class RobotService(object):
             'ReportPortal - Start suite: request_body={0}'.format(start_rq))
         return self.rp.start_test_item(**start_rq)
 
-    def finish_suite(self, suite, issue=None, ts=None):
+    def finish_suite(self, suite: Suite, issue: Optional[str] = None,
+                     ts: Optional[str] = None) -> None:
         """Finish started suite.
 
         :param suite: Instance of the started suite item
@@ -191,7 +180,7 @@ class RobotService(object):
             'ReportPortal - Finish suite: request_body={0}'.format(fta_rq))
         self.rp.finish_test_item(**fta_rq)
 
-    def start_test(self, test, ts=None):
+    def start_test(self, test: Test, ts: Optional[str] = None):
         """Call start_test method of the common client.
 
         :param test: model.Test object
@@ -214,7 +203,7 @@ class RobotService(object):
             'ReportPortal - Start test: request_body={0}'.format(start_rq))
         return self.rp.start_test_item(**start_rq)
 
-    def finish_test(self, test, issue=None, ts=None):
+    def finish_test(self, test: Test, issue: Optional[str] = None, ts: Optional[str] = None):
         """Finish started test case.
 
         :param test:  Instance of started test item
@@ -232,7 +221,7 @@ class RobotService(object):
             'ReportPortal - Finish test: request_body={0}'.format(fta_rq))
         self.rp.finish_test_item(**fta_rq)
 
-    def start_keyword(self, keyword, ts=None):
+    def start_keyword(self, keyword: Keyword, ts: Optional[str] = None):
         """Call start_test method of the common client.
 
         :param keyword: model.Keyword object
@@ -250,7 +239,7 @@ class RobotService(object):
             'ReportPortal - Start keyword: request_body={0}'.format(start_rq))
         return self.rp.start_test_item(**start_rq)
 
-    def finish_keyword(self, keyword, issue=None, ts=None):
+    def finish_keyword(self, keyword: Keyword, issue: Optional[str] = None, ts: Optional[str] = None):
         """Finish started keyword item.
 
         :param keyword: Instance of started keyword item
@@ -267,7 +256,7 @@ class RobotService(object):
             'ReportPortal - Finish keyword: request_body={0}'.format(fta_rq))
         self.rp.finish_test_item(**fta_rq)
 
-    def log(self, message, ts=None):
+    def log(self, message: LogMessage, ts: Optional[str] = None):
         """Send log message to Report Portal.
 
         :param message: model.LogMessage object
