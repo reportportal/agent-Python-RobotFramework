@@ -6,6 +6,7 @@
 ### Changed
 - Internal item list was replaced with LifoQueue, by @HardNorth
 - Client version updated on [5.4.0](https://github.com/reportportal/client-Python/releases/tag/5.4.0), by @HardNorth
+- `service.RobotService.init_service` method now accepts `variables.Variables` object as single argument instead of many of them, which were just copy-paste, by @HardNorth
 ### Removed
 - Python 2.7, 3.6 support, by @HardNorth
 
