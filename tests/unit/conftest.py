@@ -16,7 +16,7 @@ limitations under the License
 import os
 
 from pytest import fixture
-from six.moves import mock
+from unittest import mock
 
 from robotframework_reportportal.listener import listener
 from robotframework_reportportal.variables import Variables

@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 from tests.helpers import utils
-from six.moves import mock
+from unittest import mock
 
 from tests import REPORT_PORTAL_SERVICE
 

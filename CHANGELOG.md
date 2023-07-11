@@ -1,6 +1,16 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- `RP_LAUNCH_UUID_PRINT` and `RP_LAUNCH_UUID_PRINT_OUTPUT` configuration variables, by @HardNorth
+### Changed
+- Internal item list was replaced with LifoQueue, by @HardNorth
+- Client version updated on [5.4.0](https://github.com/reportportal/client-Python/releases/tag/5.4.0), by @HardNorth
+- `service.RobotService.init_service` method now accepts `variables.Variables` object as single argument instead of many of them, which were just copy-paste, by @HardNorth
+### Removed
+- Python 2.7, 3.6 support, by @HardNorth
+
+## [5.3.3]
 ### Changed
 - Client version updated on [5.3.5](https://github.com/reportportal/client-Python/releases/tag/5.3.5), by @HardNorth
 - The Agent publish a warning and does not report anything in case of a missed required variable now,  by @HardNorth
