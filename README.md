@@ -98,6 +98,10 @@ NOT REQUIRED:
 --variable RP_VERIFY_SSL:"True"
     - Default value is "True", disables SSL verification for HTTP requests.
       Also, you can specify a full path to your certificate as the value.
+--variable RP_LAUNCH_UUID_PRINT:"True"
+    - Default value is "False", enables printing Launch UUID on test run start.
+--variable RP_LAUNCH_UUID_PRINT_OUTPUT:"stderr"
+    - Default value is "stdout", Launch UUID print output. Possible values: [stderr, stdout].
 ```
 
 ### Logging
