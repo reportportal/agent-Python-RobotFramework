@@ -72,6 +72,10 @@ NOT REQUIRED:
     - Description for the launch
 --variable RP_LAUNCH_ATTRIBUTES:"RF tag_name:tag_value"
     - Space-separated list of tags/attributes for the launch
+--variable RP_LAUNCH_UUID_PRINT:"True"
+    - Default value is "False", enables printing Launch UUID on test run start.
+--variable RP_LAUNCH_UUID_PRINT_OUTPUT:"stderr"
+    - Default value is "stdout", Launch UUID print output. Possible values: [stderr, stdout].
 --variable RP_TEST_ATTRIBUTES:"key1:value1 key1:value2 tag key2:value3"
     - Space-separated list of tags/attributes for the tests
 --variable RP_LOG_BATCH_SIZE:"10"
@@ -98,10 +102,6 @@ NOT REQUIRED:
 --variable RP_VERIFY_SSL:"True"
     - Default value is "True", disables SSL verification for HTTP requests.
       Also, you can specify a full path to your certificate as the value.
---variable RP_LAUNCH_UUID_PRINT:"True"
-    - Default value is "False", enables printing Launch UUID on test run start.
---variable RP_LAUNCH_UUID_PRINT_OUTPUT:"stderr"
-    - Default value is "stdout", Launch UUID print output. Possible values: [stderr, stdout].
 ```
 
 ### Logging
