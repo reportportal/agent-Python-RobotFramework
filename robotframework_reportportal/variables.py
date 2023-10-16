@@ -64,7 +64,7 @@ class Variables:
     skipped_issue: bool = ...
     log_batch_payload_size: int = ...
     launch_uuid_print: bool
-    launch_uuid_print_output: OutputType
+    launch_uuid_print_output: Optional[OutputType]
 
     def __init__(self) -> None:
         """Initialize instance attributes."""
@@ -99,8 +99,11 @@ class Variables:
             'RP_LOG_BATCH_PAYLOAD_SIZE',
             default=str(MAX_LOG_BATCH_PAYLOAD_SIZE)))
         self.launch_uuid_print = bool(strtobool(get_variable('RP_LAUNCH_UUID_PRINT', default='False')))
-        self.launch_uuid_print_output = OutputType[
-            get_variable('RP_LAUNCH_UUID_PRINT_OUTPUT', default='STDOUT').upper()]
+        try:
+            output_type = get_variable('RP_LAUNCH_UUID_PRINT_OUTPUT')
+            self.launch_uuid_print_output = OutputType[output_type.upper()] if output_type else None
+        except KeyError:
+            self.launch_uuid_print_output = None
 
         self.api_key = get_variable('RP_API_KEY')
         if not self.api_key:

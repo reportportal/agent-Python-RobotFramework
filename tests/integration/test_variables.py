@@ -19,6 +19,7 @@ from unittest import mock
 
 import pytest
 
+from reportportal_client import OutputType
 from tests import REPORT_PORTAL_SERVICE
 from tests.helpers import utils
 
@@ -169,71 +170,60 @@ def test_rp_api_key_empty(mock_client_init):
         assert len(filter_agent_calls(w)) == 2
 
 
-@mock.patch('robotframework_reportportal.variables.OUTPUT_TYPES', new_callable=dict)
 @mock.patch(REPORT_PORTAL_SERVICE)
-def test_launch_uuid_print(mock_client_init, output_types):
+def test_launch_uuid_print(mock_client_init):
     print_uuid = True
     variables = utils.DEFAULT_VARIABLES.copy()
     variables.update({'RP_LAUNCH_UUID_PRINT': str(print_uuid)}.items())
 
-    str_io = StringIO()
-    output_types['stdout'] = str_io
     result = utils.run_robot_tests(['examples/simple.robot'],
                                    variables=variables)
 
     assert int(result) == 0, 'Exit code should be 0 (no errors)'
     assert mock_client_init.call_count == 1
     assert mock_client_init.call_args_list[0][1]['launch_uuid_print'] == print_uuid
-    assert mock_client_init.call_args_list[0][1]['print_output'] is str_io
+    assert mock_client_init.call_args_list[0][1]['print_output'] is None
 
 
-@mock.patch('robotframework_reportportal.variables.OUTPUT_TYPES', new_callable=dict)
 @mock.patch(REPORT_PORTAL_SERVICE)
-def test_launch_uuid_print_stderr(mock_client_init, output_types):
+def test_launch_uuid_print_stderr(mock_client_init):
     print_uuid = True
     variables = utils.DEFAULT_VARIABLES.copy()
     variables.update({'RP_LAUNCH_UUID_PRINT': str(print_uuid), 'RP_LAUNCH_UUID_PRINT_OUTPUT': 'stderr'}.items())
 
-    str_io = StringIO()
-    output_types['stderr'] = str_io
-    output_types['stdout'] = sys.stdout
     result = utils.run_robot_tests(['examples/simple.robot'], variables=variables)
 
     assert int(result) == 0, 'Exit code should be 0 (no errors)'
     assert mock_client_init.call_count == 1
     assert mock_client_init.call_args_list[0][1]['launch_uuid_print'] == print_uuid
-    assert mock_client_init.call_args_list[0][1]['print_output'] is str_io
+    assert mock_client_init.call_args_list[0][1]['print_output'] is OutputType.STDERR
 
 
-@mock.patch('robotframework_reportportal.variables.OUTPUT_TYPES', new_callable=dict)
 @mock.patch(REPORT_PORTAL_SERVICE)
-def test_launch_uuid_print_invalid_output(mock_client_init, output_types):
+def test_launch_uuid_print_invalid_output(mock_client_init):
     print_uuid = True
     variables = utils.DEFAULT_VARIABLES.copy()
     variables.update({'RP_LAUNCH_UUID_PRINT': str(print_uuid), 'RP_LAUNCH_UUID_PRINT_OUTPUT': 'something'}.items())
 
     str_io = StringIO()
-    output_types['stdout'] = str_io
     result = utils.run_robot_tests(['examples/simple.robot'],
                                    variables=variables)
 
     assert int(result) == 0, 'Exit code should be 0 (no errors)'
     assert mock_client_init.call_count == 1
     assert mock_client_init.call_args_list[0][1]['launch_uuid_print'] == print_uuid
-    assert mock_client_init.call_args_list[0][1]['print_output'] is str_io
+    assert mock_client_init.call_args_list[0][1]['print_output'] is None
 
 
-@mock.patch('robotframework_reportportal.variables.OUTPUT_TYPES', new_callable=dict)
 @mock.patch(REPORT_PORTAL_SERVICE)
-def test_no_launch_uuid_print(mock_client_init, output_types):
+def test_no_launch_uuid_print(mock_client_init):
     variables = utils.DEFAULT_VARIABLES.copy()
 
     str_io = StringIO()
-    output_types['stdout'] = str_io
     result = utils.run_robot_tests(['examples/simple.robot'],
                                    variables=variables)
 
     assert int(result) == 0, 'Exit code should be 0 (no errors)'
     assert mock_client_init.call_count == 1
     assert mock_client_init.call_args_list[0][1]['launch_uuid_print'] is False
-    assert mock_client_init.call_args_list[0][1]['print_output'] is str_io
+    assert mock_client_init.call_args_list[0][1]['print_output'] is None
