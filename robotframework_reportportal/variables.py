@@ -65,6 +65,7 @@ class Variables:
     log_batch_payload_size: int = ...
     launch_uuid_print: bool
     launch_uuid_print_output: Optional[OutputType]
+    client_type: []
 
     def __init__(self) -> None:
         """Initialize instance attributes."""
@@ -99,30 +100,25 @@ class Variables:
             'RP_LOG_BATCH_PAYLOAD_SIZE',
             default=str(MAX_LOG_BATCH_PAYLOAD_SIZE)))
         self.launch_uuid_print = bool(strtobool(get_variable('RP_LAUNCH_UUID_PRINT', default='False')))
-        try:
-            output_type = get_variable('RP_LAUNCH_UUID_PRINT_OUTPUT')
-            self.launch_uuid_print_output = OutputType[output_type.upper()] if output_type else None
-        except KeyError:
-            self.launch_uuid_print_output = None
+        output_type = get_variable('RP_LAUNCH_UUID_PRINT_OUTPUT')
+        self.launch_uuid_print_output = OutputType[output_type.upper()] if output_type else None
 
         self.api_key = get_variable('RP_API_KEY')
         if not self.api_key:
             token = get_variable('RP_UUID')
             if token:
                 warn(
-                    message="Argument `token` is deprecated since 2.0.4 and "
-                            "will be subject for removing in the next major "
-                            "version. Use `api_key` argument instead.",
+                    message="Argument `RP_UUID` is deprecated since version 5.3.3 and will be subject for "
+                            "removing in the next major version. Use `RP_API_KEY` argument instead.",
                     category=DeprecationWarning,
                     stacklevel=2
                 )
                 self.api_key = token
             else:
                 warn(
-                    message="Argument `api_key` is `None` or empty string, "
-                            "that's not supposed to happen because Report "
-                            "Portal is usually requires an authorization key. "
-                            "Please check your code.",
+                    message="Argument `RP_API_KEY` is `None` or empty string, that's not supposed to happen "
+                            "because ReportPortal is usually requires an authorization key. Please check your"
+                            " configuration.",
                     category=RuntimeWarning,
                     stacklevel=2
                 )

@@ -202,15 +202,14 @@ def test_launch_uuid_print_stderr(mock_client_init):
 def test_launch_uuid_print_invalid_output(mock_client_init):
     print_uuid = True
     variables = utils.DEFAULT_VARIABLES.copy()
-    variables.update({'RP_LAUNCH_UUID_PRINT': str(print_uuid), 'RP_LAUNCH_UUID_PRINT_OUTPUT': 'something'}.items())
+    variables.update({'RP_LAUNCH_UUID_PRINT': str(print_uuid),
+                      'RP_LAUNCH_UUID_PRINT_OUTPUT': 'something'}.items())
 
     result = utils.run_robot_tests(['examples/simple.robot'],
                                    variables=variables)
 
     assert int(result) == 0, 'Exit code should be 0 (no errors)'
-    assert mock_client_init.call_count == 1
-    assert mock_client_init.call_args_list[0][1]['launch_uuid_print'] == print_uuid
-    assert mock_client_init.call_args_list[0][1]['print_output'] is None
+    assert mock_client_init.call_count == 0
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
