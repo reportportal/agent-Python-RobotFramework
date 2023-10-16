@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [5.5.0]
 ### Added
 - `RP_CLIENT_TYPE` configuration variable, by @HardNorth
 - `RP_CONNECT_TIMEOUT` and `RP_READ_TIMEOUT` configuration variables, by @HardNorth
