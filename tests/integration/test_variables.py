@@ -205,7 +205,6 @@ def test_launch_uuid_print_invalid_output(mock_client_init):
     variables = utils.DEFAULT_VARIABLES.copy()
     variables.update({'RP_LAUNCH_UUID_PRINT': str(print_uuid), 'RP_LAUNCH_UUID_PRINT_OUTPUT': 'something'}.items())
 
-    str_io = StringIO()
     result = utils.run_robot_tests(['examples/simple.robot'],
                                    variables=variables)
 
@@ -219,7 +218,6 @@ def test_launch_uuid_print_invalid_output(mock_client_init):
 def test_no_launch_uuid_print(mock_client_init):
     variables = utils.DEFAULT_VARIABLES.copy()
 
-    str_io = StringIO()
     result = utils.run_robot_tests(['examples/simple.robot'],
                                    variables=variables)
 
