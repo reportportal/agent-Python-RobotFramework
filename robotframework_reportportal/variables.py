@@ -13,23 +13,17 @@
 
 """This module contains model that stores Robot Framework variables."""
 
-import sys
-
 from distutils.util import strtobool
 from os import path
-from typing import Optional, Union, Dict, Any, TextIO
+from typing import Optional, Union, Dict, Any
 from warnings import warn
 
+from reportportal_client import OutputType
 from reportportal_client.logs import MAX_LOG_BATCH_PAYLOAD_SIZE
 from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
 
 # This is a storage for the result visitor
 _variables: Dict[str, Any] = {}
-
-OUTPUT_TYPES: Dict[str, TextIO] = {
-    'stdout': sys.stdout,
-    'stderr': sys.stderr
-}
 
 
 def get_variable(name: str, default: Optional[str] = None) -> Optional[str]:
@@ -70,7 +64,7 @@ class Variables:
     skipped_issue: bool = ...
     log_batch_payload_size: int = ...
     launch_uuid_print: bool
-    launch_uuid_print_output: TextIO
+    launch_uuid_print_output: OutputType
 
     def __init__(self) -> None:
         """Initialize instance attributes."""
@@ -105,8 +99,8 @@ class Variables:
             'RP_LOG_BATCH_PAYLOAD_SIZE',
             default=str(MAX_LOG_BATCH_PAYLOAD_SIZE)))
         self.launch_uuid_print = bool(strtobool(get_variable('RP_LAUNCH_UUID_PRINT', default='False')))
-        self.launch_uuid_print_output = OUTPUT_TYPES.get(
-            get_variable('RP_LAUNCH_UUID_PRINT_OUTPUT', default='stdout').lower(), OUTPUT_TYPES['stdout'])
+        self.launch_uuid_print_output = OutputType[
+            get_variable('RP_LAUNCH_UUID_PRINT_OUTPUT', default='STDOUT').upper()]
 
         self.api_key = get_variable('RP_API_KEY')
         if not self.api_key:

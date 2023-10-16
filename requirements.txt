@@ -1,5 +1,4 @@
 # Basic dependencies
-python-dateutil>=2.8.1
-reportportal-client==5.4.0
+python-dateutil~=2.8.1
+reportportal-client~=5.5.0
 robotframework
-six>=1.15.0
