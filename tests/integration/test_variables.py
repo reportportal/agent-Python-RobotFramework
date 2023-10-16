@@ -14,7 +14,6 @@
 
 import sys
 import warnings
-from io import StringIO
 from unittest import mock
 
 import pytest
