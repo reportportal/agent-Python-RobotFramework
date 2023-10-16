@@ -1,5 +1,3 @@
-"""This module includes Robot Framework listener interfaces."""
-
 #  Copyright 2023 EPAM Systems
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,15 +12,16 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+"""This module includes Robot Framework listener interfaces."""
+
 import logging
 import os
 from functools import wraps
 from mimetypes import guess_type
 from typing import Optional, Dict, Union, Any
-from queue import LifoQueue
 from warnings import warn
 
-from reportportal_client.helpers import gen_attributes
+from reportportal_client.helpers import gen_attributes, LifoQueue
 
 from .model import Keyword, Launch, Test, LogMessage, Suite
 from .service import RobotService
@@ -30,13 +29,6 @@ from .static import MAIN_SUITE_ID, PABOT_WIHOUT_LAUNCH_ID_MSG
 from .variables import Variables
 
 logger = logging.getLogger(__name__)
-
-
-class _LifoQueue(LifoQueue):
-    def last(self):
-        with self.mutex:
-            if self._qsize():
-                return self.queue[-1]
 
 
 def check_rp_enabled(func):
@@ -54,14 +46,14 @@ def check_rp_enabled(func):
 class listener:
     """Robot Framework listener interface for reporting to Report Portal."""
 
-    _items: _LifoQueue = ...
+    _items: LifoQueue = ...
     _service: Optional[RobotService] = ...
     _variables: Optional[Variables] = ...
     ROBOT_LISTENER_API_VERSION = 2
 
     def __init__(self) -> None:
         """Initialize listener attributes."""
-        self._items = _LifoQueue()
+        self._items = LifoQueue()
         self._service = None
         self._variables = None
 

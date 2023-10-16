@@ -1,7 +1,5 @@
-"""This module is a Robot service for reporting results to Report Portal."""
-from typing import Optional
-
-#  Copyright (c) 2023 EPAM Systems
+#  Copyright 2023 EPAM Systems
+#
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
 #  You may obtain a copy of the License at
@@ -12,7 +10,11 @@ from typing import Optional
 #  distributed under the License is distributed on an "AS IS" BASIS,
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
-#  limitations under the License
+#  limitations under the License.
+
+"""This module is a Robot service for reporting results to Report Portal."""
+
+from typing import Optional
 
 from dateutil.parser import parse
 import logging
@@ -23,7 +25,7 @@ from reportportal_client.helpers import (
     get_package_version,
     timestamp
 )
-from reportportal_client.client import RPClient
+from reportportal_client import RP, create_client
 
 from .model import Launch, Suite, Test, Keyword, LogMessage
 from .variables import Variables
@@ -55,7 +57,7 @@ class RobotService(object):
 
     agent_name: str
     agent_version: str
-    rp: Optional[RPClient]
+    rp: Optional[RP]
 
     def __init__(self) -> None:
         """Initialize service attributes."""
@@ -80,28 +82,30 @@ class RobotService(object):
         :param variables: Report Portal variables
         """
         if self.rp is None:
-            logger.debug(f'ReportPortal - Init service: endpoint={variables.endpoint}, project={variables.project}, '
-                         f'api_key={variables.api_key}')
-            self.rp = RPClient(
+            logger.debug(f'ReportPortal - Init service: endpoint={variables.endpoint}, '
+                         f'project={variables.project}, api_key={variables.api_key}')
+
+            self.rp = create_client(
+                client_type=variables.client_type,
                 endpoint=variables.endpoint,
                 project=variables.project,
                 api_key=variables.api_key,
                 is_skipped_an_issue=variables.skipped_issue,
                 log_batch_size=variables.log_batch_size,
-                retries=True,
+                retries=5,
                 verify_ssl=variables.verify_ssl,
                 max_pool_size=variables.pool_size,
                 log_batch_payload_size=variables.log_batch_payload_size,
                 launch_id=variables.launch_id,
                 launch_uuid_print=variables.launch_uuid_print,
-                print_output=variables.launch_uuid_print_output
+                print_output=variables.launch_uuid_print_output,
+                http_timeout=variables.http_timeout
             )
-            self.rp.start()
 
     def terminate_service(self) -> None:
-        """Terminate common reportportal client."""
+        """Terminate common ReportPortal client."""
         if self.rp:
-            self.rp.terminate()
+            self.rp.close()
 
     def start_launch(self, launch: Launch, mode: Optional[str] = None, rerun: bool = False,
                      rerun_of: Optional[str] = None,

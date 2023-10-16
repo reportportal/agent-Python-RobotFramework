@@ -1,5 +1,3 @@
-"""This module contains model that stores Robot Framework variables."""
-
 #  Copyright (c) 2023 EPAM Systems
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -13,23 +11,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License
 
-import sys
+"""This module contains model that stores Robot Framework variables."""
 
 from distutils.util import strtobool
 from os import path
-from typing import Optional, Union, Dict, Any, TextIO
+from typing import Optional, Union, Dict, Tuple, Any
 from warnings import warn
 
-from reportportal_client.logs.log_manager import MAX_LOG_BATCH_PAYLOAD_SIZE
+from reportportal_client import OutputType, ClientType
+from reportportal_client.logs import MAX_LOG_BATCH_PAYLOAD_SIZE
 from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
 
 # This is a storage for the result visitor
 _variables: Dict[str, Any] = {}
-
-OUTPUT_TYPES: Dict[str, TextIO] = {
-    'stdout': sys.stdout,
-    'stderr': sys.stderr
-}
 
 
 def get_variable(name: str, default: Optional[str] = None) -> Optional[str]:
@@ -70,7 +64,9 @@ class Variables:
     skipped_issue: bool = ...
     log_batch_payload_size: int = ...
     launch_uuid_print: bool
-    launch_uuid_print_output: TextIO
+    launch_uuid_print_output: Optional[OutputType]
+    client_type: Optional[ClientType]
+    http_timeout: Optional[Union[Tuple[float, float], float]]
 
     def __init__(self) -> None:
         """Initialize instance attributes."""
@@ -105,27 +101,39 @@ class Variables:
             'RP_LOG_BATCH_PAYLOAD_SIZE',
             default=str(MAX_LOG_BATCH_PAYLOAD_SIZE)))
         self.launch_uuid_print = bool(strtobool(get_variable('RP_LAUNCH_UUID_PRINT', default='False')))
-        self.launch_uuid_print_output = OUTPUT_TYPES.get(
-            get_variable('RP_LAUNCH_UUID_PRINT_OUTPUT', default='stdout').lower(), OUTPUT_TYPES['stdout'])
+        output_type = get_variable('RP_LAUNCH_UUID_PRINT_OUTPUT')
+        self.launch_uuid_print_output = OutputType[output_type.upper()] if output_type else None
+        client_type = get_variable('RP_CLIENT_TYPE')
+        self.client_type = ClientType[client_type.upper()] if client_type else ClientType.SYNC
+        connect_timeout = get_variable('RP_CONNECT_TIMEOUT')
+        connect_timeout = float(connect_timeout) if connect_timeout else None
+
+        read_timeout = get_variable('RP_READ_TIMEOUT')
+        read_timeout = float(read_timeout) if read_timeout else None
+
+        if connect_timeout is None and read_timeout is None:
+            self.http_timeout = None
+        elif connect_timeout is not None and read_timeout is not None:
+            self.http_timeout = (connect_timeout, read_timeout)
+        else:
+            self.http_timeout = connect_timeout or read_timeout
 
         self.api_key = get_variable('RP_API_KEY')
         if not self.api_key:
             token = get_variable('RP_UUID')
             if token:
                 warn(
-                    message="Argument `token` is deprecated since 2.0.4 and "
-                            "will be subject for removing in the next major "
-                            "version. Use `api_key` argument instead.",
+                    message="Argument `RP_UUID` is deprecated since version 5.3.3 and will be subject for "
+                            "removing in the next major version. Use `RP_API_KEY` argument instead.",
                     category=DeprecationWarning,
                     stacklevel=2
                 )
                 self.api_key = token
             else:
                 warn(
-                    message="Argument `api_key` is `None` or empty string, "
-                            "that's not supposed to happen because Report "
-                            "Portal is usually requires an authorization key. "
-                            "Please check your code.",
+                    message="Argument `RP_API_KEY` is `None` or empty string, that's not supposed to happen "
+                            "because ReportPortal is usually requires an authorization key. Please check your"
+                            " configuration.",
                     category=RuntimeWarning,
                     stacklevel=2
                 )
