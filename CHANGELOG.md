@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Removed
+- Dependency on `six`, by @HardNorth
 
 ## [5.4.0]
 ### Added

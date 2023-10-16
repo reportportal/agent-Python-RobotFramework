@@ -1,5 +1,3 @@
-"""This module contains model that stores Robot Framework variables."""
-
 #  Copyright (c) 2023 EPAM Systems
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -13,6 +11,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License
 
+"""This module contains model that stores Robot Framework variables."""
+
 import sys
 
 from distutils.util import strtobool
@@ -20,7 +20,7 @@ from os import path
 from typing import Optional, Union, Dict, Any, TextIO
 from warnings import warn
 
-from reportportal_client.logs.log_manager import MAX_LOG_BATCH_PAYLOAD_SIZE
+from reportportal_client.logs import MAX_LOG_BATCH_PAYLOAD_SIZE
 from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
 
 # This is a storage for the result visitor

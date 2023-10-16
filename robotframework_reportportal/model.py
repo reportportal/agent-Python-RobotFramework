@@ -1,5 +1,3 @@
-"""This module contains models representing Robot Framework test items."""
-
 #  Copyright (c) 2023 EPAM Systems
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -13,10 +11,9 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License
 
-import os
+"""This module contains models representing Robot Framework test items."""
 
-from reportportal_client.helpers import convert_string
-from six import text_type
+import os
 
 
 class Suite(object):
@@ -184,14 +181,10 @@ class Keyword(object):
 
     def get_name(self):
         """Get name of the keyword suitable for Report Portal."""
-        assign = convert_string(', '.join(self.assign))
+        assign = ', '.join(self.assign)
         assignment = '{0} = '.format(assign) if self.assign else ''
         arguments = ', '.join(self.args)
-        full_name = '{0}{1} ({2})'.format(
-            assignment,
-            convert_string(self.name),
-            convert_string(arguments)
-        )
+        full_name = f'{assignment}{self.name} ({arguments})'
         return full_name[:256]
 
     def get_type(self):
@@ -216,7 +209,7 @@ class Keyword(object):
         return self
 
 
-class LogMessage(text_type):
+class LogMessage(str):
     """Class represents Robot Framework messages."""
 
     def __init__(self, message):

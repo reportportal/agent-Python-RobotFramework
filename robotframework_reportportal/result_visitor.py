@@ -17,7 +17,7 @@ import string
 from datetime import datetime
 
 from robot.api import ResultVisitor
-from six.moves.urllib.parse import unquote
+from urllib.parse import unquote
 
 from . import listener
 from .time_visitor import corrections
