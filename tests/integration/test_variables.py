@@ -256,7 +256,7 @@ def test_client_types(mock_client_init, mock_async_client_init, variable_value, 
     ]
 )
 @mock.patch(REPORT_PORTAL_SERVICE)
-def test_client_types(mock_client_init, connect_value, read_value, expected_result):
+def test_client_timeouts(mock_client_init, connect_value, read_value, expected_result):
     variables = utils.DEFAULT_VARIABLES.copy()
     if connect_value:
         variables['RP_CONNECT_TIMEOUT'] = connect_value

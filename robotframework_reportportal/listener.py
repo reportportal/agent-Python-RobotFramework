@@ -19,7 +19,6 @@ import os
 from functools import wraps
 from mimetypes import guess_type
 from typing import Optional, Dict, Union, Any
-from queue import LifoQueue
 from warnings import warn
 
 from reportportal_client.helpers import gen_attributes, LifoQueue
