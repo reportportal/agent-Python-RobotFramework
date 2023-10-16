@@ -3,7 +3,7 @@
 [![PyPI](https://img.shields.io/pypi/v/robotframework-reportportal.svg?maxAge=259200)](https://pypi.python.org/pypi/robotframework-reportportal)
 [![Python versions](https://img.shields.io/pypi/pyversions/robotframework-reportportal.svg)](https://pypi.org/project/robotframework-reportportal)
 [![Build Status](https://github.com/reportportal/agent-Python-RobotFramework/actions/workflows/tests.yml/badge.svg)](https://github.com/reportportal/agent-Python-RobotFramework/actions/workflows/tests.yml)
-[![codecov.io](https://codecov.io/gh/reportportal/agent-Python-RobotFramework/branch/master/graph/badge.svg)](https://codecov.io/gh/reportportal/agent-Python-RobotFramework)
+[![codecov.io](https://codecov.io/gh/reportportal/agent-Python-RobotFramework/branch/develop/graph/badge.svg)](https://codecov.io/gh/reportportal/agent-Python-RobotFramework)
 [![Join Slack chat!](https://slack.epmrpp.reportportal.io/badge.svg)](https://slack.epmrpp.reportportal.io/)
 [![stackoverflow](https://img.shields.io/badge/reportportal-stackoverflow-orange.svg?style=flat)](http://stackoverflow.com/questions/tagged/reportportal)
 [![Build with Love](https://img.shields.io/badge/build%20with-❤%EF%B8%8F%E2%80%8D-lightgrey.svg)](http://reportportal.io?style=flat)
@@ -26,26 +26,6 @@ The latest stable version of library is available on PyPI:
 
     pip install robotframework-reportportal
 
-[reportportal-client](https://github.com/reportportal/client-Python)
-and [six](https://pypi.org/project/six/) will be installed as dependencies
-
-**IMPORTANT!**
-The latest version **does not** support Report Portal versions below 5.0.0.
-
-Specify the last one release of the client version 3 to install or update the
-client for other versions of Report Portal below 5.0.0:
-
-```
-pip install robotframework-reportportal~=3.0
-```
-
-## Contribution
-
-All the fixes for the agent that supports Report Portal versions below 5.0.0
-should go into the v3 branch.
-The master branch will store the code base for the agent for Report Portal
-versions 5 and above.
-
 ## Usage
 
 ### Properties
@@ -66,6 +46,8 @@ REQUIRED:
 NOT REQUIRED:
 
 ```
+--variable RP_CLIENT_TYPE:"SYNC"
+    - Type of the under-the-hood ReportPortal client implamentation. Possible values: [SYNC, ASYNC_THREAD, ASYNC_BATCHED].
 --variable RP_LAUNCH_UUID:"id_of_existing_rp_launch"
     - ID of existing Report Portal launch
 --variable RP_LAUNCH_DOC:"some_documentation_for_launch"
@@ -78,6 +60,10 @@ NOT REQUIRED:
     - Default value is "stdout", Launch UUID print output. Possible values: [stderr, stdout].
 --variable RP_TEST_ATTRIBUTES:"key1:value1 key1:value2 tag key2:value3"
     - Space-separated list of tags/attributes for the tests
+--variable RP_CONNECT_TIMEOUT:"20"
+    - Default value is "10.0", connection timeout to ReportPortal server.
+--variable RP_READ_TIMEOUT:"20"
+    - Default value is "10.0", response read timeout for ReportPortal connection.
 --variable RP_LOG_BATCH_SIZE:"10"
     - Default value is "20", affects size of async batch log requests
 --variable RP_LOG_BATCH_PAYLOAD_SIZE:"10240000"

@@ -15,10 +15,10 @@
 
 from distutils.util import strtobool
 from os import path
-from typing import Optional, Union, Dict, Any
+from typing import Optional, Union, Dict, Tuple, Any
 from warnings import warn
 
-from reportportal_client import OutputType
+from reportportal_client import OutputType, ClientType
 from reportportal_client.logs import MAX_LOG_BATCH_PAYLOAD_SIZE
 from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
 
@@ -65,7 +65,8 @@ class Variables:
     log_batch_payload_size: int = ...
     launch_uuid_print: bool
     launch_uuid_print_output: Optional[OutputType]
-    client_type: []
+    client_type: Optional[ClientType]
+    http_timeout: Optional[Union[Tuple[float, float], float]]
 
     def __init__(self) -> None:
         """Initialize instance attributes."""
@@ -102,6 +103,20 @@ class Variables:
         self.launch_uuid_print = bool(strtobool(get_variable('RP_LAUNCH_UUID_PRINT', default='False')))
         output_type = get_variable('RP_LAUNCH_UUID_PRINT_OUTPUT')
         self.launch_uuid_print_output = OutputType[output_type.upper()] if output_type else None
+        client_type = get_variable('RP_CLIENT_TYPE')
+        self.client_type = ClientType[client_type.upper()] if client_type else ClientType.SYNC
+        connect_timeout = get_variable('RP_CONNECT_TIMEOUT')
+        connect_timeout = float(connect_timeout) if connect_timeout else None
+
+        read_timeout = get_variable('RP_READ_TIMEOUT')
+        read_timeout = float(read_timeout) if read_timeout else None
+
+        if connect_timeout is None and read_timeout is None:
+            self.http_timeout = None
+        elif connect_timeout is not None and read_timeout is not None:
+            self.http_timeout = (connect_timeout, read_timeout)
+        else:
+            self.http_timeout = connect_timeout or read_timeout
 
         self.api_key = get_variable('RP_API_KEY')
         if not self.api_key:

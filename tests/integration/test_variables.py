@@ -12,13 +12,13 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import sys
 import warnings
 from unittest import mock
 
+# noinspection PyPackageRequirements
 import pytest
+from reportportal_client import OutputType, RPClient, ThreadedRPClient, BatchedRPClient
 
-from reportportal_client import OutputType
 from tests import REPORT_PORTAL_SERVICE
 from tests.helpers import utils
 
@@ -56,9 +56,6 @@ def test_agent_pass_launch_uuid_variable(mock_client_init):
     assert mock_client.start_launch.call_count == 0
 
 
-@pytest.mark.skipif(sys.version_info < (3, 6),
-                    reason='For some reasons the test passes only for the '
-                           'first variable for Python 2.7')
 @pytest.mark.parametrize('variable, warn_num',
                          [('RP_PROJECT', 1), ('RP_API_KEY', 2),
                           ('RP_ENDPOINT', 1), ('RP_LAUNCH', 1)])
@@ -188,7 +185,8 @@ def test_launch_uuid_print(mock_client_init):
 def test_launch_uuid_print_stderr(mock_client_init):
     print_uuid = True
     variables = utils.DEFAULT_VARIABLES.copy()
-    variables.update({'RP_LAUNCH_UUID_PRINT': str(print_uuid), 'RP_LAUNCH_UUID_PRINT_OUTPUT': 'stderr'}.items())
+    variables.update(
+        {'RP_LAUNCH_UUID_PRINT': str(print_uuid), 'RP_LAUNCH_UUID_PRINT_OUTPUT': 'stderr'}.items())
 
     result = utils.run_robot_tests(['examples/simple.robot'], variables=variables)
 
@@ -216,10 +214,57 @@ def test_launch_uuid_print_invalid_output(mock_client_init):
 def test_no_launch_uuid_print(mock_client_init):
     variables = utils.DEFAULT_VARIABLES.copy()
 
-    result = utils.run_robot_tests(['examples/simple.robot'],
-                                   variables=variables)
+    result = utils.run_robot_tests(['examples/simple.robot'], variables=variables)
 
     assert int(result) == 0, 'Exit code should be 0 (no errors)'
     assert mock_client_init.call_count == 1
     assert mock_client_init.call_args_list[0][1]['launch_uuid_print'] is False
     assert mock_client_init.call_args_list[0][1]['print_output'] is None
+
+
+@pytest.mark.parametrize(
+    'variable_value, expected_type',
+    [('SYNC', RPClient), ('ASYNC_THREAD', ThreadedRPClient),
+     ('ASYNC_BATCHED', BatchedRPClient), (None, RPClient)]
+)
+@mock.patch('reportportal_client.aio.client.Client')
+@mock.patch(REPORT_PORTAL_SERVICE)
+def test_client_types(mock_client_init, mock_async_client_init, variable_value, expected_type):
+    variables = utils.DEFAULT_VARIABLES.copy()
+    if variable_value:
+        variables['RP_CLIENT_TYPE'] = variable_value
+
+    result = utils.run_robot_tests(['examples/simple.robot'], variables=variables)
+
+    assert int(result) == 0, 'Exit code should be 0 (no errors)'
+    if expected_type is RPClient:
+        assert mock_async_client_init.call_count == 0
+        assert mock_client_init.call_count == 1
+    else:
+        assert mock_async_client_init.call_count == 1
+        assert mock_client_init.call_count == 0
+
+
+@pytest.mark.parametrize(
+    'connect_value, read_value, expected_result',
+    [
+        ('5', '15', (5.0, 15.0)),
+        ('5.5', '15.5', (5.5, 15.5)),
+        (None, None, None),
+        (None, '5', 5),
+        ('5', None, 5)
+    ]
+)
+@mock.patch(REPORT_PORTAL_SERVICE)
+def test_client_types(mock_client_init, connect_value, read_value, expected_result):
+    variables = utils.DEFAULT_VARIABLES.copy()
+    if connect_value:
+        variables['RP_CONNECT_TIMEOUT'] = connect_value
+    if read_value:
+        variables['RP_READ_TIMEOUT'] = read_value
+
+    result = utils.run_robot_tests(['examples/simple.robot'], variables=variables)
+
+    assert int(result) == 0, 'Exit code should be 0 (no errors)'
+    assert mock_client_init.call_count == 1
+    assert mock_client_init.call_args_list[0][1]['http_timeout'] == expected_result
