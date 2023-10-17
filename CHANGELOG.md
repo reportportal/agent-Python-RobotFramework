@@ -9,7 +9,7 @@
 - `RP_CLIENT_TYPE` configuration variable, by @HardNorth
 - `RP_CONNECT_TIMEOUT` and `RP_READ_TIMEOUT` configuration variables, by @HardNorth
 ### Changed
-- Client version updated on [5.5.0](https://github.com/reportportal/client-Python/releases/tag/5.5.0), by @HardNorth
+- Client version updated on [5.5.1](https://github.com/reportportal/client-Python/releases/tag/5.5.1), by @HardNorth
 ### Removed
 - Dependency on `six`, by @HardNorth
 
