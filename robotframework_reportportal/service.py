@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""This module is a Robot service for reporting results to Report Portal."""
+"""This module is a Robot service for reporting results to ReportPortal."""
 
 from typing import Optional
 
@@ -53,7 +53,7 @@ def to_epoch(date: Optional[str]) -> Optional[str]:
 
 
 class RobotService(object):
-    """Class represents service that sends Robot items to Report Portal."""
+    """Class represents service that sends Robot items to ReportPortal."""
 
     agent_name: str
     agent_version: str
@@ -77,9 +77,9 @@ class RobotService(object):
         return attributes + dict_to_payload(system_attributes)
 
     def init_service(self, variables: Variables) -> None:
-        """Initialize common Report Portal client.
+        """Initialize common ReportPortal client.
 
-        :param variables: Report Portal variables
+        :param variables: ReportPortal variables
         """
         if self.rp is None:
             logger.debug(f'ReportPortal - Init service: endpoint={variables.endpoint}, '
@@ -261,7 +261,7 @@ class RobotService(object):
         self.rp.finish_test_item(**fta_rq)
 
     def log(self, message: LogMessage, ts: Optional[str] = None):
-        """Send log message to Report Portal.
+        """Send log message to ReportPortal.
 
         :param message: model.LogMessage object
         :param ts:      Timestamp

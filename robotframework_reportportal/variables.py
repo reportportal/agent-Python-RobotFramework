@@ -40,7 +40,7 @@ def get_variable(name: str, default: Optional[str] = None) -> Optional[str]:
 
 
 class Variables:
-    """This class stores Robot Framework variables related to Report Portal."""
+    """This class stores Robot Framework variables related to ReportPortal."""
 
     enabled: bool = ...
     endpoint: Optional[str] = ...
@@ -142,8 +142,8 @@ class Variables:
         self.enabled = all(cond)
         if not self.enabled:
             warn(
-                'One or required parameter is missing, Report Portal listener '
-                'will be disabled. Please check agent documentation.',
+                'One or required parameter is missing, ReportPortal listener will be disabled. '
+                'Please check agent documentation.',
                 RuntimeWarning,
                 2
             )

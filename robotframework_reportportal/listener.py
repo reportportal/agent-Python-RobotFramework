@@ -44,7 +44,7 @@ def check_rp_enabled(func):
 
 # noinspection PyPep8Naming
 class listener:
-    """Robot Framework listener interface for reporting to Report Portal."""
+    """Robot Framework listener interface for reporting to ReportPortal."""
 
     _items: LifoQueue = ...
     _service: Optional[RobotService] = ...
@@ -86,7 +86,7 @@ class listener:
 
     @check_rp_enabled
     def log_message(self, message: Dict) -> None:
-        """Send log message to the Report Portal.
+        """Send log message to the ReportPortal.
 
         :param message: Message passed by the Robot Framework
         """
@@ -96,7 +96,7 @@ class listener:
 
     @check_rp_enabled
     def log_message_with_image(self, msg: Dict, image: str):
-        """Send log message to the Report Portal.
+        """Send log message to the ReportPortal.
 
         :param msg:   Message passed by the Robot Framework
         :param image: Path to image
@@ -134,7 +134,7 @@ class listener:
 
     @check_rp_enabled
     def start_launch(self, attributes: Dict, ts: Optional[Any] = None) -> None:
-        """Start a new launch at the Report Portal.
+        """Start a new launch at the ReportPortal.
 
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
@@ -158,7 +158,7 @@ class listener:
 
     @check_rp_enabled
     def start_suite(self, name: str, attributes: Dict, ts: Optional[Any] = None) -> None:
-        """Start a new test suite at the Report Portal.
+        """Start a new test suite at the ReportPortal.
 
         :param name:       Test suite name
         :param attributes: Dictionary passed by the Robot Framework
@@ -183,7 +183,7 @@ class listener:
 
     @check_rp_enabled
     def end_suite(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
-        """Finish started test suite at the Report Portal.
+        """Finish started test suite at the ReportPortal.
 
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
@@ -205,7 +205,7 @@ class listener:
 
     @check_rp_enabled
     def start_test(self, name: str, attributes: Dict, ts: Optional[Any] = None) -> None:
-        """Start a new test case at the Report Portal.
+        """Start a new test case at the ReportPortal.
 
         :param name:       Test case name
         :param attributes: Dictionary passed by the Robot Framework
@@ -225,7 +225,7 @@ class listener:
 
     @check_rp_enabled
     def end_test(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
-        """Finish started test case at the Report Portal.
+        """Finish started test case at the ReportPortal.
 
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
@@ -243,7 +243,7 @@ class listener:
 
     @check_rp_enabled
     def start_keyword(self, name: str, attributes: Dict, ts: Optional[Any] = None) -> None:
-        """Start a new keyword(test step) at the Report Portal.
+        """Start a new keyword(test step) at the ReportPortal.
 
         :param name:       Keyword name
         :param attributes: Dictionary passed by the Robot Framework
@@ -258,7 +258,7 @@ class listener:
 
     @check_rp_enabled
     def end_keyword(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
-        """Finish started keyword at the Report Portal.
+        """Finish started keyword at the ReportPortal.
 
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)

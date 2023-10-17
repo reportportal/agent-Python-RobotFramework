@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Changed
+- Unified ReportPortal product spelling, by @HardNorth
 
 ## [5.5.0]
 ### Added

@@ -36,11 +36,10 @@ setup(
     packages=['robotframework_reportportal'],
     package_data={'robotframework_reportportal': ['*.pyi']},
     version=__version__,
-    description='Agent for reporting RobotFramework test results to '
-                'Report Portal',
+    description='Agent for reporting RobotFramework test results to ReportPortal',
     long_description=read_file('README.md'),
     long_description_content_type='text/markdown',
-    author='Report Portal Team',
+    author='ReportPortal Team',
     author_email='support@reportportal.io',
     url='https://github.com/reportportal/agent-Python-RobotFramework',
     download_url=(
