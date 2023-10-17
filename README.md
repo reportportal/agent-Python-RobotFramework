@@ -47,7 +47,7 @@ NOT REQUIRED:
 
 ```
 --variable RP_CLIENT_TYPE:"SYNC"
-    - Type of the under-the-hood ReportPortal client implamentation. Possible values: [SYNC, ASYNC_THREAD, ASYNC_BATCHED].
+    - Type of the under-the-hood ReportPortal client implementation. Possible values: [SYNC, ASYNC_THREAD, ASYNC_BATCHED].
 --variable RP_LAUNCH_UUID:"id_of_existing_rp_launch"
     - ID of existing ReportPortal launch
 --variable RP_LAUNCH_DOC:"some_documentation_for_launch"
