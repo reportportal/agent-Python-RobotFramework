@@ -65,7 +65,7 @@ class Variables:
     log_batch_payload_size: int = ...
     launch_uuid_print: bool
     launch_uuid_print_output: Optional[OutputType]
-    client_type: Optional[ClientType]
+    client_type: ClientType
     http_timeout: Optional[Union[Tuple[float, float], float]]
 
     def __init__(self) -> None:
