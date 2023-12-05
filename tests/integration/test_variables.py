@@ -19,7 +19,7 @@ from unittest import mock
 import pytest
 from reportportal_client import OutputType, RPClient, ThreadedRPClient, BatchedRPClient
 
-from tests import REPORT_PORTAL_SERVICE
+from tests import REPORT_PORTAL_SERVICE, REQUESTS_SERVICE
 from tests.helpers import utils
 
 
@@ -38,8 +38,8 @@ def test_agent_pass_batch_payload_size_variable(mock_client_init):
                payload_variable] == payload_size
 
 
-@mock.patch(REPORT_PORTAL_SERVICE)
-def test_agent_pass_launch_uuid_variable(mock_client_init):
+@mock.patch(REQUESTS_SERVICE)
+def test_agent_pass_launch_uuid_variable(mock_requests_init):
     variables = utils.DEFAULT_VARIABLES.copy()
     test_launch_id = 'my_test_launch'
     variables['RP_LAUNCH_UUID'] = test_launch_id
@@ -47,13 +47,11 @@ def test_agent_pass_launch_uuid_variable(mock_client_init):
                                    variables=variables)
     assert result == 0  # the test successfully passed
 
-    launch_id_variable = 'launch_id'
-    assert launch_id_variable in mock_client_init.call_args_list[0][1]
-    assert mock_client_init.call_args_list[0][1][
-               launch_id_variable] == test_launch_id
-
-    mock_client = mock_client_init.return_value
-    assert mock_client.start_launch.call_count == 0
+    mock_requests = mock_requests_init.return_value
+    assert mock_requests.post.call_count == 3
+    suite_start = mock_requests.post.call_args_list[0]
+    assert suite_start[0][0].endswith('/item')
+    assert suite_start[1]['json']['launchUuid'] == test_launch_id
 
 
 @pytest.mark.parametrize('variable, warn_num',

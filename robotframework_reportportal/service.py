@@ -96,7 +96,7 @@ class RobotService(object):
                 verify_ssl=variables.verify_ssl,
                 max_pool_size=variables.pool_size,
                 log_batch_payload_size=variables.log_batch_payload_size,
-                launch_id=variables.launch_id,
+                launch_uuid=variables.launch_id,
                 launch_uuid_print=variables.launch_uuid_print,
                 print_output=variables.launch_uuid_print_output,
                 http_timeout=variables.http_timeout
