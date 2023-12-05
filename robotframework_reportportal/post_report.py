@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""Robot Framework test report sender to Report Portal.
+"""Robot Framework test report sender to ReportPortal.
 
 This tool replays a Robot Framework test session using the output XML file
 with ReportPortal's listener agent injected without actually doing the test.

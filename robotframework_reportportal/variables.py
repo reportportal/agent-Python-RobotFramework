@@ -40,7 +40,7 @@ def get_variable(name: str, default: Optional[str] = None) -> Optional[str]:
 
 
 class Variables:
-    """This class stores Robot Framework variables related to Report Portal."""
+    """This class stores Robot Framework variables related to ReportPortal."""
 
     enabled: bool = ...
     endpoint: Optional[str] = ...
@@ -65,7 +65,7 @@ class Variables:
     log_batch_payload_size: int = ...
     launch_uuid_print: bool
     launch_uuid_print_output: Optional[OutputType]
-    client_type: Optional[ClientType]
+    client_type: ClientType
     http_timeout: Optional[Union[Tuple[float, float], float]]
 
     def __init__(self) -> None:
@@ -142,8 +142,8 @@ class Variables:
         self.enabled = all(cond)
         if not self.enabled:
             warn(
-                'One or required parameter is missing, Report Portal listener '
-                'will be disabled. Please check agent documentation.',
+                'One or required parameter is missing, ReportPortal listener will be disabled. '
+                'Please check agent documentation.',
                 RuntimeWarning,
                 2
             )

@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-"""Report Portal logging API for test libraries with support for attachments.
+"""ReportPortal logging API for test libraries with support for attachments.
 
 Usage of this logger is similar to the standard robot.api.logger with addition
 of an extra kwarg "attachment" to all logging functions.

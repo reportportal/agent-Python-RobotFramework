@@ -8,7 +8,7 @@
 [![stackoverflow](https://img.shields.io/badge/reportportal-stackoverflow-orange.svg?style=flat)](http://stackoverflow.com/questions/tagged/reportportal)
 [![Build with Love](https://img.shields.io/badge/build%20with-❤%EF%B8%8F%E2%80%8D-lightgrey.svg)](http://reportportal.io?style=flat)
 
-Listener for RobotFramework to report results to Report Portal
+Listener for RobotFramework to report results to ReportPortal
 
 * [Installation](https://github.com/reportportal/agent-Python-RobotFramework#installation)
 * [Usage](https://github.com/reportportal/agent-Python-RobotFramework#usage)
@@ -30,7 +30,7 @@ The latest stable version of library is available on PyPI:
 
 ### Properties
 
-For reporting results to Report Portal you need to pass some variables
+For reporting results to ReportPortal you need to pass some variables
 to `robot` run:
 
 REQUIRED:
@@ -47,9 +47,9 @@ NOT REQUIRED:
 
 ```
 --variable RP_CLIENT_TYPE:"SYNC"
-    - Type of the under-the-hood ReportPortal client implamentation. Possible values: [SYNC, ASYNC_THREAD, ASYNC_BATCHED].
+    - Type of the under-the-hood ReportPortal client implementation. Possible values: [SYNC, ASYNC_THREAD, ASYNC_BATCHED].
 --variable RP_LAUNCH_UUID:"id_of_existing_rp_launch"
-    - ID of existing Report Portal launch
+    - ID of existing ReportPortal launch
 --variable RP_LAUNCH_DOC:"some_documentation_for_launch"
     - Description for the launch
 --variable RP_LAUNCH_ATTRIBUTES:"RF tag_name:tag_value"
@@ -117,7 +117,7 @@ def log_free_memory():
 
 It's possible to tag tests the following way `test_case_id:12345` using default
 Robot Framework tagging functionality. ID specified after `:` will be sent to
-Report Portal.
+ReportPortal.
 
 ## Send attachment (screenshots)
 
@@ -125,11 +125,11 @@ https://github.com/reportportal/client-Python#send-attachement-screenshots
 
 ## Integration with GA
 
-Report Portal is now supporting integrations with more than 15 test frameworks
+ReportPortal is now supporting integrations with more than 15 test frameworks
 simultaneously. In order to define the most popular agents and plan the team
 workload accordingly, we are using Google analytics.
 
-Report Portal collects information about agent name and its version only. This
+ReportPortal collects information about agent name and its version only. This
 information is sent to Google analytics on the launch start. Please help us to
 make our work effective.
 If you still want to switch Off Google analytics, please change env variable

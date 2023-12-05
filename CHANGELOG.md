@@ -1,11 +1,18 @@
 # Changelog
 
 ## [Unreleased]
+### Changed
+- Unified ReportPortal product spelling, by @HardNorth
+- Client version updated on [5.5.4](https://github.com/reportportal/client-Python/releases/tag/5.5.4), by @HardNorth
+### Fixed
+- Issue [#181](https://github.com/reportportal/agent-Python-RobotFramework/issues/181) `RP_LAUNCH_UUID` variable passing to new Client, by @HardNorth
+
+## [5.5.0]
 ### Added
 - `RP_CLIENT_TYPE` configuration variable, by @HardNorth
 - `RP_CONNECT_TIMEOUT` and `RP_READ_TIMEOUT` configuration variables, by @HardNorth
 ### Changed
-- Client version updated on [5.5.0](https://github.com/reportportal/client-Python/releases/tag/5.5.0), by @HardNorth
+- Client version updated on [5.5.1](https://github.com/reportportal/client-Python/releases/tag/5.5.1), by @HardNorth
 ### Removed
 - Dependency on `six`, by @HardNorth
 

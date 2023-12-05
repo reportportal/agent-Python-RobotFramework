@@ -180,7 +180,7 @@ class Keyword(object):
         self.type = 'KEYWORD'
 
     def get_name(self):
-        """Get name of the keyword suitable for Report Portal."""
+        """Get name of the keyword suitable for ReportPortal."""
         assign = ', '.join(self.assign)
         assignment = '{0} = '.format(assign) if self.assign else ''
         arguments = ', '.join(self.args)

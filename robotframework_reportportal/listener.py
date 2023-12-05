@@ -33,18 +33,20 @@ logger = logging.getLogger(__name__)
 
 def check_rp_enabled(func):
     """Verify is RP is enabled in config."""
+
     @wraps(func)
     def wrap(*args, **kwargs):
         if args and isinstance(args[0], listener):
             if not args[0].service:
                 return
         func(*args, **kwargs)
+
     return wrap
 
 
 # noinspection PyPep8Naming
 class listener:
-    """Robot Framework listener interface for reporting to Report Portal."""
+    """Robot Framework listener interface for reporting to ReportPortal."""
 
     _items: LifoQueue = ...
     _service: Optional[RobotService] = ...
@@ -86,7 +88,7 @@ class listener:
 
     @check_rp_enabled
     def log_message(self, message: Dict) -> None:
-        """Send log message to the Report Portal.
+        """Send log message to the ReportPortal.
 
         :param message: Message passed by the Robot Framework
         """
@@ -96,7 +98,7 @@ class listener:
 
     @check_rp_enabled
     def log_message_with_image(self, msg: Dict, image: str):
-        """Send log message to the Report Portal.
+        """Send log message to the ReportPortal.
 
         :param msg:   Message passed by the Robot Framework
         :param image: Path to image
@@ -134,7 +136,7 @@ class listener:
 
     @check_rp_enabled
     def start_launch(self, attributes: Dict, ts: Optional[Any] = None) -> None:
-        """Start a new launch at the Report Portal.
+        """Start a new launch at the ReportPortal.
 
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
@@ -142,23 +144,19 @@ class listener:
         launch = Launch(self.variables.launch_name, attributes)
         launch.attributes = gen_attributes(self.variables.launch_attributes)
         launch.doc = self.variables.launch_doc or launch.doc
-        if not self.variables.launch_id:
-            if self.variables.pabot_used:
-                warn(PABOT_WIHOUT_LAUNCH_ID_MSG, stacklevel=2)
-            logger.debug('ReportPortal - Start Launch: {0}'.format(
-                launch.attributes))
-            self.service.start_launch(
-                launch=launch,
-                mode=self.variables.mode,
-                ts=ts,
-                rerun=self.variables.rerun,
-                rerun_of=self.variables.rerun_of)
-        else:
-            self.service.rp.launch_id = self.variables.launch_id
+        if self.variables.pabot_used:
+            warn(PABOT_WIHOUT_LAUNCH_ID_MSG, stacklevel=2)
+        logger.debug('ReportPortal - Start Launch: {0}'.format(launch.attributes))
+        self.service.start_launch(
+            launch=launch,
+            mode=self.variables.mode,
+            ts=ts,
+            rerun=self.variables.rerun,
+            rerun_of=self.variables.rerun_of)
 
     @check_rp_enabled
     def start_suite(self, name: str, attributes: Dict, ts: Optional[Any] = None) -> None:
-        """Start a new test suite at the Report Portal.
+        """Start a new test suite at the ReportPortal.
 
         :param name:       Test suite name
         :param attributes: Dictionary passed by the Robot Framework
@@ -168,44 +166,33 @@ class listener:
             self.start_launch(attributes, ts)
             if self.variables.pabot_used:
                 name += '.{0}'.format(self.variables.pabot_pool_id)
-            logger.debug(
-                'ReportPortal - Create global Suite: {0}'
-                .format(attributes))
-            suite = Suite(name, attributes)
-            suite.rp_item_id = self.service.start_suite(suite=suite, ts=ts)
-            self._add_current_item(suite)
+            logger.debug('ReportPortal - Create global Suite: {0}'.format(attributes))
         else:
             logger.debug('ReportPortal - Start Suite: {0}'.format(attributes))
-            suite = Suite(name, attributes)
-            suite.rp_parent_item_id = self.parent_id
-            suite.rp_item_id = self.service.start_suite(suite=suite, ts=ts)
-            self._add_current_item(suite)
+        suite = Suite(name, attributes)
+        suite.rp_parent_item_id = self.parent_id
+        suite.rp_item_id = self.service.start_suite(suite=suite, ts=ts)
+        self._add_current_item(suite)
 
     @check_rp_enabled
     def end_suite(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
-        """Finish started test suite at the Report Portal.
+        """Finish started test suite at the ReportPortal.
 
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
+        suite = self._remove_current_item().update(attributes)
+        logger.debug('ReportPortal - End Suite: {0}'.format(suite.attributes))
+        self.service.finish_suite(suite=suite, ts=ts)
         if attributes['id'] == MAIN_SUITE_ID:
-            suite = self._remove_current_item().update(attributes)
-            logger.debug('ReportPortal - End Suite: {0}'
-                         .format(suite.attributes))
-            self.service.finish_suite(suite=suite, ts=ts)
             launch = Launch(self.variables.launch_name, attributes)
             logger.debug(
                 msg='ReportPortal - End Launch: {0}'.format(attributes))
             self.service.finish_launch(launch=launch, ts=ts)
-        else:
-            suite = self._remove_current_item().update(attributes)
-            logger.debug(
-                'ReportPortal - End Suite: {0}'.format(suite.attributes))
-            self.service.finish_suite(suite=suite, ts=ts)
 
     @check_rp_enabled
     def start_test(self, name: str, attributes: Dict, ts: Optional[Any] = None) -> None:
-        """Start a new test case at the Report Portal.
+        """Start a new test case at the ReportPortal.
 
         :param name:       Test case name
         :param attributes: Dictionary passed by the Robot Framework
@@ -225,7 +212,7 @@ class listener:
 
     @check_rp_enabled
     def end_test(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
-        """Finish started test case at the Report Portal.
+        """Finish started test case at the ReportPortal.
 
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
@@ -243,7 +230,7 @@ class listener:
 
     @check_rp_enabled
     def start_keyword(self, name: str, attributes: Dict, ts: Optional[Any] = None) -> None:
-        """Start a new keyword(test step) at the Report Portal.
+        """Start a new keyword(test step) at the ReportPortal.
 
         :param name:       Keyword name
         :param attributes: Dictionary passed by the Robot Framework
@@ -258,7 +245,7 @@ class listener:
 
     @check_rp_enabled
     def end_keyword(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
-        """Finish started keyword at the Report Portal.
+        """Finish started keyword at the ReportPortal.
 
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)

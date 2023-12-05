@@ -21,7 +21,7 @@ from robotframework_reportportal import logger
 
 def screenshot_log(level, message, screenshot_file):
     """
-    Attach a screenshot file into a log entry on Report Portal.
+    Attach a screenshot file into a log entry on ReportPortal.
 
     :param level: log entry level
     :param message: screenshot description
