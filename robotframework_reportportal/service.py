@@ -47,8 +47,7 @@ def to_epoch(date: Optional[str]) -> Optional[str]:
     if hasattr(parsed_date, 'timestamp'):
         epoch_time = parsed_date.timestamp()
     else:
-        epoch_time = \
-            float(parsed_date.strftime('%s')) + parsed_date.microsecond / 1e6
+        epoch_time = float(parsed_date.strftime('%s')) + parsed_date.microsecond / 1e6
     return str(int(epoch_time * 1000))
 
 
@@ -129,8 +128,7 @@ class RobotService(object):
             'rerun_of': rerun_of,
             'start_time': ts or to_epoch(launch.start_time) or timestamp()
         }
-        logger.debug(
-            'ReportPortal - Start launch: request_body={0}'.format(sl_pt))
+        logger.debug('ReportPortal - Start launch: request_body={0}'.format(sl_pt))
         return self.rp.start_launch(**sl_pt)
 
     def finish_launch(self, launch: Launch, ts: Optional[str] = None) -> None:
@@ -143,8 +141,7 @@ class RobotService(object):
             'end_time': ts or to_epoch(launch.end_time) or timestamp(),
             'status': STATUS_MAPPING[launch.status]
         }
-        logger.debug(
-            'ReportPortal - Finish launch: request_body={0}'.format(fl_rq))
+        logger.debug('ReportPortal - Finish launch: request_body={0}'.format(fl_rq))
         self.rp.finish_launch(**fl_rq)
 
     def start_suite(self, suite: Suite, ts: Optional[str] = None) -> Optional[str]:
@@ -162,8 +159,7 @@ class RobotService(object):
             'parent_item_id': suite.rp_parent_item_id,
             'start_time': ts or to_epoch(suite.start_time) or timestamp()
         }
-        logger.debug(
-            'ReportPortal - Start suite: request_body={0}'.format(start_rq))
+        logger.debug('ReportPortal - Start suite: request_body={0}'.format(start_rq))
         return self.rp.start_test_item(**start_rq)
 
     def finish_suite(self, suite: Suite, issue: Optional[str] = None,
@@ -180,8 +176,7 @@ class RobotService(object):
             'item_id': suite.rp_item_id,
             'status': STATUS_MAPPING[suite.status]
         }
-        logger.debug(
-            'ReportPortal - Finish suite: request_body={0}'.format(fta_rq))
+        logger.debug('ReportPortal - Finish suite: request_body={0}'.format(fta_rq))
         self.rp.finish_test_item(**fta_rq)
 
     def start_test(self, test: Test, ts: Optional[str] = None):
@@ -203,8 +198,7 @@ class RobotService(object):
             'start_time': ts or to_epoch(test.start_time) or timestamp(),
             'test_case_id': test.test_case_id
         }
-        logger.debug(
-            'ReportPortal - Start test: request_body={0}'.format(start_rq))
+        logger.debug('ReportPortal - Start test: request_body={0}'.format(start_rq))
         return self.rp.start_test_item(**start_rq)
 
     def finish_test(self, test: Test, issue: Optional[str] = None, ts: Optional[str] = None):
@@ -221,8 +215,7 @@ class RobotService(object):
             'item_id': test.rp_item_id,
             'status': STATUS_MAPPING[test.status]
         }
-        logger.debug(
-            'ReportPortal - Finish test: request_body={0}'.format(fta_rq))
+        logger.debug('ReportPortal - Finish test: request_body={0}'.format(fta_rq))
         self.rp.finish_test_item(**fta_rq)
 
     def start_keyword(self, keyword: Keyword, ts: Optional[str] = None):
@@ -239,8 +232,7 @@ class RobotService(object):
             'parent_item_id': keyword.rp_parent_item_id,
             'start_time': ts or to_epoch(keyword.start_time) or timestamp()
         }
-        logger.debug(
-            'ReportPortal - Start keyword: request_body={0}'.format(start_rq))
+        logger.debug('ReportPortal - Start keyword: request_body={0}'.format(start_rq))
         return self.rp.start_test_item(**start_rq)
 
     def finish_keyword(self, keyword: Keyword, issue: Optional[str] = None, ts: Optional[str] = None):
@@ -256,8 +248,7 @@ class RobotService(object):
             'item_id': keyword.rp_item_id,
             'status': STATUS_MAPPING[keyword.status]
         }
-        logger.debug(
-            'ReportPortal - Finish keyword: request_body={0}'.format(fta_rq))
+        logger.debug('ReportPortal - Finish keyword: request_body={0}'.format(fta_rq))
         self.rp.finish_test_item(**fta_rq)
 
     def log(self, message: LogMessage, ts: Optional[str] = None):
