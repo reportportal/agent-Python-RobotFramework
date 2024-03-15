@@ -29,6 +29,23 @@ from .static import MAIN_SUITE_ID, PABOT_WIHOUT_LAUNCH_ID_MSG
 from .variables import Variables
 
 logger = logging.getLogger(__name__)
+DATA_SIGN = '${data} = '
+
+
+def is_binary(iterable: Union[bytes, bytearray, str]) -> bool:
+    """Check if given iterable is binary.
+
+    :param iterable: iterable to check
+    :return: True if iterable contains binary bytes, False otherwise
+    """
+    if isinstance(iterable, str):
+        byte_iterable = iterable.encode('utf-8')
+    else:
+        byte_iterable = iterable
+
+    if 0x00 in byte_iterable:
+        return True
+    return False
 
 
 def check_rp_enabled(func):
@@ -88,11 +105,15 @@ class listener:
 
     @check_rp_enabled
     def log_message(self, message: Dict) -> None:
-        """Send log message to the ReportPortal.
+        """Send log message to the Report Portal.
 
         :param message: Message passed by the Robot Framework
         """
         msg = self._build_msg_struct(message)
+        if msg.message.startswith(DATA_SIGN):
+            msg_content = msg.message[len(DATA_SIGN):]
+            if is_binary(msg_content):
+                msg.message = DATA_SIGN + str(msg_content.encode('utf-8')[:-4])  # remove trailing '"...'
         logger.debug('ReportPortal - Log Message: {0}'.format(message))
         self.service.log(message=msg)
 
@@ -178,6 +199,7 @@ class listener:
     def end_suite(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
         """Finish started test suite at the ReportPortal.
 
+        :param _:          Test suite name
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
@@ -214,6 +236,7 @@ class listener:
     def end_test(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
         """Finish started test case at the ReportPortal.
 
+        :param _:          Test case name
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
@@ -247,6 +270,7 @@ class listener:
     def end_keyword(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
         """Finish started keyword at the ReportPortal.
 
+        :param _:          Keyword name
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """

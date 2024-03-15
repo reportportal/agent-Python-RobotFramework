@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- Binary data escaping in `listener` module (enhancing `Get Binary File` keyword logging), by @HardNorth
 
 ## [5.5.1]
 ### Changed
