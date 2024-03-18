@@ -30,7 +30,7 @@ from .variables import Variables
 
 logger = logging.getLogger(__name__)
 DATA_SIGN = '${data} = '
-TRUNCATION_SIGN = "'..."
+TRUNCATION_SIGN = "...'"
 
 
 def is_binary(iterable: Union[bytes, bytearray, str]) -> bool:
@@ -114,8 +114,8 @@ class listener:
         if msg.message.startswith(DATA_SIGN):
             msg_content = msg.message[len(DATA_SIGN):]
             if is_binary(msg_content):
-                # remove trailing `'"...`, add `'...`
-                msg.message = DATA_SIGN + str(msg_content.encode('utf-8')[:-5]) + TRUNCATION_SIGN
+                # remove trailing `'"...`, add `...'`
+                msg.message = DATA_SIGN + str(msg_content.encode('utf-8'))[:-5] + TRUNCATION_SIGN
         logger.debug('ReportPortal - Log Message: {0}'.format(message))
         self.service.log(message=msg)
 
