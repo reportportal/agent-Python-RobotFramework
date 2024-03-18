@@ -30,6 +30,7 @@ from .variables import Variables
 
 logger = logging.getLogger(__name__)
 DATA_SIGN = '${data} = '
+TRUNCATION_SIGN = '...'
 
 
 def is_binary(iterable: Union[bytes, bytearray, str]) -> bool:
@@ -113,7 +114,8 @@ class listener:
         if msg.message.startswith(DATA_SIGN):
             msg_content = msg.message[len(DATA_SIGN):]
             if is_binary(msg_content):
-                msg.message = DATA_SIGN + str(msg_content.encode('utf-8')[:-4])  # remove trailing '"...'
+                # remove trailing `'"...`, add `'...`
+                msg.message = DATA_SIGN + str(msg_content.encode('utf-8')[:-5]) + TRUNCATION_SIGN
         logger.debug('ReportPortal - Log Message: {0}'.format(message))
         self.service.log(message=msg)
 
@@ -259,8 +261,7 @@ class listener:
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
-        kwd = Keyword(name=name, parent_type=self.current_item.type,
-                      attributes=attributes)
+        kwd = Keyword(name=name, parent_type=self.current_item.type, attributes=attributes)
         kwd.rp_parent_item_id = self.parent_id
         logger.debug('ReportPortal - Start Keyword: {0}'.format(attributes))
         kwd.rp_item_id = self.service.start_keyword(keyword=kwd, ts=ts)
