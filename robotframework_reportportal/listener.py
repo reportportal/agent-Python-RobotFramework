@@ -30,7 +30,7 @@ from .variables import Variables
 
 logger = logging.getLogger(__name__)
 DATA_SIGN = '${data} = '
-TRUNCATION_SIGN = '...'
+TRUNCATION_SIGN = "'..."
 
 
 def is_binary(iterable: Union[bytes, bytearray, str]) -> bool:
