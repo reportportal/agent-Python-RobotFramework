@@ -3,6 +3,8 @@
 ## [Unreleased]
 ### Added
 - Binary data escaping in `listener` module (enhancing `Get Binary File` keyword logging), by @HardNorth
+### Changed
+- Client version updated on [5.5.5](https://github.com/reportportal/client-Python/releases/tag/5.5.5), by @HardNorth
 
 ## [5.5.1]
 ### Changed

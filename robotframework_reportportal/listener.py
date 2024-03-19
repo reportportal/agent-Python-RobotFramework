@@ -14,14 +14,17 @@
 
 """This module includes Robot Framework listener interfaces."""
 
+import binascii
 import logging
 import os
+import re
 from functools import wraps
 from mimetypes import guess_type
+from types import MappingProxyType
 from typing import Optional, Dict, Union, Any
 from warnings import warn
 
-from reportportal_client.helpers import gen_attributes, LifoQueue
+from reportportal_client.helpers import gen_attributes, LifoQueue, is_binary, guess_content_type_from_bytes
 
 from .model import Keyword, Launch, Test, LogMessage, Suite
 from .service import RobotService
@@ -29,24 +32,61 @@ from .static import MAIN_SUITE_ID, PABOT_WIHOUT_LAUNCH_ID_MSG
 from .variables import Variables
 
 logger = logging.getLogger(__name__)
-DATA_SIGN = '${data} = '
+VARIABLE_PATTERN = r'^\s*\${[^}]*}\s*=\s*'
 TRUNCATION_SIGN = "...'"
+CONTENT_TYPE_TO_EXTENSIONS = MappingProxyType({
+    'application/pdf': 'pdf',
+    'application/zip': 'zip',
+    'application/java-archive': 'jar',
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/gif': 'gif',
+    'image/bmp': 'bmp',
+    'image/vnd.microsoft.icon': 'ico',
+    'image/webp': 'webp',
+    'audio/mpeg': 'mp3',
+    'audio/wav': 'wav',
+    'video/mpeg': 'mpeg',
+    'video/avi': 'avi',
+    'video/webm': 'webm',
+    'text/plain': 'txt',
+    'application/octet-stream': 'bin'
+})
 
 
-def is_binary(iterable: Union[bytes, bytearray, str]) -> bool:
-    """Check if given iterable is binary.
-
-    :param iterable: iterable to check
-    :return: True if iterable contains binary bytes, False otherwise
-    """
-    if isinstance(iterable, str):
-        byte_iterable = iterable.encode('utf-8')
-    else:
-        byte_iterable = iterable
-
-    if 0x00 in byte_iterable:
-        return True
-    return False
+def unescape(binary_string: str, stop_at: int = -1):
+    result = bytearray()
+    join_list = list()
+    join_idx = -3
+    skip_next = False
+    for i, b in enumerate(binary_string):
+        if skip_next:
+            skip_next = False
+            continue
+        if i < join_idx + 2:
+            join_list.append(b)
+            continue
+        else:
+            if len(join_list) > 0:
+                for bb in binascii.unhexlify(''.join(join_list)):
+                    result.append(bb)
+                    if stop_at > 0:
+                        if len(result) >= stop_at:
+                            break
+                join_list = list()
+        if b == '\\' and binary_string[i + 1] == 'x':
+            skip_next = True
+            join_idx = i + 2
+            continue
+        for bb in b.encode('utf-8'):
+            result.append(bb)
+            if stop_at > 0:
+                if len(result) >= stop_at:
+                    break
+    if len(join_list) > 0:
+        for bb in binascii.unhexlify(''.join(join_list)):
+            result.append(bb)
+    return result
 
 
 def check_rp_enabled(func):
@@ -111,11 +151,20 @@ class listener:
         :param message: Message passed by the Robot Framework
         """
         msg = self._build_msg_struct(message)
-        if msg.message.startswith(DATA_SIGN):
-            msg_content = msg.message[len(DATA_SIGN):]
-            if is_binary(msg_content):
+        if is_binary(msg.message):
+            variable_match = re.search(VARIABLE_PATTERN, msg.message)
+            if variable_match:
+                # Treat as partial binary data
+                msg_content = msg.message[variable_match.end():]
                 # remove trailing `'"...`, add `...'`
-                msg.message = DATA_SIGN + str(msg_content.encode('utf-8'))[:-5] + TRUNCATION_SIGN
+                msg.message = (msg.message[variable_match.start():variable_match.end()]
+                               + str(msg_content.encode('utf-8'))[:-5] + TRUNCATION_SIGN)
+            else:
+                # Do not log full binary data, since it's usually corrupted
+                content_type = guess_content_type_from_bytes(unescape(msg.message, 128))
+                msg.message = (f'Binary data of type "{content_type}" logging skipped, as it was processed as text and '
+                               'hence corrupted.')
+                msg.level = 'WARN'
         logger.debug('ReportPortal - Log Message: {0}'.format(message))
         self.service.log(message=msg)
 
@@ -228,8 +277,7 @@ class listener:
             attributes['source'] = getattr(self.current_item, 'source', None)
         test = Test(name=name, attributes=attributes)
         logger.debug('ReportPortal - Start Test: {0}'.format(attributes))
-        test.attributes = gen_attributes(
-            self.variables.test_attributes + test.tags)
+        test.attributes = gen_attributes(self.variables.test_attributes + test.tags)
         test.rp_parent_item_id = self.parent_id
         test.rp_item_id = self.service.start_test(test=test, ts=ts)
         self._add_current_item(test)

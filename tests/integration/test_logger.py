@@ -29,3 +29,17 @@ def test_launch_log(mock_client_init):
 
     messages = set(map(lambda x: x[1]['message'], calls))
     assert messages == {'Hello, world!', 'Goodbye, world!', 'Enjoy my pug!'}
+
+
+@mock.patch(REPORT_PORTAL_SERVICE)
+def test_binary_file_log(mock_client_init):
+    result = utils.run_robot_tests(['examples/binary_file_read.robot'])
+    assert result == 0  # the test successfully passed
+
+    mock_client = mock_client_init.return_value
+    calls = utils.get_log_calls(mock_client)
+    assert len(calls) == 3
+
+    messages = set(map(lambda x: x[1]['message'], calls))
+    error_message = 'Binary data of type "image/jpeg" logging skipped, as it was processed as text and hence corrupted.'
+    assert error_message in messages

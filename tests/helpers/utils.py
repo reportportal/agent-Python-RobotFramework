@@ -16,10 +16,11 @@
 
 import random
 import time
+from typing import List, Optional, Dict, Any, Tuple
 
 from robot.run import RobotFramework
 
-DEFAULT_VARIABLES = {
+DEFAULT_VARIABLES: Dict[str, Any] = {
     'RP_LAUNCH': 'Robot Framework',
     'RP_ENDPOINT': 'http://localhost:8080',
     'RP_PROJECT': 'default_personal',
@@ -28,8 +29,10 @@ DEFAULT_VARIABLES = {
 }
 
 
-def run_robot_tests(tests, listener='robotframework_reportportal.listener',
-                    variables=None, arguments=None):
+def run_robot_tests(tests: List[str],
+                    listener: str = 'robotframework_reportportal.listener',
+                    variables: Optional[Dict[str, Any]] = None,
+                    arguments: Optional[Dict[str, Any]] = None) -> int:
     cmd_arguments = ['--listener', listener]
     if arguments:
         for k, v in arguments.items():
@@ -51,11 +54,15 @@ def run_robot_tests(tests, listener='robotframework_reportportal.listener',
     return RobotFramework().execute_cli(cmd_arguments, False)
 
 
-def get_launch_log_calls(mock):
+def get_launch_log_calls(mock) -> List[Tuple[List[Any], Dict[str, Any]]]:
     return [e for e in mock.log.call_args_list
             if 'item_id' in e[1] and e[1]['item_id'] is None]
 
 
-def item_id_gen(**kwargs):
+def get_log_calls(mock) -> List[Tuple[List[Any], Dict[str, Any]]]:
+    return [e for e in mock.log.call_args_list if 'item_id' in e[1] and e[1]['item_id']]
+
+
+def item_id_gen(**kwargs) -> str:
     return "{}-{}-{}".format(kwargs['name'], str(round(time.time() * 1000)),
                              random.randint(0, 9999))
