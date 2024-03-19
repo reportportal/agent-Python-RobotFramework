@@ -14,14 +14,17 @@
 
 """This module includes Robot Framework listener interfaces."""
 
+import binascii
 import logging
 import os
+import re
 from functools import wraps
 from mimetypes import guess_type
+from types import MappingProxyType
 from typing import Optional, Dict, Union, Any
 from warnings import warn
 
-from reportportal_client.helpers import gen_attributes, LifoQueue
+from reportportal_client.helpers import gen_attributes, LifoQueue, is_binary, guess_content_type_from_bytes
 
 from .model import Keyword, Launch, Test, LogMessage, Suite
 from .service import RobotService
@@ -29,6 +32,61 @@ from .static import MAIN_SUITE_ID, PABOT_WIHOUT_LAUNCH_ID_MSG
 from .variables import Variables
 
 logger = logging.getLogger(__name__)
+VARIABLE_PATTERN = r'^\s*\${[^}]*}\s*=\s*'
+TRUNCATION_SIGN = "...'"
+CONTENT_TYPE_TO_EXTENSIONS = MappingProxyType({
+    'application/pdf': 'pdf',
+    'application/zip': 'zip',
+    'application/java-archive': 'jar',
+    'image/jpeg': 'jpg',
+    'image/png': 'png',
+    'image/gif': 'gif',
+    'image/bmp': 'bmp',
+    'image/vnd.microsoft.icon': 'ico',
+    'image/webp': 'webp',
+    'audio/mpeg': 'mp3',
+    'audio/wav': 'wav',
+    'video/mpeg': 'mpeg',
+    'video/avi': 'avi',
+    'video/webm': 'webm',
+    'text/plain': 'txt',
+    'application/octet-stream': 'bin'
+})
+
+
+def _unescape(binary_string: str, stop_at: int = -1):
+    result = bytearray()
+    join_list = list()
+    join_idx = -3
+    skip_next = False
+    for i, b in enumerate(binary_string):
+        if skip_next:
+            skip_next = False
+            continue
+        if i < join_idx + 2:
+            join_list.append(b)
+            continue
+        else:
+            if len(join_list) > 0:
+                for bb in binascii.unhexlify(''.join(join_list)):
+                    result.append(bb)
+                    if stop_at > 0:
+                        if len(result) >= stop_at:
+                            break
+                join_list = list()
+        if b == '\\' and binary_string[i + 1] == 'x':
+            skip_next = True
+            join_idx = i + 2
+            continue
+        for bb in b.encode('utf-8'):
+            result.append(bb)
+            if stop_at > 0:
+                if len(result) >= stop_at:
+                    break
+    if len(join_list) > 0:
+        for bb in binascii.unhexlify(''.join(join_list)):
+            result.append(bb)
+    return result
 
 
 def check_rp_enabled(func):
@@ -88,11 +146,25 @@ class listener:
 
     @check_rp_enabled
     def log_message(self, message: Dict) -> None:
-        """Send log message to the ReportPortal.
+        """Send log message to the Report Portal.
 
         :param message: Message passed by the Robot Framework
         """
         msg = self._build_msg_struct(message)
+        if is_binary(msg.message):
+            variable_match = re.search(VARIABLE_PATTERN, msg.message)
+            if variable_match:
+                # Treat as partial binary data
+                msg_content = msg.message[variable_match.end():]
+                # remove trailing `'"...`, add `...'`
+                msg.message = (msg.message[variable_match.start():variable_match.end()]
+                               + str(msg_content.encode('utf-8'))[:-5] + TRUNCATION_SIGN)
+            else:
+                # Do not log full binary data, since it's usually corrupted
+                content_type = guess_content_type_from_bytes(_unescape(msg.message, 128))
+                msg.message = (f'Binary data of type "{content_type}" logging skipped, as it was processed as text and'
+                               ' hence corrupted.')
+                msg.level = 'WARN'
         logger.debug('ReportPortal - Log Message: {0}'.format(message))
         self.service.log(message=msg)
 
@@ -178,6 +250,7 @@ class listener:
     def end_suite(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
         """Finish started test suite at the ReportPortal.
 
+        :param _:          Test suite name
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
@@ -204,8 +277,7 @@ class listener:
             attributes['source'] = getattr(self.current_item, 'source', None)
         test = Test(name=name, attributes=attributes)
         logger.debug('ReportPortal - Start Test: {0}'.format(attributes))
-        test.attributes = gen_attributes(
-            self.variables.test_attributes + test.tags)
+        test.attributes = gen_attributes(self.variables.test_attributes + test.tags)
         test.rp_parent_item_id = self.parent_id
         test.rp_item_id = self.service.start_test(test=test, ts=ts)
         self._add_current_item(test)
@@ -214,6 +286,7 @@ class listener:
     def end_test(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
         """Finish started test case at the ReportPortal.
 
+        :param _:          Test case name
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
@@ -236,8 +309,7 @@ class listener:
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
-        kwd = Keyword(name=name, parent_type=self.current_item.type,
-                      attributes=attributes)
+        kwd = Keyword(name=name, parent_type=self.current_item.type, attributes=attributes)
         kwd.rp_parent_item_id = self.parent_id
         logger.debug('ReportPortal - Start Keyword: {0}'.format(attributes))
         kwd.rp_item_id = self.service.start_keyword(keyword=kwd, ts=ts)
@@ -247,6 +319,7 @@ class listener:
     def end_keyword(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
         """Finish started keyword at the ReportPortal.
 
+        :param _:          Keyword name
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """

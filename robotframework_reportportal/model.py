@@ -16,7 +16,7 @@
 import os
 
 
-class Suite(object):
+class Suite:
     """Class represents Robot Framework test suite."""
 
     def __init__(self, name, attributes):
@@ -75,7 +75,7 @@ class Launch(Suite):
         self.type = 'LAUNCH'
 
 
-class Test(object):
+class Test:
     """Class represents Robot Framework test case."""
 
     def __init__(self, name, attributes):
@@ -152,7 +152,7 @@ class Test(object):
         return self
 
 
-class Keyword(object):
+class Keyword:
     """Class represents Robot Framework keyword."""
 
     def __init__(self, name, attributes, parent_type=None):
