@@ -162,8 +162,8 @@ class listener:
             else:
                 # Do not log full binary data, since it's usually corrupted
                 content_type = guess_content_type_from_bytes(unescape(msg.message, 128))
-                msg.message = (f'Binary data of type "{content_type}" logging skipped, as it was processed as text and '
-                               'hence corrupted.')
+                msg.message = (f'Binary data of type "{content_type}" logging skipped, as it was processed as text and'
+                               ' hence corrupted.')
                 msg.level = 'WARN'
         logger.debug('ReportPortal - Log Message: {0}'.format(message))
         self.service.log(message=msg)

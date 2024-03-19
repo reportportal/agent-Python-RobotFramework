@@ -41,5 +41,5 @@ def test_binary_file_log(mock_client_init):
     assert len(calls) == 3
 
     messages = set(map(lambda x: x[1]['message'], calls))
-    error_message = 'Binary data of type "image/jpeg" logging skipped, as it was processed as text and hence corrupted.'
-    assert error_message in messages
+    error_msg = 'Binary data of type "image/jpeg" logging skipped, as it was processed as text and hence corrupted.'
+    assert error_msg in messages
