@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Removed
+- `model.pyi` stub file, as we don't really need it anymore, by @HardNorth
 
 ## [5.5.2]
 ### Added

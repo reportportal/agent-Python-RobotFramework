@@ -120,7 +120,7 @@ class RobotService(object):
         :return:               launch UUID
         """
         sl_pt = {
-            'attributes': self._get_launch_attributes(launch.attributes),
+            'attributes': self._get_launch_attributes(launch.robot_attributes),
             'description': launch.doc,
             'name': launch.name,
             'mode': mode,

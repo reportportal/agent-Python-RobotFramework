@@ -207,18 +207,18 @@ class listener:
         return self._variables
 
     @check_rp_enabled
-    def start_launch(self, attributes: Dict, ts: Optional[Any] = None) -> None:
+    def start_launch(self, attributes: Dict[str, Any], ts: Optional[Any] = None) -> None:
         """Start a new launch at the ReportPortal.
 
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
-        launch = Launch(self.variables.launch_name, attributes)
-        launch.attributes = gen_attributes(self.variables.launch_attributes)
+        launch = Launch(self.variables.launch_name, attributes, gen_attributes(self.variables.launch_attributes))
+        launch.robot_attributes = gen_attributes(self.variables.launch_attributes)
         launch.doc = self.variables.launch_doc or launch.doc
         if self.variables.pabot_used:
             warn(PABOT_WIHOUT_LAUNCH_ID_MSG, stacklevel=2)
-        logger.debug('ReportPortal - Start Launch: {0}'.format(launch.attributes))
+        logger.debug('ReportPortal - Start Launch: {0}'.format(launch.robot_attributes))
         self.service.start_launch(
             launch=launch,
             mode=self.variables.mode,
@@ -255,10 +255,10 @@ class listener:
         :param ts:         Timestamp(used by the ResultVisitor)
         """
         suite = self._remove_current_item().update(attributes)
-        logger.debug('ReportPortal - End Suite: {0}'.format(suite.attributes))
+        logger.debug('ReportPortal - End Suite: {0}'.format(suite.robot_attributes))
         self.service.finish_suite(suite=suite, ts=ts)
         if attributes['id'] == MAIN_SUITE_ID:
-            launch = Launch(self.variables.launch_name, attributes)
+            launch = Launch(self.variables.launch_name, attributes, None)
             logger.debug(
                 msg='ReportPortal - End Launch: {0}'.format(attributes))
             self.service.finish_launch(launch=launch, ts=ts)
@@ -275,7 +275,7 @@ class listener:
             # no 'source' parameter at this level for Robot versions < 4
             attributes = attributes.copy()
             attributes['source'] = getattr(self.current_item, 'source', None)
-        test = Test(name=name, attributes=attributes)
+        test = Test(name=name, robot_attributes=attributes)
         logger.debug('ReportPortal - Start Test: {0}'.format(attributes))
         test.attributes = gen_attributes(self.variables.test_attributes + test.tags)
         test.rp_parent_item_id = self.parent_id
@@ -291,13 +291,13 @@ class listener:
         :param ts:         Timestamp(used by the ResultVisitor)
         """
         test = self.current_item.update(attributes)
-        test.attributes = gen_attributes(
+        test.robot_attributes = gen_attributes(
             self.variables.test_attributes + test.tags)
         if not test.critical and test.status == 'FAIL':
             test.status = 'SKIP'
         if test.message:
             self.log_message({'message': test.message, 'level': 'DEBUG'})
-        logger.debug('ReportPortal - End Test: {0}'.format(test.attributes))
+        logger.debug('ReportPortal - End Test: {0}'.format(test.robot_attributes))
         self._remove_current_item()
         self.service.finish_test(test=test, ts=ts)
 
@@ -309,7 +309,7 @@ class listener:
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
-        kwd = Keyword(name=name, parent_type=self.current_item.type, attributes=attributes)
+        kwd = Keyword(name=name, parent_type=self.current_item.type, robot_attributes=attributes)
         kwd.rp_parent_item_id = self.parent_id
         logger.debug('ReportPortal - Start Keyword: {0}'.format(attributes))
         kwd.rp_item_id = self.service.start_keyword(keyword=kwd, ts=ts)
@@ -324,7 +324,7 @@ class listener:
         :param ts:         Timestamp(used by the ResultVisitor)
         """
         kwd = self._remove_current_item().update(attributes)
-        logger.debug('ReportPortal - End Keyword: {0}'.format(kwd.attributes))
+        logger.debug('ReportPortal - End Keyword: {0}'.format(kwd.robot_attributes))
         self.service.finish_keyword(keyword=kwd, ts=ts)
 
     def log_file(self, log_path: str) -> None:

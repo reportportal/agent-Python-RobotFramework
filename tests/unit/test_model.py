@@ -25,7 +25,7 @@ from robotframework_reportportal.model import Keyword
 ])
 def test_keyword_get_type(kwd_attributes, self_type, parent_type, expected):
     """Test for the get_type() method of the Keyword model."""
-    kwd = Keyword(name='Test keyword', attributes=kwd_attributes,
+    kwd = Keyword(name='Test keyword', robot_attributes=kwd_attributes,
                   parent_type=parent_type)
     kwd.keyword_type = self_type
     assert kwd.get_type() == expected
