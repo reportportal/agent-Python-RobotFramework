@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [5.5.3]
 ### Added
 - Issue [#178](https://github.com/reportportal/agent-Python-RobotFramework/issues/178) Metadata attributes handling, by @HardNorth
 ### Changed
