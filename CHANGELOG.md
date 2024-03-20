@@ -2,7 +2,7 @@
 
 ## [Unreleased]
 ### Removed
-- `model.pyi` stub file, as we don't really need it anymore, by @HardNorth
+- `model.pyi`, `static.pyi` stub files, as we don't really need them anymore, by @HardNorth
 
 ## [5.5.2]
 ### Added

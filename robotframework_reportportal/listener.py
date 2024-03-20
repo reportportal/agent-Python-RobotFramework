@@ -28,7 +28,7 @@ from reportportal_client.helpers import gen_attributes, LifoQueue, is_binary, gu
 
 from .model import Keyword, Launch, Test, LogMessage, Suite
 from .service import RobotService
-from .static import MAIN_SUITE_ID, PABOT_WIHOUT_LAUNCH_ID_MSG
+from .static import MAIN_SUITE_ID, PABOT_WITHOUT_LAUNCH_ID_MSG
 from .variables import Variables
 
 logger = logging.getLogger(__name__)
@@ -217,7 +217,7 @@ class listener:
         launch.robot_attributes = gen_attributes(self.variables.launch_attributes)
         launch.doc = self.variables.launch_doc or launch.doc
         if self.variables.pabot_used:
-            warn(PABOT_WIHOUT_LAUNCH_ID_MSG, stacklevel=2)
+            warn(PABOT_WITHOUT_LAUNCH_ID_MSG, stacklevel=2)
         logger.debug('ReportPortal - Start Launch: {0}'.format(launch.robot_attributes))
         self.service.start_launch(
             launch=launch,
