@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- Issue [#178](https://github.com/reportportal/agent-Python-RobotFramework/issues/178) Metadata attributes handling, by @HardNorth
 ### Removed
 - `model.pyi`, `static.pyi` stub files, as we don't really need them anymore, by @HardNorth
 
