@@ -20,38 +20,19 @@ import os
 import re
 from functools import wraps
 from mimetypes import guess_type
-from types import MappingProxyType
 from typing import Optional, Dict, Union, Any
 from warnings import warn
 
-from reportportal_client.helpers import gen_attributes, LifoQueue, is_binary, guess_content_type_from_bytes
+from reportportal_client.helpers import LifoQueue, is_binary, guess_content_type_from_bytes
 
 from .model import Keyword, Launch, Test, LogMessage, Suite
 from .service import RobotService
-from .static import MAIN_SUITE_ID, PABOT_WIHOUT_LAUNCH_ID_MSG
+from .static import MAIN_SUITE_ID, PABOT_WITHOUT_LAUNCH_ID_MSG
 from .variables import Variables
 
 logger = logging.getLogger(__name__)
 VARIABLE_PATTERN = r'^\s*\${[^}]*}\s*=\s*'
 TRUNCATION_SIGN = "...'"
-CONTENT_TYPE_TO_EXTENSIONS = MappingProxyType({
-    'application/pdf': 'pdf',
-    'application/zip': 'zip',
-    'application/java-archive': 'jar',
-    'image/jpeg': 'jpg',
-    'image/png': 'png',
-    'image/gif': 'gif',
-    'image/bmp': 'bmp',
-    'image/vnd.microsoft.icon': 'ico',
-    'image/webp': 'webp',
-    'audio/mpeg': 'mp3',
-    'audio/wav': 'wav',
-    'video/mpeg': 'mpeg',
-    'video/avi': 'avi',
-    'video/webm': 'webm',
-    'text/plain': 'txt',
-    'application/octet-stream': 'bin'
-})
 
 
 def _unescape(binary_string: str, stop_at: int = -1):
@@ -106,9 +87,9 @@ def check_rp_enabled(func):
 class listener:
     """Robot Framework listener interface for reporting to ReportPortal."""
 
-    _items: LifoQueue = ...
-    _service: Optional[RobotService] = ...
-    _variables: Optional[Variables] = ...
+    _items: LifoQueue
+    _service: Optional[RobotService]
+    _variables: Optional[Variables]
     ROBOT_LISTENER_API_VERSION = 2
 
     def __init__(self) -> None:
@@ -165,7 +146,7 @@ class listener:
                 msg.message = (f'Binary data of type "{content_type}" logging skipped, as it was processed as text and'
                                ' hence corrupted.')
                 msg.level = 'WARN'
-        logger.debug('ReportPortal - Log Message: {0}'.format(message))
+        logger.debug(f'ReportPortal - Log Message: {message}')
         self.service.log(message=msg)
 
     @check_rp_enabled
@@ -182,8 +163,7 @@ class listener:
                 'data': fh.read(),
                 'mime': guess_type(image)[0] or 'application/octet-stream'
             }
-        logger.debug('ReportPortal - Log Message with Image: {0} {1}'
-                     .format(mes, image))
+        logger.debug(f'ReportPortal - Log Message with Image: {mes} {image}')
         self.service.log(message=mes)
 
     @property
@@ -207,18 +187,17 @@ class listener:
         return self._variables
 
     @check_rp_enabled
-    def start_launch(self, attributes: Dict, ts: Optional[Any] = None) -> None:
+    def start_launch(self, attributes: Dict[str, Any], ts: Optional[Any] = None) -> None:
         """Start a new launch at the ReportPortal.
 
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
-        launch = Launch(self.variables.launch_name, attributes)
-        launch.attributes = gen_attributes(self.variables.launch_attributes)
+        launch = Launch(self.variables.launch_name, attributes, self.variables.launch_attributes)
         launch.doc = self.variables.launch_doc or launch.doc
         if self.variables.pabot_used:
-            warn(PABOT_WIHOUT_LAUNCH_ID_MSG, stacklevel=2)
-        logger.debug('ReportPortal - Start Launch: {0}'.format(launch.attributes))
+            warn(PABOT_WITHOUT_LAUNCH_ID_MSG, stacklevel=2)
+        logger.debug(f'ReportPortal - Start Launch: {launch.robot_attributes}')
         self.service.start_launch(
             launch=launch,
             mode=self.variables.mode,
@@ -237,10 +216,10 @@ class listener:
         if attributes['id'] == MAIN_SUITE_ID:
             self.start_launch(attributes, ts)
             if self.variables.pabot_used:
-                name += '.{0}'.format(self.variables.pabot_pool_id)
-            logger.debug('ReportPortal - Create global Suite: {0}'.format(attributes))
+                name = f'{name}.{self.variables.pabot_pool_id}'
+            logger.debug(f'ReportPortal - Create global Suite: {attributes}')
         else:
-            logger.debug('ReportPortal - Start Suite: {0}'.format(attributes))
+            logger.debug(f'ReportPortal - Start Suite: {attributes}')
         suite = Suite(name, attributes)
         suite.rp_parent_item_id = self.parent_id
         suite.rp_item_id = self.service.start_suite(suite=suite, ts=ts)
@@ -255,12 +234,11 @@ class listener:
         :param ts:         Timestamp(used by the ResultVisitor)
         """
         suite = self._remove_current_item().update(attributes)
-        logger.debug('ReportPortal - End Suite: {0}'.format(suite.attributes))
+        logger.debug(f'ReportPortal - End Suite: {suite.robot_attributes}')
         self.service.finish_suite(suite=suite, ts=ts)
         if attributes['id'] == MAIN_SUITE_ID:
-            launch = Launch(self.variables.launch_name, attributes)
-            logger.debug(
-                msg='ReportPortal - End Launch: {0}'.format(attributes))
+            launch = Launch(self.variables.launch_name, attributes, None)
+            logger.debug(msg=f'ReportPortal - End Launch: {attributes}')
             self.service.finish_launch(launch=launch, ts=ts)
 
     @check_rp_enabled
@@ -275,9 +253,8 @@ class listener:
             # no 'source' parameter at this level for Robot versions < 4
             attributes = attributes.copy()
             attributes['source'] = getattr(self.current_item, 'source', None)
-        test = Test(name=name, attributes=attributes)
-        logger.debug('ReportPortal - Start Test: {0}'.format(attributes))
-        test.attributes = gen_attributes(self.variables.test_attributes + test.tags)
+        test = Test(name=name, robot_attributes=attributes, test_attributes=self.variables.test_attributes)
+        logger.debug(f'ReportPortal - Start Test: {attributes}')
         test.rp_parent_item_id = self.parent_id
         test.rp_item_id = self.service.start_test(test=test, ts=ts)
         self._add_current_item(test)
@@ -291,13 +268,11 @@ class listener:
         :param ts:         Timestamp(used by the ResultVisitor)
         """
         test = self.current_item.update(attributes)
-        test.attributes = gen_attributes(
-            self.variables.test_attributes + test.tags)
         if not test.critical and test.status == 'FAIL':
             test.status = 'SKIP'
         if test.message:
             self.log_message({'message': test.message, 'level': 'DEBUG'})
-        logger.debug('ReportPortal - End Test: {0}'.format(test.attributes))
+        logger.debug(f'ReportPortal - End Test: {test.robot_attributes}')
         self._remove_current_item()
         self.service.finish_test(test=test, ts=ts)
 
@@ -309,9 +284,9 @@ class listener:
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
-        kwd = Keyword(name=name, parent_type=self.current_item.type, attributes=attributes)
+        kwd = Keyword(name=name, parent_type=self.current_item.type, robot_attributes=attributes)
         kwd.rp_parent_item_id = self.parent_id
-        logger.debug('ReportPortal - Start Keyword: {0}'.format(attributes))
+        logger.debug(f'ReportPortal - Start Keyword: {attributes}')
         kwd.rp_item_id = self.service.start_keyword(keyword=kwd, ts=ts)
         self._add_current_item(kwd)
 
@@ -324,7 +299,7 @@ class listener:
         :param ts:         Timestamp(used by the ResultVisitor)
         """
         kwd = self._remove_current_item().update(attributes)
-        logger.debug('ReportPortal - End Keyword: {0}'.format(kwd.attributes))
+        logger.debug(f'ReportPortal - End Keyword: {kwd.robot_attributes}')
         self.service.finish_keyword(keyword=kwd, ts=ts)
 
     def log_file(self, log_path: str) -> None:

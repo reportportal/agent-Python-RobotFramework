@@ -35,29 +35,29 @@ class MyLibrary(object):
             },
         )
 """
+from typing import Optional, Dict
 
 from robot.api import logger
 
 from .model import LogMessage
 
 
-def write(msg, level='INFO', html=False, attachment=None, launch_log=False):
+def write(msg: str, level: str = 'INFO', html: bool = False, attachment: Optional[Dict[str, str]] = None,
+          launch_log: bool = False) -> None:
     """Write the message to the log file using the given level.
 
-    Valid log levels are ``TRACE``, ``DEBUG``, ``INFO`` (default since RF
-    2.9.1), ``WARN``, and ``ERROR`` (new in RF 2.9). Additionally it is
-    possible to use ``HTML`` pseudo log level that logs the message as HTML
-    using the ``INFO`` level.
+    Valid log levels are ``TRACE``, ``DEBUG``, ``INFO`` (default since RF 2.9.1), ``WARN``,
+    and ``ERROR`` (new in RF 2.9). Additionally, it is possible to use ``HTML`` pseudo log level that logs the message
+    as HTML using the ``INFO`` level.
 
-    Attachment should contain a dict with "name", "data" and "mime" values
-    defined. See module example.
+    Attachment should contain a dict with "name", "data" and "mime" values defined. See module example.
 
-    Instead of using this method, it is generally better to use the level
-    specific methods such as ``info`` and ``debug`` that have separate
+    Instead of using this method, it is generally better to use the level specific methods such as ``info`` and
+    ``debug`` that have separate
 
-    :param msg: argument to control the message format.
-    :param level: log level
-    :param html: format or not format the message as html.
+    :param msg:        argument to control the message format.
+    :param level:      log level
+    :param html:       format or not format the message as html.
     :param attachment: a binary content to attach to the log entry
     :param launch_log: put the log entry on Launch level
     """
@@ -68,46 +68,43 @@ def write(msg, level='INFO', html=False, attachment=None, launch_log=False):
     logger.write(log_message, level, html)
 
 
-def trace(msg, html=False, attachment=None, launch_log=False):
+def trace(msg: str, html: bool = False, attachment: Optional[Dict[str, str]] = None, launch_log: bool = False) -> None:
     """Write the message to the log file using the ``TRACE`` level."""
     write(msg, "TRACE", html, attachment, launch_log)
 
 
-def debug(msg, html=False, attachment=None, launch_log=False):
+def debug(msg: str, html: bool = False, attachment: Optional[Dict[str, str]] = None, launch_log: bool = False) -> None:
     """Write the message to the log file using the ``DEBUG`` level."""
     write(msg, "DEBUG", html, attachment, launch_log)
 
 
-def info(msg, html=False, also_console=False, attachment=None,
-         launch_log=False):
+def info(msg: str, html: bool = False, also_console: bool = False, attachment: Optional[Dict[str, str]] = None,
+         launch_log: bool = False):
     """Write the message to the log file using the ``INFO`` level.
 
-    If ``also_console`` argument is set to ``True``, the message is
-    written both to the log file and to the console.
+    If ``also_console`` argument is set to ``True``, the message is written both to the log file and to the console.
     """
     write(msg, "INFO", html, attachment, launch_log)
     if also_console:
         console(msg)
 
 
-def warn(msg, html=False, attachment=None, launch_log=False):
+def warn(msg: str, html: bool = False, attachment: Optional[Dict[str, str]] = None, launch_log: bool = False) -> None:
     """Write the message to the log file using the ``WARN`` level."""
-    write(msg, "WARN", html, attachment, launch_log)
+    write(msg, 'WARN', html, attachment, launch_log)
 
 
-def error(msg, html=False, attachment=None, launch_log=False):
+def error(msg: str, html: bool = False, attachment: Optional[Dict[str, str]] = None, launch_log: bool = False) -> None:
     """Write the message to the log file using the ``ERROR`` level."""
-    write(msg, "ERROR", html, attachment, launch_log)
+    write(msg, 'ERROR', html, attachment, launch_log)
 
 
-def console(msg, newline=True, stream="stdout"):
+def console(msg: str, newline: bool = True, stream: str = 'stdout') -> None:
     """Write the message to the console.
 
-    If the ``newline`` argument is ``True``, a newline character is
-    automatically added to the message.
+    If the ``newline`` argument is ``True``, a newline character is automatically added to the message.
 
-    By default the message is written to the standard output stream.
-    Using the standard error stream is possibly by giving the ``stream``
-    argument value ``'stderr'``.
+    By default, the message is written to the standard output stream.
+    Using the standard error stream is possibly by giving the ``stream`` argument value ``'stderr'``.
     """
     logger.console(msg, newline, stream)

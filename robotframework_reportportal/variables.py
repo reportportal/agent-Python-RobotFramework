@@ -15,7 +15,7 @@
 
 from distutils.util import strtobool
 from os import path
-from typing import Optional, Union, Dict, Tuple, Any
+from typing import Optional, Union, Dict, Tuple, Any, List
 from warnings import warn
 
 from reportportal_client import OutputType, ClientType
@@ -42,27 +42,27 @@ def get_variable(name: str, default: Optional[str] = None) -> Optional[str]:
 class Variables:
     """This class stores Robot Framework variables related to ReportPortal."""
 
-    enabled: bool = ...
-    endpoint: Optional[str] = ...
-    launch_name: Optional[str] = ...
-    _pabot_pool_id: Optional[int] = ...
-    _pabot_used: Optional[str] = ...
-    project: Optional[str] = ...
-    api_key: Optional[str] = ...
-    attach_log: bool = ...
-    attach_report: bool = ...
-    attach_xunit: bool = ...
-    launch_attributes: list = ...
-    launch_id: Optional[str] = ...
-    launch_doc: Optional[str] = ...
-    log_batch_size: Optional[int] = ...
-    mode: Optional[str] = ...
-    pool_size: Optional[int] = ...
-    rerun: bool = ...
-    rerun_of: Optional[str] = ...
-    test_attributes: Optional[list] = ...
-    skipped_issue: bool = ...
-    log_batch_payload_size: int = ...
+    enabled: bool
+    endpoint: Optional[str]
+    launch_name: Optional[str]
+    _pabot_pool_id: Optional[int]
+    _pabot_used: Optional[str]
+    project: Optional[str]
+    api_key: Optional[str]
+    attach_log: bool
+    attach_report: bool
+    attach_xunit: bool
+    launch_attributes: List[str]
+    launch_id: Optional[str]
+    launch_doc: Optional[str]
+    log_batch_size: Optional[int]
+    mode: Optional[str]
+    pool_size: Optional[int]
+    rerun: bool
+    rerun_of: Optional[str]
+    test_attributes: List[str]
+    skipped_issue: bool
+    log_batch_payload_size: int
     launch_uuid_print: bool
     launch_uuid_print_output: Optional[OutputType]
     client_type: ClientType
@@ -78,12 +78,9 @@ class Variables:
         self._pabot_used = None
         self.attach_log = bool(strtobool(get_variable(
             'RP_ATTACH_LOG', default='False')))
-        self.attach_report = bool(strtobool(get_variable(
-            'RP_ATTACH_REPORT', default='False')))
-        self.attach_xunit = bool(strtobool(get_variable(
-            'RP_ATTACH_XUNIT', default='False')))
-        self.launch_attributes = get_variable(
-            'RP_LAUNCH_ATTRIBUTES', default='').split()
+        self.attach_report = bool(strtobool(get_variable('RP_ATTACH_REPORT', default='False')))
+        self.attach_xunit = bool(strtobool(get_variable('RP_ATTACH_XUNIT', default='False')))
+        self.launch_attributes = get_variable('RP_LAUNCH_ATTRIBUTES', default='').split()
         self.launch_id = get_variable('RP_LAUNCH_UUID')
         self.launch_doc = get_variable('RP_LAUNCH_DOC')
         self.log_batch_size = int(get_variable(
@@ -95,11 +92,9 @@ class Variables:
         self.rerun_of = get_variable('RP_RERUN_OF', default=None)
         self.skipped_issue = bool(strtobool(get_variable(
             'RP_SKIPPED_ISSUE', default='True')))
-        self.test_attributes = get_variable(
-            'RP_TEST_ATTRIBUTES', default='').split()
-        self.log_batch_payload_size = int(get_variable(
-            'RP_LOG_BATCH_PAYLOAD_SIZE',
-            default=str(MAX_LOG_BATCH_PAYLOAD_SIZE)))
+        self.test_attributes = get_variable('RP_TEST_ATTRIBUTES', default='').split()
+        self.log_batch_payload_size = int(get_variable('RP_LOG_BATCH_PAYLOAD_SIZE',
+                                                       default=str(MAX_LOG_BATCH_PAYLOAD_SIZE)))
         self.launch_uuid_print = bool(strtobool(get_variable('RP_LAUNCH_UUID_PRINT', default='False')))
         output_type = get_variable('RP_LAUNCH_UUID_PRINT_OUTPUT')
         self.launch_uuid_print_output = OutputType[output_type.upper()] if output_type else None
