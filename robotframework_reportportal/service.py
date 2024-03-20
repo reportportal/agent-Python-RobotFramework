@@ -111,16 +111,16 @@ class RobotService(object):
                      ts: Optional[str] = None) -> Optional[str]:
         """Call start_launch method of the common client.
 
-        :param launch:         Instance of the Launch class
-        :param mode:           Launch mode
-        :param rerun:          Rerun mode. Allowable values 'True' of 'False'
-        :param rerun_of:       Rerun mode. Specifies launch to be re-runned.
-                               Should be used with the 'rerun' option.
-        :param ts:             Start time
-        :return:               launch UUID
+        :param launch:   Instance of the Launch class
+        :param mode:     Launch mode
+        :param rerun:    Rerun mode. Allowable values 'True' of 'False'
+        :param rerun_of: Rerun mode. Specifies launch to be re-run.
+                         Should be used with the 'rerun' option.
+        :param ts:       Start time
+        :return:         launch UUID
         """
         sl_pt = {
-            'attributes': self._get_launch_attributes(launch.robot_attributes),
+            'attributes': self._get_launch_attributes(launch.attributes),
             'description': launch.doc,
             'name': launch.name,
             'mode': mode,
@@ -152,7 +152,7 @@ class RobotService(object):
         :return:      Suite UUID
         """
         start_rq = {
-            'attributes': None,
+            'attributes': suite.attributes,
             'description': suite.doc,
             'item_type': suite.type,
             'name': suite.name,

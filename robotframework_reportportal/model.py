@@ -17,6 +17,8 @@
 import os
 from typing import Any, Dict, List, Optional, Union
 
+from reportportal_client.helpers import gen_attributes
+
 
 class Suite:
     """Class represents Robot Framework test suite."""
@@ -64,6 +66,13 @@ class Suite:
         self.type = 'SUITE'
 
     @property
+    def attributes(self) -> Optional[List[Dict[str, str]]]:
+        """Get Suite attributes."""
+        if self.metadata is None or not self.metadata:
+            return None
+        return [{'key': key, 'value': value} for key, value in self.metadata.items()]
+
+    @property
     def source(self) -> str:
         """Return the test case source file path."""
         if self.robot_attributes.get('source') is not None:
@@ -84,16 +93,24 @@ class Suite:
 class Launch(Suite):
     """Class represents Robot Framework test suite."""
 
+    launch_attributes: Optional[List[Dict[str, str]]]
     type: str = 'LAUNCH'
 
-    def __init__(self, name: str, robot_attributes: Dict[str, Any], launch_attributes: Optional[List[Dict[str, str]]]):
+    def __init__(self, name: str, robot_attributes: Dict[str, Any], launch_attributes: Optional[List[str]]):
         """Initialize required attributes.
 
         :param name:       Launch name
         :param robot_attributes: Suite attributes passed through the listener
+        :param launch_attributes: Launch attributes from variables
         """
         super().__init__(name, robot_attributes)
+        self.launch_attributes = gen_attributes(launch_attributes or [])
         self.type = 'LAUNCH'
+
+    @property
+    def attributes(self) -> Optional[List[Dict[str, str]]]:
+        """Get Launch attributes."""
+        return self.launch_attributes
 
 
 class Test:
@@ -102,7 +119,7 @@ class Test:
     _critical: str
     _tags: List[str]
     robot_attributes: Dict[str, Any]
-    attributes: List[Dict[str, str]]
+    test_attributes: Optional[List[Dict[str, str]]]
     doc: str
     end_time: str
     longname: str
@@ -116,16 +133,17 @@ class Test:
     template: str
     type: str = 'TEST'
 
-    def __init__(self, name: str, robot_attributes: Dict[str, Any]):
+    def __init__(self, name: str, robot_attributes: Dict[str, Any], test_attributes: List[str]):
         """Initialize required attributes.
 
-        :param name:       Name of the test
-        :param robot_attributes: Test attributes passed through the listener
+        :param name:             Name of the test
+        :param robot_attributes: Attributes passed through the listener
         """
         # for backward compatibility with Robot < 4.0 mark every test case
         # as critical if not set
         self._critical = robot_attributes.get('critical', 'yes')
         self._tags = robot_attributes['tags']
+        self.test_attributes = gen_attributes(test_attributes)
         self.robot_attributes = robot_attributes
         self.doc = robot_attributes['doc']
         self.end_time = robot_attributes.get('endtime', '')
@@ -139,6 +157,11 @@ class Test:
         self.status = robot_attributes.get('status')
         self.template = robot_attributes['template']
         self.type = 'TEST'
+
+    @property
+    def attributes(self) -> Optional[List[Dict[str, str]]]:
+        """Get Test attributes."""
+        return self.test_attributes + gen_attributes(self._tags)
 
     @property
     def critical(self) -> bool:
@@ -213,9 +236,9 @@ class Keyword:
     def __init__(self, name: str, robot_attributes: Dict[str, Any], parent_type: Optional[str] = None):
         """Initialize required attributes.
 
-        :param name:        Name of the keyword
-        :param robot_attributes:  Keyword attributes passed through the listener
-        :param parent_type: Type of the parent test item
+        :param name:              Name of the keyword
+        :param robot_attributes:  Attributes passed through the listener
+        :param parent_type:       Type of the parent test item
         """
         self.robot_attributes = robot_attributes
         self.args = robot_attributes['args']
@@ -264,7 +287,7 @@ class Keyword:
         return self
 
 
-class LogMessage:
+class LogMessage(str):
     """Class represents Robot Framework messages."""
 
     attachment: Optional[Dict[str, str]]
