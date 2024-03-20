@@ -20,7 +20,6 @@ import os
 import re
 from functools import wraps
 from mimetypes import guess_type
-from types import MappingProxyType
 from typing import Optional, Dict, Union, Any
 from warnings import warn
 
@@ -34,24 +33,6 @@ from .variables import Variables
 logger = logging.getLogger(__name__)
 VARIABLE_PATTERN = r'^\s*\${[^}]*}\s*=\s*'
 TRUNCATION_SIGN = "...'"
-CONTENT_TYPE_TO_EXTENSIONS = MappingProxyType({
-    'application/pdf': 'pdf',
-    'application/zip': 'zip',
-    'application/java-archive': 'jar',
-    'image/jpeg': 'jpg',
-    'image/png': 'png',
-    'image/gif': 'gif',
-    'image/bmp': 'bmp',
-    'image/vnd.microsoft.icon': 'ico',
-    'image/webp': 'webp',
-    'audio/mpeg': 'mp3',
-    'audio/wav': 'wav',
-    'video/mpeg': 'mpeg',
-    'video/avi': 'avi',
-    'video/webm': 'webm',
-    'text/plain': 'txt',
-    'application/octet-stream': 'bin'
-})
 
 
 def _unescape(binary_string: str, stop_at: int = -1):
