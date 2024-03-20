@@ -159,11 +159,6 @@ class Test:
         self.type = 'TEST'
 
     @property
-    def attributes(self) -> Optional[List[Dict[str, str]]]:
-        """Get Test attributes."""
-        return self.test_attributes + gen_attributes(self._tags)
-
-    @property
     def critical(self) -> bool:
         """Form unique value for RF 4.0+ and older versions."""
         return self._critical in ('yes', True)
@@ -171,8 +166,12 @@ class Test:
     @property
     def tags(self) -> List[str]:
         """Get list of test tags excluding test_case_id."""
-        return [
-            tag for tag in self._tags if not tag.startswith('test_case_id')]
+        return [tag for tag in self._tags if not tag.startswith('test_case_id')]
+
+    @property
+    def attributes(self) -> Optional[List[Dict[str, str]]]:
+        """Get Test attributes."""
+        return self.test_attributes + gen_attributes(self.tags)
 
     @property
     def source(self) -> str:
