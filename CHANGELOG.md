@@ -3,6 +3,8 @@
 ## [Unreleased]
 ### Added
 - Issue [#178](https://github.com/reportportal/agent-Python-RobotFramework/issues/178) Metadata attributes handling, by @HardNorth
+### Changed
+- Client version updated on [5.5.6](https://github.com/reportportal/client-Python/releases/tag/5.5.6), by @HardNorth
 ### Removed
 - `model.pyi`, `static.pyi` stub files, as we don't really need them anymore, by @HardNorth
 
