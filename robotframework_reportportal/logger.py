@@ -78,7 +78,7 @@ def debug(msg: str, html: bool = False, attachment: Optional[Dict[str, str]] = N
     write(msg, "DEBUG", html, attachment, launch_log)
 
 
-def info(msg: str, html: bool = False, also_console: bool  = False, attachment: Optional[Dict[str, str]] = None,
+def info(msg: str, html: bool = False, also_console: bool = False, attachment: Optional[Dict[str, str]] = None,
          launch_log: bool = False):
     """Write the message to the log file using the ``INFO`` level.
 
