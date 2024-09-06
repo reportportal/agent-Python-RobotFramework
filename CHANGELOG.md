@@ -1,6 +1,10 @@
 # Changelog
 
 ## [Unreleased]
+### Fixed
+- Issue [#187](https://github.com/reportportal/agent-Python-RobotFramework/issues/187): Distutils in the agent, by @HardNorth
+### Added
+- Python 12 support, by @HardNorth
 
 ## [5.5.3]
 ### Added

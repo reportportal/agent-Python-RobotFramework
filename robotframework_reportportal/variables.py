@@ -13,12 +13,12 @@
 
 """This module contains model that stores Robot Framework variables."""
 
-from distutils.util import strtobool
 from os import path
 from typing import Optional, Union, Dict, Tuple, Any, List
 from warnings import warn
 
 from reportportal_client import OutputType, ClientType
+from reportportal_client.helpers import to_bool
 from reportportal_client.logs import MAX_LOG_BATCH_PAYLOAD_SIZE
 from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
 
@@ -76,10 +76,9 @@ class Variables:
 
         self._pabot_pool_id = None
         self._pabot_used = None
-        self.attach_log = bool(strtobool(get_variable(
-            'RP_ATTACH_LOG', default='False')))
-        self.attach_report = bool(strtobool(get_variable('RP_ATTACH_REPORT', default='False')))
-        self.attach_xunit = bool(strtobool(get_variable('RP_ATTACH_XUNIT', default='False')))
+        self.attach_log = to_bool(get_variable('RP_ATTACH_LOG', default='False'))
+        self.attach_report = to_bool(get_variable('RP_ATTACH_REPORT', default='False'))
+        self.attach_xunit = to_bool(get_variable('RP_ATTACH_XUNIT', default='False'))
         self.launch_attributes = get_variable('RP_LAUNCH_ATTRIBUTES', default='').split()
         self.launch_id = get_variable('RP_LAUNCH_UUID')
         self.launch_doc = get_variable('RP_LAUNCH_DOC')
@@ -87,15 +86,13 @@ class Variables:
             'RP_LOG_BATCH_SIZE', default='20'))
         self.mode = get_variable('RP_MODE')
         self.pool_size = int(get_variable('RP_MAX_POOL_SIZE', default='50'))
-        self.rerun = bool(strtobool(get_variable(
-            'RP_RERUN', default='False')))
+        self.rerun = to_bool(get_variable('RP_RERUN', default='False'))
         self.rerun_of = get_variable('RP_RERUN_OF', default=None)
-        self.skipped_issue = bool(strtobool(get_variable(
-            'RP_SKIPPED_ISSUE', default='True')))
+        self.skipped_issue = to_bool(get_variable('RP_SKIPPED_ISSUE', default='True'))
         self.test_attributes = get_variable('RP_TEST_ATTRIBUTES', default='').split()
         self.log_batch_payload_size = int(get_variable('RP_LOG_BATCH_PAYLOAD_SIZE',
                                                        default=str(MAX_LOG_BATCH_PAYLOAD_SIZE)))
-        self.launch_uuid_print = bool(strtobool(get_variable('RP_LAUNCH_UUID_PRINT', default='False')))
+        self.launch_uuid_print = to_bool(get_variable('RP_LAUNCH_UUID_PRINT', default='False'))
         output_type = get_variable('RP_LAUNCH_UUID_PRINT_OUTPUT')
         self.launch_uuid_print_output = OutputType[output_type.upper()] if output_type else None
         client_type = get_variable('RP_CLIENT_TYPE')
@@ -169,4 +166,4 @@ class Variables:
         verify_ssl = get_variable('RP_VERIFY_SSL', default='True')
         if path.exists(verify_ssl):
             return verify_ssl
-        return bool(strtobool(verify_ssl))
+        return to_bool(verify_ssl)
