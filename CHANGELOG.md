@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [5.5.4]
 ### Fixed
 - Issue [#187](https://github.com/reportportal/agent-Python-RobotFramework/issues/187): Distutils in the agent, by @HardNorth
 ### Added
