@@ -18,7 +18,7 @@ import os
 from setuptools import setup
 
 
-__version__ = '5.5.3'
+__version__ = '5.5.4'
 
 
 def read_file(fname):
@@ -54,6 +54,7 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         ],
     install_requires=read_file('requirements.txt').splitlines(),
     entry_points={
