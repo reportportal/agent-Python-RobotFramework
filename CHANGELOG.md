@@ -1,8 +1,6 @@
 # Changelog
 
 ## [Unreleased]
-### Added
-- Issue [#193](https://github.com/reportportal/agent-Python-RobotFramework/issues/193): Listener self registration, by @HardNorth
 
 ## [5.5.4]
 ### Fixed
