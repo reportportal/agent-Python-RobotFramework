@@ -94,6 +94,7 @@ class listener:
 
     def __init__(self) -> None:
         """Initialize listener attributes."""
+        self.ROBOT_LIBRARY_LISTENER = self
         self._items = LifoQueue()
         self._service = None
         self._variables = None
