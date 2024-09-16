@@ -13,10 +13,13 @@
 #  limitations under the License.
 
 from typing import Pattern, List
-from .listener import listener as ls
+
 from robot.result import ResultVisitor, Result, TestSuite, TestCase, Keyword, Message
 
+from robotframework_reportportal.listener import listener as ls
+
 listener: ls
+
 
 class RobotResultsVisitor(ResultVisitor):
     def __init__(self):

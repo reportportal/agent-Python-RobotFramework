@@ -15,15 +15,14 @@
 import re
 import string
 from datetime import datetime
-
-from robot.api import ResultVisitor
 from urllib.parse import unquote
 
-from . import listener
-from .time_visitor import corrections
-# noinspection PyUnresolvedReferences
-from .variables import _variables
+from robot.api import ResultVisitor
 
+from robotframework_reportportal import listener
+from robotframework_reportportal.time_visitor import corrections
+# noinspection PyUnresolvedReferences
+from robotframework_reportportal.variables import _variables
 
 listener = listener.listener()
 

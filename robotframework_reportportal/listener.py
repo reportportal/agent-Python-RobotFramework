@@ -25,10 +25,10 @@ from warnings import warn
 
 from reportportal_client.helpers import LifoQueue, is_binary, guess_content_type_from_bytes
 
-from .model import Keyword, Launch, Test, LogMessage, Suite
-from .service import RobotService
-from .static import MAIN_SUITE_ID, PABOT_WITHOUT_LAUNCH_ID_MSG
-from .variables import Variables
+from robotframework_reportportal.model import Keyword, Launch, Test, LogMessage, Suite
+from robotframework_reportportal.service import RobotService
+from robotframework_reportportal.static import MAIN_SUITE_ID, PABOT_WITHOUT_LAUNCH_ID_MSG
+from robotframework_reportportal.variables import Variables
 
 logger = logging.getLogger(__name__)
 VARIABLE_PATTERN = r'^\s*\${[^}]*}\s*=\s*'

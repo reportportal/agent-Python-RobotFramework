@@ -39,7 +39,7 @@ from typing import Optional, Dict
 
 from robot.api import logger
 
-from .model import LogMessage
+from robotframework_reportportal.model import LogMessage
 
 
 def write(msg: str, level: str = 'INFO', html: bool = False, attachment: Optional[Dict[str, str]] = None,
