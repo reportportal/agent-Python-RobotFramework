@@ -17,6 +17,7 @@
 import os
 from typing import Any, Dict, List, Optional, Union
 
+from robotframework_reportportal.helpers import robot_markup_to_markdown
 from reportportal_client.helpers import gen_attributes
 
 
@@ -48,7 +49,7 @@ class Suite:
         :param robot_attributes: Suite attributes passed through the listener
         """
         self.robot_attributes = robot_attributes
-        self.doc = robot_attributes['doc']
+        self.doc = robot_markup_to_markdown(robot_attributes['doc'])
         self.end_time = robot_attributes.get('endtime', '')
         self.longname = robot_attributes['longname']
         self.message = robot_attributes.get('message')
@@ -145,7 +146,7 @@ class Test:
         self._tags = robot_attributes['tags']
         self.test_attributes = gen_attributes(test_attributes)
         self.robot_attributes = robot_attributes
-        self.doc = robot_attributes['doc']
+        self.doc = robot_markup_to_markdown(robot_attributes['doc'])
         self.end_time = robot_attributes.get('endtime', '')
         self.longname = robot_attributes['longname']
         self.message = robot_attributes.get('message')
@@ -242,7 +243,7 @@ class Keyword:
         self.robot_attributes = robot_attributes
         self.args = robot_attributes['args']
         self.assign = robot_attributes['assign']
-        self.doc = robot_attributes['doc']
+        self.doc = robot_markup_to_markdown(robot_attributes['doc'])
         self.end_time = robot_attributes.get('endtime')
         self.keyword_name = robot_attributes['kwname']
         self.keyword_type = robot_attributes['type']
