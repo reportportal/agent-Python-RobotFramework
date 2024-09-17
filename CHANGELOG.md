@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [5.5.5]
 ### Added
 - Issue [#192](https://github.com/reportportal/agent-Python-RobotFramework/issues/192): Robot link markup to Markdown conversion, by @HardNorth
 
