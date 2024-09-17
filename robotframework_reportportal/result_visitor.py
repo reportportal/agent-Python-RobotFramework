@@ -15,9 +15,10 @@
 import re
 import string
 from datetime import datetime
+from typing import List, Pattern
 from urllib.parse import unquote
 
-from robot.api import ResultVisitor
+from robot.result import ResultVisitor, Result, TestSuite, TestCase, Keyword, Message
 
 from robotframework_reportportal import listener
 from robotframework_reportportal.time_visitor import corrections
@@ -35,15 +36,16 @@ def to_timestamp(time_str):
 
 
 class RobotResultsVisitor(ResultVisitor):
-    _link_pattern = re.compile("src=[\"\']([^\"\']+)[\"\']")
+    _link_pattern: Pattern = re.compile("src=[\"\']([^\"\']+)[\"\']")
 
-    def start_result(self, result):
+    def start_result(self, result: Result) -> bool:
         if "RP_LAUNCH" not in _variables:
             _variables["RP_LAUNCH"] = result.suite.name
         if "RP_LAUNCH_DOC" not in _variables:
             _variables["RP_LAUNCH_DOC"] = result.suite.doc
+        return True
 
-    def start_suite(self, suite):
+    def start_suite(self, suite: TestSuite) -> bool:
         ts = to_timestamp(suite.starttime if suite.id not in corrections else corrections[suite.id][0])
         attrs = {
             'id': suite.id,
@@ -57,8 +59,9 @@ class RobotResultsVisitor(ResultVisitor):
             'starttime': ts
         }
         listener.start_suite(suite.name, attrs, ts)
+        return True
 
-    def end_suite(self, suite):
+    def end_suite(self, suite: TestSuite) -> None:
         ts = to_timestamp(suite.endtime if suite.id not in corrections else corrections[suite.id][1])
         attrs = {
             'id': suite.id,
@@ -77,7 +80,7 @@ class RobotResultsVisitor(ResultVisitor):
         }
         listener.end_suite(None, attrs, ts)
 
-    def start_test(self, test):
+    def start_test(self, test: TestCase) -> bool:
         ts = to_timestamp(test.starttime if test.id not in corrections else corrections[test.id][0])
         attrs = {
             'id': test.id,
@@ -94,8 +97,9 @@ class RobotResultsVisitor(ResultVisitor):
             'starttime': ts,
         }
         listener.start_test(test.name, attrs, ts)
+        return True
 
-    def end_test(self, test):
+    def end_test(self, test: TestCase) -> None:
         ts = to_timestamp(test.endtime if test.id not in corrections else corrections[test.id][1])
         attrs = {
             'id': test.id,
@@ -116,7 +120,7 @@ class RobotResultsVisitor(ResultVisitor):
         }
         listener.end_test(test.name, attrs, ts)
 
-    def start_keyword(self, kw):
+    def start_keyword(self, kw: Keyword) -> bool:
         ts = to_timestamp(kw.starttime if kw.id not in corrections else corrections[kw.id][0])
         attrs = {
             'type': string.capwords(kw.type),
@@ -129,8 +133,9 @@ class RobotResultsVisitor(ResultVisitor):
             'starttime': ts,
         }
         listener.start_keyword(kw.name, attrs, ts)
+        return True
 
-    def end_keyword(self, kw):
+    def end_keyword(self, kw: Keyword) -> None:
         ts = to_timestamp(kw.endtime if kw.id not in corrections else corrections[kw.id][1])
         attrs = {
             'type': string.capwords(kw.type),
@@ -146,7 +151,7 @@ class RobotResultsVisitor(ResultVisitor):
         }
         listener.end_keyword(kw.name, attrs, ts)
 
-    def start_message(self, msg):
+    def start_message(self, msg: Message) -> bool:
         if msg.message:
             message = {
                 'message': msg.message,
@@ -161,8 +166,9 @@ class RobotResultsVisitor(ResultVisitor):
                 try:
                     listener.log_message(message)
                 except Exception:
-                    pass
+                    return False
+        return True
 
-    def parse_message(self, msg):
+    def parse_message(self, msg: str) -> List[str]:
         m = self._link_pattern.search(msg)
         return [m.group(), unquote(m.group(1))]
