@@ -15,7 +15,7 @@
 import re
 import string
 from datetime import datetime
-from typing import List, Pattern
+from typing import List, Pattern, Optional
 from urllib.parse import unquote
 
 from robot.result import ResultVisitor, Result, TestSuite, TestCase, Keyword, Message
@@ -28,7 +28,7 @@ from robotframework_reportportal.variables import _variables
 listener = listener.listener()
 
 
-def to_timestamp(time_str):
+def to_timestamp(time_str: str) -> Optional[str]:
     if time_str:
         dt = datetime.strptime(time_str, '%Y%m%d %H:%M:%S.%f')
         return str(int(dt.timestamp() * 1000))
