@@ -19,7 +19,7 @@ from typing import Iterable, Tuple
 
 
 def replace_patterns(text: str, patterns: Iterable[Tuple[re.Pattern, str]]) -> str:
-    """Removes starting patterns from the text."""
+    """Replace given patterns in the text."""
     result = text
     for p, repl in patterns:
         result = p.sub(repl, result)
