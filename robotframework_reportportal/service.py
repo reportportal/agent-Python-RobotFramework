@@ -14,22 +14,21 @@
 
 """This module is a Robot service for reporting results to ReportPortal."""
 
+import logging
 from typing import Optional
 
 from dateutil.parser import parse
-import logging
-
+from reportportal_client import RP, create_client
 from reportportal_client.helpers import (
     dict_to_payload,
     get_launch_sys_attrs,
     get_package_version,
     timestamp
 )
-from reportportal_client import RP, create_client
 
-from .model import Launch, Suite, Test, Keyword, LogMessage
-from .variables import Variables
-from .static import LOG_LEVEL_MAPPING, STATUS_MAPPING
+from robotframework_reportportal.model import Launch, Suite, Test, Keyword, LogMessage
+from robotframework_reportportal.static import LOG_LEVEL_MAPPING, STATUS_MAPPING
+from robotframework_reportportal.variables import Variables
 
 logger = logging.getLogger(__name__)
 
