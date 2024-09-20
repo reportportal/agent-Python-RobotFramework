@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 ### Added
+- `timezone` command line argument for `post_report.py` script, by @HardNorth
+
+## [5.5.5]
+### Added
 - Issue [#192](https://github.com/reportportal/agent-Python-RobotFramework/issues/192): Robot link markup to Markdown conversion, by @HardNorth
 
 ## [5.5.4]

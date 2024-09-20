@@ -14,7 +14,11 @@
 
 import re
 import string
-from datetime import datetime
+import sys
+from datetime import datetime, timedelta, timezone
+
+if sys.version_info >= (3, 9):
+    from zoneinfo import available_timezones, ZoneInfo
 from typing import List, Pattern, Optional
 from urllib.parse import unquote
 
@@ -26,13 +30,28 @@ from robotframework_reportportal.time_visitor import corrections
 from robotframework_reportportal.variables import _variables
 
 listener = listener.listener()
+if sys.version_info >= (3, 9):
+    AVAILABLE_TIMEZONES: set[str] = available_timezones()
+else:
+    AVAILABLE_TIMEZONES = set()
 
 
 def to_timestamp(time_str: str) -> Optional[str]:
-    if time_str:
-        dt = datetime.strptime(time_str, '%Y%m%d %H:%M:%S.%f')
-        return str(int(dt.timestamp() * 1000))
-    return None
+    if not time_str:
+        return None
+
+    timezone_offset_str: Optional[str] = _variables.get('RP_TIME_ZONE_OFFSET', None)
+    dt = datetime.strptime(time_str, '%Y%m%d %H:%M:%S.%f')
+
+    if timezone_offset_str:
+        if timezone_offset_str in AVAILABLE_TIMEZONES:
+            tz = ZoneInfo(timezone_offset_str)
+            dt = dt.replace(tzinfo=tz)
+        else:
+            hours, minutes = map(int, timezone_offset_str.split(':'))
+            offset = timedelta(hours=hours, minutes=minutes)
+            dt = dt.replace(tzinfo=timezone(offset))
+    return str(int(dt.timestamp() * 1000))
 
 
 class RobotResultsVisitor(ResultVisitor):
