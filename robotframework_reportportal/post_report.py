@@ -34,6 +34,7 @@ Command-line usage:
                 [--variable RP_MAX_POOL_SIZE:"50"]
                 [--variable RP_MODE:"DEBUG"]
                 [--loglevel CRITICAL|ERROR|WARNING|INFO|DEBUG]
+                [--timezone "+03:00"|"EST"|"Europe/Warsaw"]
                 [output.xml]
 
 This script needs to be run within the same directory as the report xml file.
@@ -66,10 +67,9 @@ def process(infile="output.xml"):
 def main():
     argument_list = sys.argv[1:]
     short_options = "hv:"
-    long_options = ["help", "variable=", "loglevel="]
+    long_options = ["help", "variable=", "loglevel=", 'timezone=']
     try:
-        arguments, values = getopt.getopt(argument_list, short_options,
-                                          long_options)
+        arguments, values = getopt.getopt(argument_list, short_options, long_options)
     except getopt.error:
         sys.exit(1)
 
@@ -83,6 +83,8 @@ def main():
         elif current_argument == "--loglevel":
             numeric_level = getattr(logging, current_value.upper(), None)
             logging.basicConfig(level=numeric_level)
+        elif current_argument == "--timezone":
+            _variables['RP_TIME_ZONE_OFFSET'] = current_value
 
     try:
         process(*values)

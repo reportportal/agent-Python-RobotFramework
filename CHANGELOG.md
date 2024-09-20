@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- `timezone` command line argument for `post_report.py` script, by @HardNorth
 
 ## [5.5.5]
 ### Added
