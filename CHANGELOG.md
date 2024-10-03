@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 ### Added
+- `Test Case ID` reporting on Item Finish, by @HardNorth
+### Changed
+- Client version updated on [5.5.8](https://github.com/reportportal/client-Python/releases/tag/5.5.8), by @HardNorth
+
+## [5.5.6]
+### Added
 - `timezone` command line argument for `post_report.py` script, by @HardNorth
 
 ## [5.5.5]

@@ -20,6 +20,8 @@ from typing import Any, Dict, List, Optional, Union
 from robotframework_reportportal.helpers import robot_markup_to_markdown
 from reportportal_client.helpers import gen_attributes
 
+TEST_CASE_ID_SIGN = 'test_case_id:'
+
 
 class Suite:
     """Class represents Robot Framework test suite."""
@@ -167,7 +169,7 @@ class Test:
     @property
     def tags(self) -> List[str]:
         """Get list of test tags excluding test_case_id."""
-        return [tag for tag in self._tags if not tag.startswith('test_case_id')]
+        return [tag for tag in self._tags if not tag.startswith(TEST_CASE_ID_SIGN)]
 
     @property
     def attributes(self) -> Optional[List[Dict[str, str]]]:
@@ -196,7 +198,7 @@ class Test:
         """Get test case ID through the tags."""
         # use test case id from tags if specified
         for tag in self._tags:
-            if tag.startswith('test_case_id:'):
+            if tag.startswith(TEST_CASE_ID_SIGN):
                 return tag.split(':')[1]
         # generate it if not
         return '{0}:{1}'.format(self.source, self.name)

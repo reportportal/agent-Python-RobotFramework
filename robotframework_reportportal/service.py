@@ -50,7 +50,7 @@ def to_epoch(date: Optional[str]) -> Optional[str]:
     return str(int(epoch_time * 1000))
 
 
-class RobotService(object):
+class RobotService:
     """Class represents service that sends Robot items to ReportPortal."""
 
     agent_name: str
@@ -212,7 +212,8 @@ class RobotService(object):
             'end_time': ts or to_epoch(test.end_time) or timestamp(),
             'issue': issue,
             'item_id': test.rp_item_id,
-            'status': STATUS_MAPPING[test.status]
+            'status': STATUS_MAPPING[test.status],
+            'test_case_id': test.test_case_id
         }
         logger.debug('ReportPortal - Finish test: request_body={0}'.format(fta_rq))
         self.rp.finish_test_item(**fta_rq)

@@ -195,7 +195,7 @@ class listener:
         """
         launch = Launch(self.variables.launch_name, attributes, self.variables.launch_attributes)
         launch.doc = self.variables.launch_doc or launch.doc
-        if self.variables.pabot_used:
+        if self.variables.pabot_used and not self._variables.launch_id:
             warn(PABOT_WITHOUT_LAUNCH_ID_MSG, stacklevel=2)
         logger.debug(f'ReportPortal - Start Launch: {launch.robot_attributes}')
         self.service.start_launch(
