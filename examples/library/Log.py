@@ -14,35 +14,19 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import os
-
 from robotframework_reportportal import logger
 
 
-def screenshot_log(level, message, screenshot_file):
-    """
-    Attach a screenshot file into a log entry on ReportPortal.
-
-    :param level: log entry level
-    :param message: screenshot description
-    :param screenshot_file: path to image file
-    """
-    with open(screenshot_file, "rb") as image_file:
-        file_data = image_file.read()
-    item_log(level, message, {"name": screenshot_file.split(os.path.sep)[-1],
-                              "data": file_data,
-                              "mime": "image/png"})
-
-
-def item_log(level, message, attachment=None):
+def item_log(level, message, attachment=None, html=False):
     """
     Post a log entry on which will be attached to the current processing item.
 
     :param level: log entry level
     :param message: message to post
     :param attachment: path to attachment file
+    :param html: format or not format the message as html
     """
-    logger.write(message, level, attachment=attachment)
+    logger.write(message, level, attachment=attachment, html=html)
 
 
 def launch_log(level, message, attachment=None):
