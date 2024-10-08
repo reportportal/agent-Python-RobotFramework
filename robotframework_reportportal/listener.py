@@ -31,7 +31,12 @@ from robotframework_reportportal.static import MAIN_SUITE_ID, PABOT_WITHOUT_LAUN
 from robotframework_reportportal.variables import Variables
 
 logger = logging.getLogger(__name__)
-VARIABLE_PATTERN = r'^\s*\${[^}]*}\s*=\s*'
+VARIABLE_PATTERN = re.compile(r'^\s*\${[^}]*}\s*=\s*')
+IMAGE_PATTERN = re.compile(
+    r'</td></tr><tr><td colspan="\d+"><a href="[^"]+"(?: target="_blank")?>'
+    r'<img src="([^"]+)" width="\d+(?:px|pt)?"/?></a>')
+
+DEFAULT_BINARY_FILE_TYPE = 'application/octet-stream'
 TRUNCATION_SIGN = "...'"
 
 
@@ -98,7 +103,7 @@ class listener:
         self._service = None
         self._variables = None
 
-    def _build_msg_struct(self, message: Dict) -> LogMessage:
+    def _build_msg_struct(self, message: Dict[str, Any]) -> LogMessage:
         """Check if the given message comes from our custom logger or not.
 
         :param message: Message passed by the Robot Framework
@@ -110,6 +115,44 @@ class listener:
             msg.level = message['level']
         if not msg.launch_log:
             msg.item_id = getattr(self.current_item, 'rp_item_id', None)
+
+        message_str = msg.message
+        if is_binary(message_str):
+            variable_match = VARIABLE_PATTERN.search(message_str)
+            if variable_match:
+                # Treat as partial binary data
+                msg_content = message_str[variable_match.end():]
+                # remove trailing `'"...`, add `...'`
+                msg.message = (message_str[variable_match.start():variable_match.end()]
+                               + str(msg_content.encode('utf-8'))[:-5] + TRUNCATION_SIGN)
+            else:
+                # Do not log full binary data, since it's usually corrupted
+                content_type = guess_content_type_from_bytes(_unescape(message_str, 128))
+                msg.message = (f'Binary data of type "{content_type}" logging skipped, as it was processed as text and'
+                               ' hence corrupted.')
+                msg.level = 'WARN'
+        elif message.get('html', 'no') == 'yes':
+            image_match = IMAGE_PATTERN.match(message_str)
+            if image_match:
+                image_path = image_match.group(1)
+                msg.message = f'Image attached: {image_path}'
+                if os.path.exists(image_path):
+                    image_type_by_name = guess_type(image_path)[0]
+                    with open(image_path, 'rb') as fh:
+                        image_data = fh.read()
+                        image_type_by_data = guess_content_type_from_bytes(image_data)
+                        if image_type_by_name and image_type_by_data and image_type_by_name != image_type_by_data:
+                            logger.warning(
+                                f'Image type mismatch: type by file name "{image_type_by_name}" '
+                                f'!= type by file content "{image_type_by_data}"')
+                            mime_type = DEFAULT_BINARY_FILE_TYPE
+                        else:
+                            mime_type = image_type_by_name or image_type_by_data or DEFAULT_BINARY_FILE_TYPE
+                        msg.attachment = {
+                            'name': os.path.basename(image_path),
+                            'data': image_data,
+                            'mime': mime_type
+                        }
         return msg
 
     def _add_current_item(self, item: Union[Keyword, Launch, Suite, Test]) -> None:
@@ -132,20 +175,6 @@ class listener:
         :param message: Message passed by the Robot Framework
         """
         msg = self._build_msg_struct(message)
-        if is_binary(msg.message):
-            variable_match = re.search(VARIABLE_PATTERN, msg.message)
-            if variable_match:
-                # Treat as partial binary data
-                msg_content = msg.message[variable_match.end():]
-                # remove trailing `'"...`, add `...'`
-                msg.message = (msg.message[variable_match.start():variable_match.end()]
-                               + str(msg_content.encode('utf-8'))[:-5] + TRUNCATION_SIGN)
-            else:
-                # Do not log full binary data, since it's usually corrupted
-                content_type = guess_content_type_from_bytes(_unescape(msg.message, 128))
-                msg.message = (f'Binary data of type "{content_type}" logging skipped, as it was processed as text and'
-                               ' hence corrupted.')
-                msg.level = 'WARN'
         logger.debug(f'ReportPortal - Log Message: {message}')
         self.service.log(message=msg)
 
@@ -161,7 +190,7 @@ class listener:
             mes.attachment = {
                 'name': os.path.basename(image),
                 'data': fh.read(),
-                'mime': guess_type(image)[0] or 'application/octet-stream'
+                'mime': guess_type(image)[0] or DEFAULT_BINARY_FILE_TYPE
             }
         logger.debug(f'ReportPortal - Log Message with Image: {mes} {image}')
         self.service.log(message=mes)
