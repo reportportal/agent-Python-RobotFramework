@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [5.5.8]
+
 ## [5.5.7]
 ### Added
 - `Test Case ID` reporting on Item Finish, by @HardNorth
