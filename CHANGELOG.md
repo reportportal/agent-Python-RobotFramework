@@ -3,6 +3,8 @@
 ## [Unreleased]
 
 ## [5.5.8]
+### Added
+- Issue [#191](https://github.com/reportportal/agent-Python-RobotFramework/issues/191): Add seamless screenshot logging for Selenium and Browser libraries, by @HardNorth
 
 ## [5.5.7]
 ### Added
