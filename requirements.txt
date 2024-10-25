@@ -1,4 +1,4 @@
 # Basic dependencies
-python-dateutil~=2.8.1
+python-dateutil~=2.9.0.post0
 reportportal-client~=5.5.8
 robotframework
