@@ -1,4 +1,4 @@
-# ReportPortal RobotFramework agent
+# ReportPortal integration for RobotFramework
 
 A RobotFramework Listener to report test results to ReportPortal
 
