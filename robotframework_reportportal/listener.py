@@ -20,7 +20,7 @@ import os
 import re
 from functools import wraps
 from mimetypes import guess_type
-from typing import Optional, Dict, Union, Any
+from typing import Optional, Dict, Set, Union, Any
 from warnings import warn
 
 from reportportal_client.helpers import LifoQueue, is_binary, guess_content_type_from_bytes
@@ -95,6 +95,7 @@ class listener:
     _items: LifoQueue
     _service: Optional[RobotService]
     _variables: Optional[Variables]
+    _remove_keywords: Set[str] = set()
     ROBOT_LISTENER_API_VERSION = 2
 
     def __init__(self) -> None:
@@ -222,6 +223,14 @@ class listener:
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
+        try:
+            # noinspection PyUnresolvedReferences
+            from robot.running.context import EXECUTION_CONTEXTS
+            # noinspection PyProtectedMember
+            self._remove_keywords = set(EXECUTION_CONTEXTS.current.output._settings.remove_keywords)
+        except ImportError:
+            warn('Unable to locate Robot Framework context. "removekeywords" feature will not work.', stacklevel=2)
+            pass
         launch = Launch(self.variables.launch_name, attributes, self.variables.launch_attributes)
         launch.doc = self.variables.launch_doc or launch.doc
         if self.variables.pabot_used and not self._variables.launch_id:
