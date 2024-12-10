@@ -226,8 +226,10 @@ class listener:
         try:
             # noinspection PyUnresolvedReferences
             from robot.running.context import EXECUTION_CONTEXTS
-            # noinspection PyProtectedMember
-            self._remove_keywords = set(EXECUTION_CONTEXTS.current.output._settings.remove_keywords)
+            current_context = EXECUTION_CONTEXTS.current
+            if current_context:
+                # noinspection PyProtectedMember
+                self._remove_keywords = set(current_context.output._settings.remove_keywords)
         except ImportError:
             warn('Unable to locate Robot Framework context. "removekeywords" feature will not work.', stacklevel=2)
             pass
