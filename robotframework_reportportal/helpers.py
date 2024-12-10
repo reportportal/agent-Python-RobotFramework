@@ -14,8 +14,9 @@
 
 """This module contains functions to ease reporting to ReportPortal."""
 
+import fnmatch
 import re
-from typing import Iterable, Tuple
+from typing import Iterable, Tuple, Optional
 
 
 def replace_patterns(text: str, patterns: Iterable[Tuple[re.Pattern, str]]) -> str:
@@ -38,3 +39,21 @@ ROBOT_MARKUP_REPLACEMENT_PATTERS = [
 def robot_markup_to_markdown(text: str) -> str:
     """Convert Robot Framework's text markup to Markdown format."""
     return replace_patterns(text, ROBOT_MARKUP_REPLACEMENT_PATTERS)
+
+
+def match_with_glob_pattern(pattern: Optional[str], line: Optional[str]) -> bool:
+    """Check if the line matches given glob pattern.
+
+    :param pattern: glob pattern
+    :param line: line to check
+    :return: True if the line matches the pattern with asterisks, False otherwise
+    """
+    if pattern is None and line is None:
+        return True
+    if pattern is None:
+        return True
+    if line is None:
+        return False
+
+    regex_pattern = fnmatch.translate(pattern)
+    return re.fullmatch(regex_pattern, line) is not None
