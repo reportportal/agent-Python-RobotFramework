@@ -35,25 +35,37 @@ ROBOT_MARKUP_REPLACEMENT_PATTERS = [
     (NAMED_LINK_PATTERN, r'[\2](\1)'),
 ]
 
+PATTERN_MATCHES_EMPTY_STRING: re.Pattern = re.compile('^$')
+
 
 def robot_markup_to_markdown(text: str) -> str:
     """Convert Robot Framework's text markup to Markdown format."""
     return replace_patterns(text, ROBOT_MARKUP_REPLACEMENT_PATTERS)
 
 
-def match_with_glob_pattern(pattern: Optional[str], line: Optional[str]) -> bool:
-    """Check if the line matches given glob pattern.
+def translate_glob_to_regex(pattern: Optional[str]) -> Optional[re.Pattern]:
+    """Translate glob string pattern to regex Pattern.
 
     :param pattern: glob pattern
-    :param line: line to check
-    :return: True if the line matches the pattern with asterisks, False otherwise
+    :return: regex pattern
     """
-    if pattern is None and line is None:
-        return True
+    if pattern is None:
+        return None
+    if pattern == '':
+        return PATTERN_MATCHES_EMPTY_STRING
+    return re.compile(fnmatch.translate(pattern))
+
+
+def match_pattern(pattern: Optional[re.Pattern], line: Optional[str]) -> bool:
+    """Check if the line matches given pattern. Handles None values.
+
+    :param pattern: regex pattern
+    :param line: line to check
+    :return: True if the line matches the pattern, False otherwise
+    """
     if pattern is None:
         return True
     if line is None:
         return False
 
-    regex_pattern = fnmatch.translate(pattern)
-    return re.fullmatch(regex_pattern, line) is not None
+    return pattern.fullmatch(line) is not None
