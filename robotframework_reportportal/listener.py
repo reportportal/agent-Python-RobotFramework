@@ -18,13 +18,15 @@ import binascii
 import logging
 import os
 import re
+from abc import abstractmethod, ABC
 from functools import wraps
 from mimetypes import guess_type
-from typing import Optional, Dict, Set, Union, Any
+from typing import Optional, Dict, Union, Any, List, override
 from warnings import warn
 
 from reportportal_client.helpers import LifoQueue, is_binary, guess_content_type_from_bytes
 
+from robotframework_reportportal.helpers import translate_glob_to_regex, match_pattern
 from robotframework_reportportal.model import Keyword, Launch, Test, LogMessage, Suite
 from robotframework_reportportal.service import RobotService
 from robotframework_reportportal.static import MAIN_SUITE_ID, PABOT_WITHOUT_LAUNCH_ID_MSG
@@ -88,14 +90,54 @@ def check_rp_enabled(func):
     return wrap
 
 
+class _KeywordMatch(ABC):
+    @abstractmethod
+    def match(self, line: Optional[str]) -> bool:
+        ...
+
+
+class KeywordNameMatch(_KeywordMatch):
+    pattern: Optional[re.Pattern]
+
+    def __init__(self, pattern: Optional[str]):
+        self.pattern = translate_glob_to_regex(pattern)
+
+    @override
+    def match(self, kw: Keyword) -> bool:
+        return match_pattern(self.pattern, kw.name)
+
+
+class KeywordTagMatch(_KeywordMatch):
+    pattern: Optional[re.Pattern]
+
+    def __init__(self, pattern: Optional[str]):
+        self.pattern = translate_glob_to_regex(pattern)
+
+    @override
+    def match(self, kw: Keyword) -> bool:
+        return next((True for t in kw.tags if match_pattern(self.pattern, t)), False)
+
+
+class KeywordStatusMatch(_KeywordMatch):
+    status: str
+
+    def __init__(self, status: str):
+        self.status = status.upper()
+
+    @override
+    def match(self, kw: Keyword) -> bool:
+        return kw.status.upper() == self.status
+
+
 # noinspection PyPep8Naming
 class listener:
     """Robot Framework listener interface for reporting to ReportPortal."""
 
-    _items: LifoQueue
+    _items: LifoQueue[Union[Keyword, Launch, Suite, Test]]
     _service: Optional[RobotService]
     _variables: Optional[Variables]
-    _remove_keywords: Set[str] = set()
+    _remove_keywords: List[_KeywordMatch] = []
+    _realtime_keywords: bool = True
     ROBOT_LISTENER_API_VERSION = 2
 
     def __init__(self) -> None:
@@ -216,6 +258,39 @@ class listener:
             self._variables = Variables()
         return self._variables
 
+    def _process_keyword_skip(self):
+        try:
+            # noinspection PyUnresolvedReferences
+            from robot.running.context import EXECUTION_CONTEXTS
+            current_context = EXECUTION_CONTEXTS.current
+            if current_context:
+                # noinspection PyProtectedMember
+                for pattern_str in set(current_context.output._settings.remove_keywords):
+                    if 'ALL' == pattern_str.upper():
+                        self._remove_keywords = [KeywordNameMatch(None)]
+                        break
+                    if 'PASSED' == pattern_str.upper():
+                        self._remove_keywords = [KeywordStatusMatch('PASS')]
+                        self._realtime_keywords = False
+                        continue
+                    if pattern_str.upper() in {'NOT_RUN', 'NOTRUN', 'NOT RUN'}:
+                        self._remove_keywords = [KeywordStatusMatch('NOT RUN')]
+                        self._realtime_keywords = False
+                        continue
+                    if pattern_str.upper() in {'FOR', 'WHILE', 'WUKS'}:
+                        self._remove_keywords = [KeywordNameMatch(pattern_str)]
+                        continue
+                    if ':' in pattern_str:
+                        pattern_type, pattern = pattern_str.split(':', 1)
+                        pattern_type = pattern_type.strip().upper()
+                        if 'NAME' == pattern_type.upper():
+                            self._remove_keywords.append(KeywordNameMatch(pattern.strip()))
+                        elif 'TAG' == pattern_type.upper():
+                            self._remove_keywords.append(KeywordTagMatch(pattern.strip()))
+                            self._realtime_keywords = False
+        except ImportError:
+            warn('Unable to locate Robot Framework context. "removekeywords" feature will not work.', stacklevel=2)
+
     @check_rp_enabled
     def start_launch(self, attributes: Dict[str, Any], ts: Optional[Any] = None) -> None:
         """Start a new launch at the ReportPortal.
@@ -223,16 +298,8 @@ class listener:
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
-        try:
-            # noinspection PyUnresolvedReferences
-            from robot.running.context import EXECUTION_CONTEXTS
-            current_context = EXECUTION_CONTEXTS.current
-            if current_context:
-                # noinspection PyProtectedMember
-                self._remove_keywords = set(current_context.output._settings.remove_keywords)
-        except ImportError:
-            warn('Unable to locate Robot Framework context. "removekeywords" feature will not work.', stacklevel=2)
-            pass
+        self._process_keyword_skip()
+
         launch = Launch(self.variables.launch_name, attributes, self.variables.launch_attributes)
         launch.doc = self.variables.launch_doc or launch.doc
         if self.variables.pabot_used and not self._variables.launch_id:
