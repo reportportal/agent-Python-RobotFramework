@@ -96,7 +96,7 @@ class _KeywordMatch(ABC):
         ...
 
 
-class KeywordNameMatch(_KeywordMatch):
+class _KeywordNameMatch(_KeywordMatch):
     pattern: Optional[re.Pattern]
 
     def __init__(self, pattern: Optional[str]):
@@ -106,7 +106,7 @@ class KeywordNameMatch(_KeywordMatch):
         return match_pattern(self.pattern, kw.name)
 
 
-class KeywordTagMatch(_KeywordMatch):
+class _KeywordTagMatch(_KeywordMatch):
     pattern: Optional[re.Pattern]
 
     def __init__(self, pattern: Optional[str]):
@@ -116,7 +116,7 @@ class KeywordTagMatch(_KeywordMatch):
         return next((True for t in kw.tags if match_pattern(self.pattern, t)), False)
 
 
-class KeywordStatusMatch(_KeywordMatch):
+class _KeywordStatusMatch(_KeywordMatch):
     status: str
 
     def __init__(self, status: str):
@@ -264,26 +264,26 @@ class listener:
                 # noinspection PyProtectedMember
                 for pattern_str in set(current_context.output._settings.remove_keywords):
                     if 'ALL' == pattern_str.upper():
-                        self._remove_keywords = [KeywordNameMatch(None)]
+                        self._remove_keywords = [_KeywordNameMatch(None)]
                         break
                     if 'PASSED' == pattern_str.upper():
-                        self._remove_keywords = [KeywordStatusMatch('PASS')]
+                        self._remove_keywords = [_KeywordStatusMatch('PASS')]
                         self._realtime_keywords = False
                         continue
                     if pattern_str.upper() in {'NOT_RUN', 'NOTRUN', 'NOT RUN'}:
-                        self._remove_keywords = [KeywordStatusMatch('NOT RUN')]
+                        self._remove_keywords = [_KeywordStatusMatch('NOT RUN')]
                         self._realtime_keywords = False
                         continue
                     if pattern_str.upper() in {'FOR', 'WHILE', 'WUKS'}:
-                        self._remove_keywords = [KeywordNameMatch(pattern_str)]
+                        self._remove_keywords = [_KeywordNameMatch(pattern_str)]
                         continue
                     if ':' in pattern_str:
                         pattern_type, pattern = pattern_str.split(':', 1)
                         pattern_type = pattern_type.strip().upper()
                         if 'NAME' == pattern_type.upper():
-                            self._remove_keywords.append(KeywordNameMatch(pattern.strip()))
+                            self._remove_keywords.append(_KeywordNameMatch(pattern.strip()))
                         elif 'TAG' == pattern_type.upper():
-                            self._remove_keywords.append(KeywordTagMatch(pattern.strip()))
+                            self._remove_keywords.append(_KeywordTagMatch(pattern.strip()))
                             self._realtime_keywords = False
         except ImportError:
             warn('Unable to locate Robot Framework context. "removekeywords" feature will not work.', stacklevel=2)
