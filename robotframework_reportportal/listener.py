@@ -21,7 +21,7 @@ import re
 from abc import abstractmethod, ABC
 from functools import wraps
 from mimetypes import guess_type
-from typing import Optional, Dict, Union, Any, List, override
+from typing import Optional, Dict, Union, Any, List
 from warnings import warn
 
 from reportportal_client.helpers import LifoQueue, is_binary, guess_content_type_from_bytes
@@ -102,7 +102,6 @@ class KeywordNameMatch(_KeywordMatch):
     def __init__(self, pattern: Optional[str]):
         self.pattern = translate_glob_to_regex(pattern)
 
-    @override
     def match(self, kw: Keyword) -> bool:
         return match_pattern(self.pattern, kw.name)
 
@@ -113,7 +112,6 @@ class KeywordTagMatch(_KeywordMatch):
     def __init__(self, pattern: Optional[str]):
         self.pattern = translate_glob_to_regex(pattern)
 
-    @override
     def match(self, kw: Keyword) -> bool:
         return next((True for t in kw.tags if match_pattern(self.pattern, t)), False)
 
@@ -124,7 +122,6 @@ class KeywordStatusMatch(_KeywordMatch):
     def __init__(self, status: str):
         self.status = status.upper()
 
-    @override
     def match(self, kw: Keyword) -> bool:
         return kw.status.upper() == self.status
 
