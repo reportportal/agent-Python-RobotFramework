@@ -416,10 +416,13 @@ class listener:
         kwd = Keyword(name=name, parent_type=self.current_item.type, robot_attributes=attributes)
         parent = self.current_item
         kwd.rp_parent_item_id = parent.rp_item_id
-        paren_kwd = parent.type == 'KEYWORD'
+        is_paren_kwd = parent.type == 'KEYWORD'
         skip_kwd = self._remove_keywords or (
-                paren_kwd and (self._remove_keyword_data or any(m.match(kwd) for m in self._keyword_filters)))
-        if not skip_kwd:
+                is_paren_kwd and (self._remove_keyword_data or any(m.match(kwd) for m in self._keyword_filters)))
+
+        if skip_kwd:
+            parent.skipped_keywords.append(kwd)
+        else:
             logger.debug(f'ReportPortal - Start Keyword: {attributes}')
             kwd.rp_item_id = self.service.start_keyword(keyword=kwd, ts=ts)
         self._add_current_item(kwd)
@@ -432,8 +435,7 @@ class listener:
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
-        if self._remove_keyword_data:
-            return
+        # TODO: add finish condition for skipped keywords
 
         kwd = self._remove_current_item().update(attributes)
         logger.debug(f'ReportPortal - End Keyword: {kwd.robot_attributes}')
