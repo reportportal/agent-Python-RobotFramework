@@ -92,7 +92,7 @@ def check_rp_enabled(func):
 
 class _KeywordMatch(ABC):
     @abstractmethod
-    def match(self, line: Optional[str]) -> bool:
+    def match(self, kw: Keyword) -> bool:
         ...
 
 
@@ -133,8 +133,9 @@ class listener:
     _items: LifoQueue[Union[Keyword, Launch, Suite, Test]]
     _service: Optional[RobotService]
     _variables: Optional[Variables]
-    _remove_keywords: List[_KeywordMatch] = []
-    _realtime_keywords: bool = True
+    _keyword_filters: List[_KeywordMatch] = []
+    _remove_keyword_data: bool = False
+    _remove_keywords: bool = False
     ROBOT_LISTENER_API_VERSION = 2
 
     def __init__(self) -> None:
@@ -208,6 +209,28 @@ class listener:
         """Get the last item from the self._items queue."""
         return self._items.last()
 
+    def _post_skipped_keywords(self) -> None:
+        # TODO: implement
+        ...
+
+    def _log_message(self, message: LogMessage) -> None:
+        """Send log message to the Report Portal.
+
+        :param message: Internal message object to send
+        """
+        if message.attachment:
+            logger.debug(f'ReportPortal - Log Message with Attachment: {message}')
+        else:
+            logger.debug(f'ReportPortal - Log Message: {message}')
+
+        if not message.item_id and not message.launch_log:
+            if message.level not in ['ERROR', 'WARN']:
+                self.current_item.skipped_logs.append(message)
+                return
+            # Keyword is not posted yet, due to '--removekeywords' option
+            self._post_skipped_keywords()
+        self.service.log(message=message)
+
     @check_rp_enabled
     def log_message(self, message: Dict) -> None:
         """Send log message to the Report Portal.
@@ -215,8 +238,7 @@ class listener:
         :param message: Message passed by the Robot Framework
         """
         msg = self._build_msg_struct(message)
-        logger.debug(f'ReportPortal - Log Message: {message}')
-        self.service.log(message=msg)
+        self._log_message(msg)
 
     @check_rp_enabled
     def log_message_with_image(self, msg: Dict, image: str):
@@ -232,8 +254,7 @@ class listener:
                 'data': fh.read(),
                 'mime': guess_type(image)[0] or DEFAULT_BINARY_FILE_TYPE
             }
-        logger.debug(f'ReportPortal - Log Message with Image: {mes} {image}')
-        self.service.log(message=mes)
+        self._log_message(mes)
 
     @property
     def parent_id(self) -> Optional[str]:
@@ -264,31 +285,27 @@ class listener:
                 # noinspection PyProtectedMember
                 for pattern_str in set(current_context.output._settings.remove_keywords):
                     if 'ALL' == pattern_str.upper():
-                        self._remove_keywords = [_KeywordNameMatch(None)]
+                        self._remove_keyword_data = True
                         break
                     if 'PASSED' == pattern_str.upper():
-                        self._remove_keywords = [_KeywordStatusMatch('PASS')]
-                        self._realtime_keywords = False
+                        self._remove_keywords = True
                         continue
                     if pattern_str.upper() in {'NOT_RUN', 'NOTRUN', 'NOT RUN'}:
-                        self._remove_keywords = [_KeywordStatusMatch('NOT RUN')]
-                        self._realtime_keywords = False
+                        self._keyword_filters = [_KeywordStatusMatch('NOT RUN')]
                         continue
                     if pattern_str.upper() in {'FOR', 'WHILE', 'WUKS'}:
-                        self._remove_keywords = [_KeywordNameMatch(pattern_str)]
+                        self._keyword_filters = [_KeywordNameMatch(pattern_str)]
                         continue
                     if ':' in pattern_str:
                         pattern_type, pattern = pattern_str.split(':', 1)
                         pattern_type = pattern_type.strip().upper()
                         if 'NAME' == pattern_type.upper():
-                            self._remove_keywords.append(_KeywordNameMatch(pattern.strip()))
+                            self._keyword_filters.append(_KeywordNameMatch(pattern.strip()))
                         elif 'TAG' == pattern_type.upper():
-                            self._remove_keywords.append(_KeywordTagMatch(pattern.strip()))
-                            self._realtime_keywords = False
+                            self._keyword_filters.append(_KeywordTagMatch(pattern.strip()))
         except ImportError:
             warn('Unable to locate Robot Framework context. "removekeywords" feature will not work.', stacklevel=2)
 
-    @check_rp_enabled
     def start_launch(self, attributes: Dict[str, Any], ts: Optional[Any] = None) -> None:
         """Start a new launch at the ReportPortal.
 
@@ -308,6 +325,16 @@ class listener:
             ts=ts,
             rerun=self.variables.rerun,
             rerun_of=self.variables.rerun_of)
+
+    def finish_launch(self, attributes: Dict[str, Any], ts: Optional[Any] = None) -> None:
+        """Finish started launch at the ReportPortal.
+
+        :param attributes: Dictionary passed by the Robot Framework
+        :param ts:         Timestamp(used by the ResultVisitor)
+        """
+        launch = Launch(self.variables.launch_name, attributes, None)
+        logger.debug(f'ReportPortal - End Launch: {launch.robot_attributes}')
+        self.service.finish_launch(launch=launch, ts=ts)
 
     @check_rp_enabled
     def start_suite(self, name: str, attributes: Dict, ts: Optional[Any] = None) -> None:
@@ -341,9 +368,7 @@ class listener:
         logger.debug(f'ReportPortal - End Suite: {suite.robot_attributes}')
         self.service.finish_suite(suite=suite, ts=ts)
         if attributes['id'] == MAIN_SUITE_ID:
-            launch = Launch(self.variables.launch_name, attributes, None)
-            logger.debug(msg=f'ReportPortal - End Launch: {attributes}')
-            self.service.finish_launch(launch=launch, ts=ts)
+            self.finish_launch(attributes, ts)
 
     @check_rp_enabled
     def start_test(self, name: str, attributes: Dict, ts: Optional[Any] = None) -> None:
@@ -389,9 +414,14 @@ class listener:
         :param ts:         Timestamp(used by the ResultVisitor)
         """
         kwd = Keyword(name=name, parent_type=self.current_item.type, robot_attributes=attributes)
-        kwd.rp_parent_item_id = self.parent_id
-        logger.debug(f'ReportPortal - Start Keyword: {attributes}')
-        kwd.rp_item_id = self.service.start_keyword(keyword=kwd, ts=ts)
+        parent = self.current_item
+        kwd.rp_parent_item_id = parent.rp_item_id
+        paren_kwd = parent.type == 'KEYWORD'
+        skip_kwd = self._remove_keywords or (
+                paren_kwd and (self._remove_keyword_data or any(m.match(kwd) for m in self._keyword_filters)))
+        if not skip_kwd:
+            logger.debug(f'ReportPortal - Start Keyword: {attributes}')
+            kwd.rp_item_id = self.service.start_keyword(keyword=kwd, ts=ts)
         self._add_current_item(kwd)
 
     @check_rp_enabled
@@ -402,6 +432,9 @@ class listener:
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
+        if self._remove_keyword_data:
+            return
+
         kwd = self._remove_current_item().update(attributes)
         logger.debug(f'ReportPortal - End Keyword: {kwd.robot_attributes}')
         self.service.finish_keyword(keyword=kwd, ts=ts)

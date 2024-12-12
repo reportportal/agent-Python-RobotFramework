@@ -23,6 +23,24 @@ from reportportal_client.helpers import gen_attributes
 TEST_CASE_ID_SIGN = 'test_case_id:'
 
 
+class LogMessage(str):
+    """Class represents Robot Framework messages."""
+
+    attachment: Optional[Dict[str, str]]
+    launch_log: bool
+    item_id: Optional[str]
+    level: str
+    message: str
+
+    def __init__(self, message: str):
+        """Initialize required attributes."""
+        self.attachment = None
+        self.item_id = None
+        self.level = 'INFO'
+        self.launch_log = False
+        self.message = message
+
+
 class Suite:
     """Class represents Robot Framework test suite."""
 
@@ -116,6 +134,81 @@ class Launch(Suite):
         return self.launch_attributes
 
 
+class Keyword:
+    """Class represents Robot Framework keyword."""
+
+    robot_attributes: Dict[str, Any]
+    args: List[str]
+    assign: List[str]
+    doc: str
+    end_time: str
+    keyword_name: str
+    keyword_type: str
+    libname: str
+    name: str
+    rp_item_id: Optional[str]
+    rp_parent_item_id: Optional[str]
+    parent_type: str
+    start_time: str
+    status: str
+    tags: List[str]
+    type: str = 'KEYWORD'
+    skipped_logs: List[LogMessage] = []
+
+    def __init__(self, name: str, robot_attributes: Dict[str, Any], parent_type: Optional[str] = None):
+        """Initialize required attributes.
+
+        :param name:              Name of the keyword
+        :param robot_attributes:  Attributes passed through the listener
+        :param parent_type:       Type of the parent test item
+        """
+        self.robot_attributes = robot_attributes
+        self.args = robot_attributes['args']
+        self.assign = robot_attributes['assign']
+        self.doc = robot_markup_to_markdown(robot_attributes['doc'])
+        self.end_time = robot_attributes.get('endtime')
+        self.keyword_name = robot_attributes['kwname']
+        self.keyword_type = robot_attributes['type']
+        self.libname = robot_attributes['libname']
+        self.name = name
+        self.rp_item_id = None
+        self.rp_parent_item_id = None
+        self.parent_type = parent_type
+        self.start_time = robot_attributes['starttime']
+        self.status = robot_attributes.get('status')
+        self.tags = robot_attributes['tags']
+        self.type = 'KEYWORD'
+
+    def get_name(self) -> str:
+        """Get name of the keyword suitable for ReportPortal."""
+        assign = ', '.join(self.assign)
+        assignment = '{0} = '.format(assign) if self.assign else ''
+        arguments = ', '.join(self.args)
+        full_name = f'{assignment}{self.name} ({arguments})'
+        return full_name[:256]
+
+    def get_type(self) -> str:
+        """Get keyword type."""
+        if self.keyword_type.lower() in ('setup', 'teardown'):
+            if self.parent_type.lower() == 'keyword':
+                return 'STEP'
+            if self.keyword_type.lower() == 'setup':
+                return 'BEFORE_{0}'.format(self.parent_type.upper())
+            if self.keyword_type.lower() == 'teardown':
+                return 'AFTER_{0}'.format(self.parent_type.upper())
+        else:
+            return 'STEP'
+
+    def update(self, attributes: Dict[str, Any]) -> 'Keyword':
+        """Update keyword attributes on keyword finish.
+
+        :param attributes: Suite attributes passed through the listener
+        """
+        self.end_time = attributes.get('endtime', '')
+        self.status = attributes.get('status')
+        return self
+
+
 class Test:
     """Class represents Robot Framework test case."""
 
@@ -135,6 +228,7 @@ class Test:
     status: str
     template: str
     type: str = 'TEST'
+    skipped_keywords: List[Keyword]
 
     def __init__(self, name: str, robot_attributes: Dict[str, Any], test_attributes: List[str]):
         """Initialize required attributes.
@@ -213,95 +307,3 @@ class Test:
         self.message = attributes.get('message')
         self.status = attributes.get('status')
         return self
-
-
-class Keyword:
-    """Class represents Robot Framework keyword."""
-
-    robot_attributes: Dict[str, Any]
-    args: List[str]
-    assign: List[str]
-    doc: str
-    end_time: str
-    keyword_name: str
-    keyword_type: str
-    libname: str
-    name: str
-    rp_item_id: Optional[str]
-    rp_parent_item_id: Optional[str]
-    parent_type: str
-    start_time: str
-    status: str
-    tags: List[str]
-    type: str = 'KEYWORD'
-
-    def __init__(self, name: str, robot_attributes: Dict[str, Any], parent_type: Optional[str] = None):
-        """Initialize required attributes.
-
-        :param name:              Name of the keyword
-        :param robot_attributes:  Attributes passed through the listener
-        :param parent_type:       Type of the parent test item
-        """
-        self.robot_attributes = robot_attributes
-        self.args = robot_attributes['args']
-        self.assign = robot_attributes['assign']
-        self.doc = robot_markup_to_markdown(robot_attributes['doc'])
-        self.end_time = robot_attributes.get('endtime')
-        self.keyword_name = robot_attributes['kwname']
-        self.keyword_type = robot_attributes['type']
-        self.libname = robot_attributes['libname']
-        self.name = name
-        self.rp_item_id = None
-        self.rp_parent_item_id = None
-        self.parent_type = parent_type
-        self.start_time = robot_attributes['starttime']
-        self.status = robot_attributes.get('status')
-        self.tags = robot_attributes['tags']
-        self.type = 'KEYWORD'
-
-    def get_name(self) -> str:
-        """Get name of the keyword suitable for ReportPortal."""
-        assign = ', '.join(self.assign)
-        assignment = '{0} = '.format(assign) if self.assign else ''
-        arguments = ', '.join(self.args)
-        full_name = f'{assignment}{self.name} ({arguments})'
-        return full_name[:256]
-
-    def get_type(self) -> str:
-        """Get keyword type."""
-        if self.keyword_type.lower() in ('setup', 'teardown'):
-            if self.parent_type.lower() == 'keyword':
-                return 'STEP'
-            if self.keyword_type.lower() == 'setup':
-                return 'BEFORE_{0}'.format(self.parent_type.upper())
-            if self.keyword_type.lower() == 'teardown':
-                return 'AFTER_{0}'.format(self.parent_type.upper())
-        else:
-            return 'STEP'
-
-    def update(self, attributes: Dict[str, Any]) -> 'Keyword':
-        """Update keyword attributes on keyword finish.
-
-        :param attributes: Suite attributes passed through the listener
-        """
-        self.end_time = attributes.get('endtime', '')
-        self.status = attributes.get('status')
-        return self
-
-
-class LogMessage(str):
-    """Class represents Robot Framework messages."""
-
-    attachment: Optional[Dict[str, str]]
-    launch_log: bool
-    item_id: Optional[str]
-    level: str
-    message: str
-
-    def __init__(self, message: str):
-        """Initialize required attributes."""
-        self.attachment = None
-        self.item_id = None
-        self.level = 'INFO'
-        self.launch_log = False
-        self.message = message
