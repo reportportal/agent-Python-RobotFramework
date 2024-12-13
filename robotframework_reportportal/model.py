@@ -155,6 +155,8 @@ class Keyword:
     type: str = 'KEYWORD'
     skipped_logs: List[LogMessage] = []
     skipped_keywords: List['Keyword'] = []
+    posted: bool = True
+    remove_data: bool = False
 
     def __init__(self, name: str, robot_attributes: Dict[str, Any], parent_type: Optional[str] = None):
         """Initialize required attributes.
@@ -230,6 +232,7 @@ class Test:
     template: str
     type: str = 'TEST'
     skipped_keywords: List[Keyword]
+    remove_data: bool = False
 
     def __init__(self, name: str, robot_attributes: Dict[str, Any], test_attributes: List[str]):
         """Initialize required attributes.

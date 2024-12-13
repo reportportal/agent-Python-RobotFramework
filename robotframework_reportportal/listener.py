@@ -18,6 +18,7 @@ import binascii
 import logging
 import os
 import re
+import uuid
 from abc import abstractmethod, ABC
 from functools import wraps
 from mimetypes import guess_type
@@ -209,9 +210,20 @@ class listener:
         """Get the last item from the self._items queue."""
         return self._items.last()
 
+    def __post_skipped_keyword(self, kwd: Keyword) -> None:
+        if not kwd.posted:
+            self._do_start_keyword(kwd)
+
+        for log_message in kwd.skipped_logs:
+            self._log_message(log_message)
+        for skipped_kwd in kwd.skipped_keywords:
+            self.__post_skipped_keyword(skipped_kwd)
+
     def _post_skipped_keywords(self) -> None:
-        # TODO: implement
-        ...
+        kwd = self.current_item
+        if kwd.type != 'KEYWORD':
+            return
+        self.__post_skipped_keyword(kwd)
 
     def _log_message(self, message: LogMessage) -> None:
         """Send log message to the Report Portal.
@@ -223,13 +235,12 @@ class listener:
         else:
             logger.debug(f'ReportPortal - Log Message: {message}')
 
-        if not message.item_id and not message.launch_log:
-            if message.level not in ['ERROR', 'WARN']:
-                self.current_item.skipped_logs.append(message)
-                return
-            # Keyword is not posted yet, due to '--removekeywords' option
+        if not self.current_item.posted and message.level not in ['ERROR', 'WARN']:
+            self.current_item.skipped_logs.append(message)
+        else:
+            # Post everything skipped by '--removekeywords' option
             self._post_skipped_keywords()
-        self.service.log(message=message)
+            self.service.log(message=message)
 
     @check_rp_enabled
     def log_message(self, message: Dict) -> None:
@@ -289,7 +300,7 @@ class listener:
                         break
                     if 'PASSED' == pattern_str.upper():
                         self._remove_keywords = True
-                        continue
+                        break
                     if pattern_str.upper() in {'NOT_RUN', 'NOTRUN', 'NOT RUN'}:
                         self._keyword_filters = [_KeywordStatusMatch('NOT RUN')]
                         continue
@@ -370,6 +381,12 @@ class listener:
         if attributes['id'] == MAIN_SUITE_ID:
             self.finish_launch(attributes, ts)
 
+    def _log_keyword_data_removed(self, item_id: str) -> None:
+        msg = LogMessage(f'Keyword data removed using --RemoveKeywords option.')
+        msg.level = 'INFO'
+        msg.item_id = item_id
+        self._log_message(msg)
+
     @check_rp_enabled
     def start_test(self, name: str, attributes: Dict, ts: Optional[Any] = None) -> None:
         """Start a new test case at the ReportPortal.
@@ -383,10 +400,13 @@ class listener:
             attributes = attributes.copy()
             attributes['source'] = getattr(self.current_item, 'source', None)
         test = Test(name=name, robot_attributes=attributes, test_attributes=self.variables.test_attributes)
+        test.remove_data = self._remove_keywords
         logger.debug(f'ReportPortal - Start Test: {attributes}')
         test.rp_parent_item_id = self.parent_id
         test.rp_item_id = self.service.start_test(test=test, ts=ts)
         self._add_current_item(test)
+        if test.remove_data:
+            self._log_keyword_data_removed(test.rp_item_id)
 
     @check_rp_enabled
     def end_test(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
@@ -405,6 +425,11 @@ class listener:
         self._remove_current_item()
         self.service.finish_test(test=test, ts=ts)
 
+    def _do_start_keyword(self, keyword: Keyword, ts: Optional[str] = None) -> None:
+        logger.debug(f'ReportPortal - Start Keyword: {keyword}')
+        keyword.rp_item_id = self.service.start_keyword(keyword=keyword, ts=ts)
+        keyword.posted = True
+
     @check_rp_enabled
     def start_keyword(self, name: str, attributes: Dict, ts: Optional[Any] = None) -> None:
         """Start a new keyword(test step) at the ReportPortal.
@@ -416,15 +441,18 @@ class listener:
         kwd = Keyword(name=name, parent_type=self.current_item.type, robot_attributes=attributes)
         parent = self.current_item
         kwd.rp_parent_item_id = parent.rp_item_id
-        is_paren_kwd = parent.type == 'KEYWORD'
-        skip_kwd = self._remove_keywords or (
-                is_paren_kwd and (self._remove_keyword_data or any(m.match(kwd) for m in self._keyword_filters)))
+        skip_kwd = parent.remove_data
+        kwd.remove_data = skip_kwd or self._remove_keyword_data or any(m.match(kwd) for m in self._keyword_filters)
 
         if skip_kwd:
+            kwd.rp_item_id = str(uuid.uuid4())
             parent.skipped_keywords.append(kwd)
+            kwd.posted = False
         else:
-            logger.debug(f'ReportPortal - Start Keyword: {attributes}')
-            kwd.rp_item_id = self.service.start_keyword(keyword=kwd, ts=ts)
+            self._do_start_keyword(kwd, ts)
+            if kwd.remove_data:
+                self._log_keyword_data_removed(kwd.rp_item_id)
+
         self._add_current_item(kwd)
 
     @check_rp_enabled
@@ -436,8 +464,12 @@ class listener:
         :param ts:         Timestamp(used by the ResultVisitor)
         """
         # TODO: add finish condition for skipped keywords
+        if attributes.get('status') == 'FAIL' and not self.current_item.posted:
+            self._post_skipped_keywords()
 
         kwd = self._remove_current_item().update(attributes)
+        if not kwd.posted:
+            return
         logger.debug(f'ReportPortal - End Keyword: {kwd.robot_attributes}')
         self.service.finish_keyword(keyword=kwd, ts=ts)
 

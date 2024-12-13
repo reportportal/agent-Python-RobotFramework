@@ -232,6 +232,8 @@ class RobotService:
             'parent_item_id': keyword.rp_parent_item_id,
             'start_time': ts or to_epoch(keyword.start_time) or timestamp()
         }
+        if keyword.rp_item_id:
+            start_rq['uuid'] = keyword.rp_item_id
         logger.debug('ReportPortal - Start keyword: request_body={0}'.format(start_rq))
         return self.rp.start_test_item(**start_rq)
 
