@@ -211,18 +211,19 @@ class listener:
         return self._items.last()
 
     def __post_skipped_keyword(self, kwd: Keyword) -> None:
-        if not kwd.posted:
-            self._do_start_keyword(kwd)
-
         for log_message in kwd.skipped_logs:
             self._log_message(log_message)
         for skipped_kwd in kwd.skipped_keywords:
+            self._do_start_keyword(kwd)
             self.__post_skipped_keyword(skipped_kwd)
+            self._do_end_keyword(kwd)
 
     def _post_skipped_keywords(self) -> None:
         kwd = self.current_item
-        if not kwd or kwd.type != 'KEYWORD':
+        if not kwd:
             return
+        if not getattr(kwd, 'posted', True):
+            self._do_start_keyword(kwd)
         self.__post_skipped_keyword(kwd)
 
     def _log_message(self, message: LogMessage) -> None:
@@ -364,9 +365,12 @@ class listener:
         else:
             logger.debug(f'ReportPortal - Start Suite: {attributes}')
         suite = Suite(name, attributes)
+        suite.remove_data = self._remove_keywords
         suite.rp_parent_item_id = self.parent_id
         suite.rp_item_id = self.service.start_suite(suite=suite, ts=ts)
         self._add_current_item(suite)
+        if suite.remove_data:
+            self._log_keyword_data_removed(suite.rp_item_id)
 
     @check_rp_enabled
     def end_suite(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
@@ -420,6 +424,8 @@ class listener:
         test = self.current_item.update(attributes)
         if not test.critical and test.status == 'FAIL':
             test.status = 'SKIP'
+        if test.remove_data and attributes['status'] == 'FAIL':
+            self._post_skipped_keywords()
         if test.message:
             self.log_message({'message': test.message, 'level': 'DEBUG'})
         logger.debug(f'ReportPortal - End Test: {test.robot_attributes}')
@@ -427,7 +433,7 @@ class listener:
         self.service.finish_test(test=test, ts=ts)
 
     def _do_start_keyword(self, keyword: Keyword, ts: Optional[str] = None) -> None:
-        logger.debug(f'ReportPortal - Start Keyword: {keyword}')
+        logger.debug(f'ReportPortal - Start Keyword: {keyword.robot_attributes}')
         keyword.rp_item_id = self.service.start_keyword(keyword=keyword, ts=ts)
         keyword.posted = True
 
@@ -456,6 +462,10 @@ class listener:
 
         self._add_current_item(kwd)
 
+    def _do_end_keyword(self, keyword: Keyword, ts: Optional[str] = None) -> None:
+        logger.debug(f'ReportPortal - End Keyword: {keyword.robot_attributes}')
+        self.service.finish_keyword(keyword=keyword, ts=ts)
+
     @check_rp_enabled
     def end_keyword(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
         """Finish started keyword at the ReportPortal.
@@ -471,8 +481,7 @@ class listener:
         kwd = self._remove_current_item().update(attributes)
         if not kwd.posted:
             return
-        logger.debug(f'ReportPortal - End Keyword: {kwd.robot_attributes}')
-        self.service.finish_keyword(keyword=kwd, ts=ts)
+        self._do_end_keyword(kwd, ts)
 
     def log_file(self, log_path: str) -> None:
         """Attach HTML log file created by Robot Framework to RP launch.

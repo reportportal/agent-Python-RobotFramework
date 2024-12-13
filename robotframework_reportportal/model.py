@@ -41,99 +41,6 @@ class LogMessage(str):
         self.message = message
 
 
-class Suite:
-    """Class represents Robot Framework test suite."""
-
-    robot_attributes: Union[List[str], Dict[str, Any]]
-    doc: str
-    end_time: str
-    longname: str
-    message: str
-    metadata: Dict[str, str]
-    name: str
-    robot_id: str
-    rp_item_id: Optional[str]
-    rp_parent_item_id: Optional[str]
-    start_time: Optional[str]
-    statistics: str
-    status: str
-    suites: List[str]
-    tests: List[str]
-    total_tests: int
-    type: str = 'SUITE'
-
-    def __init__(self, name: str, robot_attributes: Dict[str, Any]):
-        """Initialize required attributes.
-
-        :param name:       Suite name
-        :param robot_attributes: Suite attributes passed through the listener
-        """
-        self.robot_attributes = robot_attributes
-        self.doc = robot_markup_to_markdown(robot_attributes['doc'])
-        self.end_time = robot_attributes.get('endtime', '')
-        self.longname = robot_attributes['longname']
-        self.message = robot_attributes.get('message')
-        self.metadata = robot_attributes['metadata']
-        self.name = name
-        self.robot_id = robot_attributes['id']
-        self.rp_item_id = None
-        self.rp_parent_item_id = None
-        self.start_time = robot_attributes.get('starttime')
-        self.statistics = robot_attributes.get('statistics')
-        self.status = robot_attributes.get('status')
-        self.suites = robot_attributes['suites']
-        self.tests = robot_attributes['tests']
-        self.total_tests = robot_attributes['totaltests']
-        self.type = 'SUITE'
-
-    @property
-    def attributes(self) -> Optional[List[Dict[str, str]]]:
-        """Get Suite attributes."""
-        if self.metadata is None or not self.metadata:
-            return None
-        return [{'key': key, 'value': value} for key, value in self.metadata.items()]
-
-    @property
-    def source(self) -> str:
-        """Return the test case source file path."""
-        if self.robot_attributes.get('source') is not None:
-            return os.path.relpath(self.robot_attributes['source'], os.getcwd())
-
-    def update(self, attributes: Dict[str, Any]) -> 'Suite':
-        """Update suite attributes on suite finish.
-
-        :param attributes: Suite attributes passed through the listener
-        """
-        self.end_time = attributes.get('endtime', '')
-        self.message = attributes.get('message')
-        self.status = attributes.get('status')
-        self.statistics = attributes.get('statistics')
-        return self
-
-
-class Launch(Suite):
-    """Class represents Robot Framework test suite."""
-
-    launch_attributes: Optional[List[Dict[str, str]]]
-    type: str = 'LAUNCH'
-
-    def __init__(self, name: str, robot_attributes: Dict[str, Any], launch_attributes: Optional[List[str]]):
-        """Initialize required attributes.
-
-        :param name:       Launch name
-        :param robot_attributes: Suite attributes passed through the listener
-        :param launch_attributes: Launch attributes from variables
-        """
-        super().__init__(name, robot_attributes)
-        self.launch_attributes = gen_attributes(launch_attributes or [])
-        self.type = 'LAUNCH'
-
-    @property
-    def attributes(self) -> Optional[List[Dict[str, str]]]:
-        """Get Launch attributes."""
-        return self.launch_attributes
-
-
 class Keyword:
     """Class represents Robot Framework keyword."""
 
@@ -210,6 +117,101 @@ class Keyword:
         self.end_time = attributes.get('endtime', '')
         self.status = attributes.get('status')
         return self
+
+
+class Suite:
+    """Class represents Robot Framework test suite."""
+
+    robot_attributes: Union[List[str], Dict[str, Any]]
+    doc: str
+    end_time: str
+    longname: str
+    message: str
+    metadata: Dict[str, str]
+    name: str
+    robot_id: str
+    rp_item_id: Optional[str]
+    rp_parent_item_id: Optional[str]
+    start_time: Optional[str]
+    statistics: str
+    status: str
+    suites: List[str]
+    tests: List[str]
+    total_tests: int
+    type: str = 'SUITE'
+    skipped_keywords: List[Keyword]
+    remove_data: bool = False
+
+    def __init__(self, name: str, robot_attributes: Dict[str, Any]):
+        """Initialize required attributes.
+
+        :param name:       Suite name
+        :param robot_attributes: Suite attributes passed through the listener
+        """
+        self.robot_attributes = robot_attributes
+        self.doc = robot_markup_to_markdown(robot_attributes['doc'])
+        self.end_time = robot_attributes.get('endtime', '')
+        self.longname = robot_attributes['longname']
+        self.message = robot_attributes.get('message')
+        self.metadata = robot_attributes['metadata']
+        self.name = name
+        self.robot_id = robot_attributes['id']
+        self.rp_item_id = None
+        self.rp_parent_item_id = None
+        self.start_time = robot_attributes.get('starttime')
+        self.statistics = robot_attributes.get('statistics')
+        self.status = robot_attributes.get('status')
+        self.suites = robot_attributes['suites']
+        self.tests = robot_attributes['tests']
+        self.total_tests = robot_attributes['totaltests']
+        self.type = 'SUITE'
+
+    @property
+    def attributes(self) -> Optional[List[Dict[str, str]]]:
+        """Get Suite attributes."""
+        if self.metadata is None or not self.metadata:
+            return None
+        return [{'key': key, 'value': value} for key, value in self.metadata.items()]
+
+    @property
+    def source(self) -> str:
+        """Return the test case source file path."""
+        if self.robot_attributes.get('source') is not None:
+            return os.path.relpath(self.robot_attributes['source'], os.getcwd())
+
+    def update(self, attributes: Dict[str, Any]) -> 'Suite':
+        """Update suite attributes on suite finish.
+
+        :param attributes: Suite attributes passed through the listener
+        """
+        self.end_time = attributes.get('endtime', '')
+        self.message = attributes.get('message')
+        self.status = attributes.get('status')
+        self.statistics = attributes.get('statistics')
+        return self
+
+
+class Launch(Suite):
+    """Class represents Robot Framework test suite."""
+
+    launch_attributes: Optional[List[Dict[str, str]]]
+    type: str = 'LAUNCH'
+
+    def __init__(self, name: str, robot_attributes: Dict[str, Any], launch_attributes: Optional[List[str]]):
+        """Initialize required attributes.
+
+        :param name:       Launch name
+        :param robot_attributes: Suite attributes passed through the listener
+        :param launch_attributes: Launch attributes from variables
+        """
+        super().__init__(name, robot_attributes)
+        self.launch_attributes = gen_attributes(launch_attributes or [])
+        self.type = 'LAUNCH'
+
+    @property
+    def attributes(self) -> Optional[List[Dict[str, str]]]:
+        """Get Launch attributes."""
+        return self.launch_attributes
 
 
 class Test:
