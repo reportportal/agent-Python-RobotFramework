@@ -221,7 +221,7 @@ class listener:
 
     def _post_skipped_keywords(self) -> None:
         kwd = self.current_item
-        if kwd.type != 'KEYWORD':
+        if not kwd or kwd.type != 'KEYWORD':
             return
         self.__post_skipped_keyword(kwd)
 
@@ -235,7 +235,8 @@ class listener:
         else:
             logger.debug(f'ReportPortal - Log Message: {message}')
 
-        if not self.current_item.posted and message.level not in ['ERROR', 'WARN']:
+        current_item = self.current_item
+        if current_item and not getattr(current_item, 'posted', True) and message.level not in ['ERROR', 'WARN']:
             self.current_item.skipped_logs.append(message)
         else:
             # Post everything skipped by '--removekeywords' option

@@ -14,7 +14,6 @@ limitations under the License
 """
 
 import pytest
-from delayed_assert import assert_expectations, expect
 from unittest import mock
 
 from robotframework_reportportal import logger
@@ -61,19 +60,17 @@ def test_logger_params_bypass(mock_logger, method, params):
         launch_log = params[3]
 
     if method == 'info' and params[2]:
-        expect(mock_logger.console.call_count == 1)
-        expect(mock_logger.console.call_args[0][0] == params[0])
-        expect(mock_logger.console.call_args[0][1] is True)
-        expect(mock_logger.console.call_args[0][2] == 'stdout')
+        assert mock_logger.console.call_count == 1
+        assert mock_logger.console.call_args[0][0] == params[0]
+        assert mock_logger.console.call_args[0][1] is True
+        assert mock_logger.console.call_args[0][2] == 'stdout'
     else:
-        expect(mock_logger.console.call_count == 0)
+        assert mock_logger.console.call_count == 0
 
     message = mock_logger.write.call_args[0][0]
-    expect(message.level == method.upper())
-    expect(message.message == params[0])
-    expect(message.attachment == attachment)
-    expect(message.launch_log == launch_log)
-    expect(mock_logger.write.call_args[0][1] == method.upper())
-    expect(mock_logger.write.call_args[0][2] == params[1])
-
-    assert_expectations()
+    assert message.level == method.upper()
+    assert message.message == params[0]
+    assert message.attachment == attachment
+    assert message.launch_log == launch_log
+    assert mock_logger.write.call_args[0][1] == method.upper()
+    assert mock_logger.write.call_args[0][2] == params[1]

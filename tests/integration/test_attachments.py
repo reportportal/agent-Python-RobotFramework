@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from delayed_assert import assert_expectations, expect
 from unittest import mock
 
 from tests import REPORT_PORTAL_SERVICE
@@ -27,20 +26,15 @@ def verify_attachment(mock_client_init, result, message, name, content_type):
     assert len(calls) == 1
 
     call_params = calls[0][1]
-    expect('attachment' in call_params.keys(),
-           'log entry does not contain attachment')
-    expect('level' in call_params.keys(),
-           'log entry does not contain level')
-    expect('message' in call_params.keys(),
-           'log entry does not contain message')
+    assert 'attachment' in call_params.keys(), 'log entry does not contain attachment'
+    assert 'level' in call_params.keys(), 'log entry does not contain level'
+    assert 'message' in call_params.keys(), 'log entry does not contain message'
 
-    assert_expectations()
-    expect(call_params['level'] == 'INFO')
-    expect(call_params['message'] == message)
-    expect(call_params['attachment']['name'] == name)
-    expect(call_params['attachment']['mime'] == content_type)
-    expect(len(call_params['attachment']['data']) > 0)
-    assert_expectations()
+    assert call_params['level'] == 'INFO'
+    assert call_params['message'] == message
+    assert call_params['attachment']['name'] == name
+    assert call_params['attachment']['mime'] == content_type
+    assert len(call_params['attachment']['data']) > 0
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)

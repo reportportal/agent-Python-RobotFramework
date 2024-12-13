@@ -14,7 +14,6 @@
 
 import uuid
 
-from delayed_assert import assert_expectations, expect
 from unittest import mock
 
 from tests import REPORT_PORTAL_SERVICE
@@ -44,10 +43,8 @@ def test_launch_log(mock_client_init):
                     call[1]['item_id'] in TEST_CASE_UUIDS]
 
     for start in start_tests:
-        expect(len(start[1]['attributes']) == 0)
+        assert len(start[1]['attributes']) == 0
 
-    expect(finish_tests[0][1]['attributes'] == [{'value': 'dynamic_tag'}])
-    expect(finish_tests[1][1]['attributes'] == [])
-    expect(finish_tests[2][1]['attributes'] ==
-           [{'value': 'multiple_tags_one'}, {'value': 'multiple_tags_two'}])
-    assert_expectations()
+    assert finish_tests[0][1]['attributes'] == [{'value': 'dynamic_tag'}]
+    assert finish_tests[1][1]['attributes'] == []
+    assert finish_tests[2][1]['attributes'] == [{'value': 'multiple_tags_one'}, {'value': 'multiple_tags_two'}]

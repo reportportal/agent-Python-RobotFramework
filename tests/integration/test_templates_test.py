@@ -12,7 +12,6 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.s
 
-from delayed_assert import assert_expectations, expect
 from unittest import mock
 
 from tests import REPORT_PORTAL_SERVICE
@@ -35,7 +34,5 @@ def test_code_reference_template(mock_client_init, test, test_names,
                                               code_ref_suffixes):
         code_ref = call[1]['code_ref']
         test_case_id = call[1]['test_case_id']
-        expect(test_case_id == test + ':' + test_name)
-        expect(code_ref == test + ':' + code_ref_suff)
-
-    assert_expectations()
+        assert test_case_id == test + ':' + test_name
+        assert code_ref == test + ':' + code_ref_suff

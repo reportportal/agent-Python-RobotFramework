@@ -1,5 +1,4 @@
 # Dev dependencies
 pytest
 pytest-cov
-delayed_assert
 robotframework-datadriver
