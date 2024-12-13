@@ -211,7 +211,8 @@ class listener:
         return self._items.last()
 
     def __post_skipped_keyword(self, kwd: Keyword) -> None:
-        for log_message in kwd.skipped_logs:
+        skipped_logs = getattr(kwd, 'skipped_logs', [])
+        for log_message in skipped_logs:
             self._log_message(log_message)
         for skipped_kwd in kwd.skipped_keywords:
             self._do_start_keyword(kwd)
@@ -381,6 +382,8 @@ class listener:
         :param ts:         Timestamp(used by the ResultVisitor)
         """
         suite = self._remove_current_item().update(attributes)
+        if suite.remove_data and attributes['status'] == 'FAIL':
+            self._post_skipped_keywords()
         logger.debug(f'ReportPortal - End Suite: {suite.robot_attributes}')
         self.service.finish_suite(suite=suite, ts=ts)
         if attributes['id'] == MAIN_SUITE_ID:

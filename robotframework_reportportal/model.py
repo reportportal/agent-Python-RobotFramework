@@ -60,10 +60,10 @@ class Keyword:
     status: str
     tags: List[str]
     type: str = 'KEYWORD'
-    skipped_logs: List[LogMessage] = []
-    skipped_keywords: List['Keyword'] = []
-    posted: bool = True
-    remove_data: bool = False
+    skipped_logs: List[LogMessage]
+    skipped_keywords: List['Keyword']
+    posted: bool
+    remove_data: bool
 
     def __init__(self, name: str, robot_attributes: Dict[str, Any], parent_type: Optional[str] = None):
         """Initialize required attributes.
@@ -88,6 +88,10 @@ class Keyword:
         self.status = robot_attributes.get('status')
         self.tags = robot_attributes['tags']
         self.type = 'KEYWORD'
+        self.skipped_keywords = []
+        self.skipped_logs = []
+        self.posted = True
+        self.remove_data = False
 
     def get_name(self) -> str:
         """Get name of the keyword suitable for ReportPortal."""
@@ -140,7 +144,7 @@ class Suite:
     total_tests: int
     type: str = 'SUITE'
     skipped_keywords: List[Keyword]
-    remove_data: bool = False
+    remove_data: bool
 
     def __init__(self, name: str, robot_attributes: Dict[str, Any]):
         """Initialize required attributes.
@@ -165,6 +169,8 @@ class Suite:
         self.tests = robot_attributes['tests']
         self.total_tests = robot_attributes['totaltests']
         self.type = 'SUITE'
+        self.skipped_keywords = []
+        self.remove_data = False
 
     @property
     def attributes(self) -> Optional[List[Dict[str, str]]]:
@@ -234,7 +240,7 @@ class Test:
     template: str
     type: str = 'TEST'
     skipped_keywords: List[Keyword]
-    remove_data: bool = False
+    remove_data: bool
 
     def __init__(self, name: str, robot_attributes: Dict[str, Any], test_attributes: List[str]):
         """Initialize required attributes.
@@ -260,6 +266,8 @@ class Test:
         self.status = robot_attributes.get('status')
         self.template = robot_attributes['template']
         self.type = 'TEST'
+        self.skipped_keywords = []
+        self.remove_data = False
 
     @property
     def critical(self) -> bool:
