@@ -390,7 +390,7 @@ class listener:
             self.finish_launch(attributes, ts)
 
     def _log_keyword_data_removed(self, item_id: str) -> None:
-        msg = LogMessage(f'Keyword data removed using --RemoveKeywords option.')
+        msg = LogMessage('Keyword data removed using --RemoveKeywords option.')
         msg.level = 'INFO'
         msg.item_id = item_id
         self._log_message(msg)
