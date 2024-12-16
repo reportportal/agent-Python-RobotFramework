@@ -64,6 +64,7 @@ class Keyword:
     skipped_keywords: List['Keyword']
     posted: bool
     remove_data: bool
+    matched_filter: Any
 
     def __init__(self, name: str, robot_attributes: Dict[str, Any], parent_type: Optional[str] = None):
         """Initialize required attributes.
@@ -92,6 +93,7 @@ class Keyword:
         self.skipped_logs = []
         self.posted = True
         self.remove_data = False
+        self.matched_filter = None
 
     def get_name(self) -> str:
         """Get name of the keyword suitable for ReportPortal."""

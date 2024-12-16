@@ -42,6 +42,8 @@ DEFAULT_BINARY_FILE_TYPE = 'application/octet-stream'
 TRUNCATION_SIGN = "...'"
 REMOVED_KEYWORD_LOG = 'Keyword data removed using --RemoveKeywords option.'
 WKUS_KEYWORD_NAME = 'BuiltIn.Wait Until Keyword Succeeds'
+FOR_KEYWORD_NAME = 'BuiltIn.For'
+WHILE_KEYWORD_NAME = 'BuiltIn.While'
 
 
 def check_rp_enabled(func):
@@ -94,6 +96,8 @@ class _KeywordStatusMatch(_KeywordMatch):
 
 
 WKUS_KEYWORD_MATCH = _KeywordNameMatch(WKUS_KEYWORD_NAME)
+FOR_KEYWORD_MATCH = _KeywordNameMatch(FOR_KEYWORD_NAME)
+WHILE_KEYWORD_NAME = _KeywordNameMatch(WHILE_KEYWORD_NAME)
 
 
 # noinspection PyPep8Naming
@@ -214,7 +218,7 @@ class listener:
         current_item = self.current_item
         if current_item and not getattr(current_item, 'posted', True) and message.level not in ['ERROR', 'WARN']:
             self.current_item.skipped_logs.append(message)
-        else:
+        elif getattr(current_item, 'matched_filter', None) is not WKUS_KEYWORD_MATCH:
             # Post everything skipped by '--removekeywords' option
             self._post_skipped_keywords()
             self.service.log(message=message)
@@ -280,13 +284,15 @@ class listener:
                         self._remove_keywords = True
                         break
                     if pattern_str_upper in {'NOT_RUN', 'NOTRUN', 'NOT RUN'}:
-                        self._keyword_filters = [_KeywordStatusMatch('NOT RUN')]
+                        self._keyword_filters.append(_KeywordStatusMatch('NOT RUN'))
                         continue
                     if pattern_str_upper in {'FOR', 'WHILE', 'WUKS'}:
                         if pattern_str_upper == 'WUKS':
-                            self._keyword_filters = [WKUS_KEYWORD_MATCH]
+                            self._keyword_filters.append(WKUS_KEYWORD_MATCH)
+                        elif pattern_str_upper == 'FOR':
+                            self._keyword_filters.append(FOR_KEYWORD_MATCH)
                         else:
-                            self._keyword_filters = [_KeywordNameMatch(pattern_str)]
+                            self._keyword_filters.append(WHILE_KEYWORD_NAME)
                         continue
                     if ':' in pattern_str:
                         pattern_type, pattern = pattern_str.split(':', 1)
@@ -430,7 +436,16 @@ class listener:
         parent = self.current_item
         kwd.rp_parent_item_id = parent.rp_item_id
         skip_kwd = parent.remove_data
-        kwd.remove_data = skip_kwd or self._remove_keyword_data or any(m.match(kwd) for m in self._keyword_filters)
+        kwd.remove_data = skip_kwd or self._remove_keyword_data
+
+        if kwd.remove_data:
+            kwd.matched_filter = getattr(parent, 'matched_filter', None)
+        else:
+            for m in self._keyword_filters:
+                if m.match(kwd):
+                    kwd.remove_data = True
+                    kwd.matched_filter = m
+                    break
 
         if skip_kwd:
             kwd.rp_item_id = str(uuid.uuid4())
@@ -455,10 +470,11 @@ class listener:
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
-        if attributes.get('status') == 'FAIL' and not self.current_item.posted:
+        kwd = self.current_item.update(attributes)
+        if kwd.status == 'FAIL' and not kwd.posted and kwd.matched_filter is not WKUS_KEYWORD_MATCH:
             self._post_skipped_keywords()
 
-        kwd = self._remove_current_item().update(attributes)
+        self._remove_current_item()
         if not kwd.posted:
             return
         self._do_end_keyword(kwd, ts)
