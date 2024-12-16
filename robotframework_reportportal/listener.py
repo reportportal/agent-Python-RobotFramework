@@ -14,7 +14,6 @@
 
 """This module includes Robot Framework listener interfaces."""
 
-import binascii
 import logging
 import os
 import re
@@ -27,7 +26,7 @@ from warnings import warn
 
 from reportportal_client.helpers import LifoQueue, is_binary, guess_content_type_from_bytes
 
-from robotframework_reportportal.helpers import translate_glob_to_regex, match_pattern
+from robotframework_reportportal.helpers import translate_glob_to_regex, match_pattern, unescape
 from robotframework_reportportal.model import Keyword, Launch, Test, LogMessage, Suite
 from robotframework_reportportal.service import RobotService
 from robotframework_reportportal.static import MAIN_SUITE_ID, PABOT_WITHOUT_LAUNCH_ID_MSG
@@ -41,41 +40,8 @@ IMAGE_PATTERN = re.compile(
 
 DEFAULT_BINARY_FILE_TYPE = 'application/octet-stream'
 TRUNCATION_SIGN = "...'"
-
-
-def _unescape(binary_string: str, stop_at: int = -1):
-    result = bytearray()
-    join_list = list()
-    join_idx = -3
-    skip_next = False
-    for i, b in enumerate(binary_string):
-        if skip_next:
-            skip_next = False
-            continue
-        if i < join_idx + 2:
-            join_list.append(b)
-            continue
-        else:
-            if len(join_list) > 0:
-                for bb in binascii.unhexlify(''.join(join_list)):
-                    result.append(bb)
-                    if stop_at > 0:
-                        if len(result) >= stop_at:
-                            break
-                join_list = list()
-        if b == '\\' and binary_string[i + 1] == 'x':
-            skip_next = True
-            join_idx = i + 2
-            continue
-        for bb in b.encode('utf-8'):
-            result.append(bb)
-            if stop_at > 0:
-                if len(result) >= stop_at:
-                    break
-    if len(join_list) > 0:
-        for bb in binascii.unhexlify(''.join(join_list)):
-            result.append(bb)
-    return result
+REMOVED_KEYWORD_LOG = 'Keyword data removed using --RemoveKeywords option.'
+WKUS_KEYWORD_NAME = 'BuiltIn.Wait Until Keyword Succeeds'
 
 
 def check_rp_enabled(func):
@@ -127,6 +93,9 @@ class _KeywordStatusMatch(_KeywordMatch):
         return kw.status.upper() == self.status
 
 
+WKUS_KEYWORD_MATCH = _KeywordNameMatch(WKUS_KEYWORD_NAME)
+
+
 # noinspection PyPep8Naming
 class listener:
     """Robot Framework listener interface for reporting to ReportPortal."""
@@ -169,7 +138,7 @@ class listener:
                                + str(msg_content.encode('utf-8'))[:-5] + TRUNCATION_SIGN)
             else:
                 # Do not log full binary data, since it's usually corrupted
-                content_type = guess_content_type_from_bytes(_unescape(message_str, 128))
+                content_type = guess_content_type_from_bytes(unescape(message_str, 128))
                 msg.message = (f'Binary data of type "{content_type}" logging skipped, as it was processed as text and'
                                ' hence corrupted.')
                 msg.level = 'WARN'
@@ -214,7 +183,9 @@ class listener:
         skipped_logs = getattr(kwd, 'skipped_logs', [])
         for log_message in skipped_logs:
             self._log_message(log_message)
-        for skipped_kwd in kwd.skipped_keywords:
+        skipped_kwds = kwd.skipped_keywords
+        kwd.skipped_keywords = []
+        for skipped_kwd in skipped_kwds:
             self._do_start_keyword(kwd)
             self.__post_skipped_keyword(skipped_kwd)
             self._do_end_keyword(kwd)
@@ -225,7 +196,10 @@ class listener:
             return
         if not getattr(kwd, 'posted', True):
             self._do_start_keyword(kwd)
-        self.__post_skipped_keyword(kwd)
+        skipped_kwds = kwd.skipped_keywords
+        kwd.skipped_keywords = []
+        for skipped_kwd in skipped_kwds:
+            self.__post_skipped_keyword(skipped_kwd)
 
     def _log_message(self, message: LogMessage) -> None:
         """Send log message to the Report Portal.
@@ -298,17 +272,21 @@ class listener:
             if current_context:
                 # noinspection PyProtectedMember
                 for pattern_str in set(current_context.output._settings.remove_keywords):
-                    if 'ALL' == pattern_str.upper():
+                    pattern_str_upper = pattern_str.upper()
+                    if 'ALL' == pattern_str_upper:
                         self._remove_keyword_data = True
                         break
-                    if 'PASSED' == pattern_str.upper():
+                    if 'PASSED' == pattern_str_upper:
                         self._remove_keywords = True
                         break
-                    if pattern_str.upper() in {'NOT_RUN', 'NOTRUN', 'NOT RUN'}:
+                    if pattern_str_upper in {'NOT_RUN', 'NOTRUN', 'NOT RUN'}:
                         self._keyword_filters = [_KeywordStatusMatch('NOT RUN')]
                         continue
-                    if pattern_str.upper() in {'FOR', 'WHILE', 'WUKS'}:
-                        self._keyword_filters = [_KeywordNameMatch(pattern_str)]
+                    if pattern_str_upper in {'FOR', 'WHILE', 'WUKS'}:
+                        if pattern_str_upper == 'WUKS':
+                            self._keyword_filters = [WKUS_KEYWORD_MATCH]
+                        else:
+                            self._keyword_filters = [_KeywordNameMatch(pattern_str)]
                         continue
                     if ':' in pattern_str:
                         pattern_type, pattern = pattern_str.split(':', 1)
@@ -390,7 +368,7 @@ class listener:
             self.finish_launch(attributes, ts)
 
     def _log_keyword_data_removed(self, item_id: str) -> None:
-        msg = LogMessage('Keyword data removed using --RemoveKeywords option.')
+        msg = LogMessage(REMOVED_KEYWORD_LOG)
         msg.level = 'INFO'
         msg.item_id = item_id
         self._log_message(msg)
@@ -477,7 +455,6 @@ class listener:
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
-        # TODO: add finish condition for skipped keywords
         if attributes.get('status') == 'FAIL' and not self.current_item.posted:
             self._post_skipped_keywords()
 

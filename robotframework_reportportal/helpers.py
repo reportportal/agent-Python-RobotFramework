@@ -14,6 +14,7 @@
 
 """This module contains functions to ease reporting to ReportPortal."""
 
+import binascii
 import fnmatch
 import re
 from typing import Iterable, Tuple, Optional
@@ -69,3 +70,38 @@ def match_pattern(pattern: Optional[re.Pattern], line: Optional[str]) -> bool:
         return False
 
     return pattern.fullmatch(line) is not None
+
+
+def unescape(binary_string: str, stop_at: int = -1):
+    result = bytearray()
+    join_list = list()
+    join_idx = -3
+    skip_next = False
+    for i, b in enumerate(binary_string):
+        if skip_next:
+            skip_next = False
+            continue
+        if i < join_idx + 2:
+            join_list.append(b)
+            continue
+        else:
+            if len(join_list) > 0:
+                for bb in binascii.unhexlify(''.join(join_list)):
+                    result.append(bb)
+                    if stop_at > 0:
+                        if len(result) >= stop_at:
+                            break
+                join_list = list()
+        if b == '\\' and binary_string[i + 1] == 'x':
+            skip_next = True
+            join_idx = i + 2
+            continue
+        for bb in b.encode('utf-8'):
+            result.append(bb)
+            if stop_at > 0:
+                if len(result) >= stop_at:
+                    break
+    if len(join_list) > 0:
+        for bb in binascii.unhexlify(''.join(join_list)):
+            result.append(bb)
+    return result
