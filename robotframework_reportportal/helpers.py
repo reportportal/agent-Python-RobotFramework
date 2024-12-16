@@ -72,7 +72,7 @@ def match_pattern(pattern: Optional[re.Pattern], line: Optional[str]) -> bool:
     return pattern.fullmatch(line) is not None
 
 
-def unescape(binary_string: str, stop_at: int = -1):
+def _unescape(binary_string: str, stop_at: int = -1):
     result = bytearray()
     join_list = list()
     join_idx = -3

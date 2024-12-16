@@ -26,7 +26,7 @@ from warnings import warn
 
 from reportportal_client.helpers import LifoQueue, is_binary, guess_content_type_from_bytes
 
-from robotframework_reportportal.helpers import translate_glob_to_regex, match_pattern, unescape
+from robotframework_reportportal.helpers import translate_glob_to_regex, match_pattern, _unescape
 from robotframework_reportportal.model import Keyword, Launch, Test, LogMessage, Suite
 from robotframework_reportportal.service import RobotService
 from robotframework_reportportal.static import MAIN_SUITE_ID, PABOT_WITHOUT_LAUNCH_ID_MSG
@@ -138,7 +138,7 @@ class listener:
                                + str(msg_content.encode('utf-8'))[:-5] + TRUNCATION_SIGN)
             else:
                 # Do not log full binary data, since it's usually corrupted
-                content_type = guess_content_type_from_bytes(unescape(message_str, 128))
+                content_type = guess_content_type_from_bytes(_unescape(message_str, 128))
                 msg.message = (f'Binary data of type "{content_type}" logging skipped, as it was processed as text and'
                                ' hence corrupted.')
                 msg.level = 'WARN'
