@@ -194,16 +194,17 @@ class listener:
             self.__post_skipped_keyword(skipped_kwd)
             self._do_end_keyword(kwd)
 
-    def _post_skipped_keywords(self) -> None:
-        kwd = self.current_item
-        if not kwd:
+    def _post_skipped_keywords(self, to_post: Optional[Any]) -> None:
+        if not to_post:
             return
-        if not getattr(kwd, 'posted', True):
-            self._do_start_keyword(kwd)
-        skipped_kwds = kwd.skipped_keywords
-        kwd.skipped_keywords = []
-        for skipped_kwd in skipped_kwds:
-            self.__post_skipped_keyword(skipped_kwd)
+        if isinstance(to_post, Keyword):
+            if not to_post.posted:
+                self._do_start_keyword(to_post)
+        skipped_kwds = getattr(to_post, 'skipped_keywords', None)
+        if skipped_kwds:
+            to_post.skipped_keywords = []
+            for skipped_kwd in skipped_kwds:
+                self.__post_skipped_keyword(skipped_kwd)
 
     def _log_message(self, message: LogMessage) -> None:
         """Send log message to the Report Portal.
@@ -220,7 +221,7 @@ class listener:
             self.current_item.skipped_logs.append(message)
         elif getattr(current_item, 'matched_filter', None) is not WKUS_KEYWORD_MATCH:
             # Post everything skipped by '--removekeywords' option
-            self._post_skipped_keywords()
+            self._post_skipped_keywords(current_item)
             self.service.log(message=message)
 
     @check_rp_enabled
@@ -367,7 +368,7 @@ class listener:
         """
         suite = self._remove_current_item().update(attributes)
         if suite.remove_data and attributes['status'] == 'FAIL':
-            self._post_skipped_keywords()
+            self._post_skipped_keywords(suite)
         logger.debug(f'ReportPortal - End Suite: {suite.robot_attributes}')
         self.service.finish_suite(suite=suite, ts=ts)
         if attributes['id'] == MAIN_SUITE_ID:
@@ -412,7 +413,7 @@ class listener:
         if not test.critical and test.status == 'FAIL':
             test.status = 'SKIP'
         if test.remove_data and attributes['status'] == 'FAIL':
-            self._post_skipped_keywords()
+            self._post_skipped_keywords(test)
         if test.message:
             self.log_message({'message': test.message, 'level': 'DEBUG'})
         logger.debug(f'ReportPortal - End Test: {test.robot_attributes}')
@@ -472,7 +473,7 @@ class listener:
         """
         kwd = self.current_item.update(attributes)
         if kwd.status == 'FAIL' and not kwd.posted and kwd.matched_filter is not WKUS_KEYWORD_MATCH:
-            self._post_skipped_keywords()
+            self._post_skipped_keywords(kwd)
 
         self._remove_current_item()
         if not kwd.posted:
