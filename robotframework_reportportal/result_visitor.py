@@ -41,7 +41,7 @@ else:
 
 
 def to_timestamp(time_str: str) -> Optional[str]:
-    """Converts time string to timestamp with given timezone offset."""
+    """Convert time string to timestamp with given timezone offset."""
     if not time_str:
         return None
 
@@ -65,6 +65,7 @@ class RobotResultsVisitor(ResultVisitor):
     _link_pattern: Pattern = re.compile("src=[\"']([^\"']+)[\"']")
 
     def start_result(self, result: Result) -> bool:
+        """Start result."""
         if "RP_LAUNCH" not in _variables:
             _variables["RP_LAUNCH"] = result.suite.name
         if "RP_LAUNCH_DOC" not in _variables:
@@ -73,7 +74,6 @@ class RobotResultsVisitor(ResultVisitor):
 
     def start_suite(self, suite: TestSuite) -> bool:
         """Start suite."""
-
         ts = to_timestamp(suite.starttime if suite.id not in corrections else corrections[suite.id][0])
         attrs = {
             "id": suite.id,
@@ -91,7 +91,6 @@ class RobotResultsVisitor(ResultVisitor):
 
     def end_suite(self, suite: TestSuite) -> None:
         """End suite."""
-
         ts = to_timestamp(suite.endtime if suite.id not in corrections else corrections[suite.id][1])
         attrs = {
             "id": suite.id,
@@ -112,7 +111,6 @@ class RobotResultsVisitor(ResultVisitor):
 
     def start_test(self, test: TestCase) -> bool:
         """Start test."""
-
         ts = to_timestamp(test.starttime if test.id not in corrections else corrections[test.id][0])
         attrs = {
             "id": test.id,
@@ -133,7 +131,6 @@ class RobotResultsVisitor(ResultVisitor):
 
     def end_test(self, test: TestCase) -> None:
         """End test."""
-
         ts = to_timestamp(test.endtime if test.id not in corrections else corrections[test.id][1])
         attrs = {
             "id": test.id,
@@ -156,7 +153,6 @@ class RobotResultsVisitor(ResultVisitor):
 
     def start_keyword(self, kw: Keyword) -> bool:
         """Start keyword."""
-
         ts = to_timestamp(kw.starttime if kw.id not in corrections else corrections[kw.id][0])
         attrs = {
             "type": string.capwords(kw.type),
@@ -173,7 +169,6 @@ class RobotResultsVisitor(ResultVisitor):
 
     def end_keyword(self, kw: Keyword) -> None:
         """End keyword."""
-
         ts = to_timestamp(kw.endtime if kw.id not in corrections else corrections[kw.id][1])
         attrs = {
             "type": string.capwords(kw.type),
@@ -191,7 +186,6 @@ class RobotResultsVisitor(ResultVisitor):
 
     def start_message(self, msg: Message) -> bool:
         """Start message."""
-
         if msg.message:
             message = {
                 "message": msg.message,
@@ -211,6 +205,5 @@ class RobotResultsVisitor(ResultVisitor):
 
     def split_message_and_image(self, msg: str) -> Tuple[str, str]:
         """Split message and image."""
-
         m = self._link_pattern.search(msg)
         return m.group(), unquote(m.group(1))
