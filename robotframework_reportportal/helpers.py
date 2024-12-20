@@ -17,7 +17,7 @@
 import binascii
 import fnmatch
 import re
-from typing import Iterable, Tuple, Optional
+from typing import Iterable, Optional, Tuple
 
 
 def replace_patterns(text: str, patterns: Iterable[Tuple[re.Pattern, str]]) -> str:

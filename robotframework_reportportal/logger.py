@@ -35,7 +35,7 @@ class MyLibrary(object):
             },
         )
 """
-from typing import Optional, Dict
+from typing import Dict, Optional
 
 from robot.api import logger
 

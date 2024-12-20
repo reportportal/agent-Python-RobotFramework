@@ -21,7 +21,7 @@ from dateutil.parser import parse
 from reportportal_client import RP, create_client
 from reportportal_client.helpers import dict_to_payload, get_launch_sys_attrs, get_package_version, timestamp
 
-from robotframework_reportportal.model import Launch, Suite, Test, Keyword, LogMessage
+from robotframework_reportportal.model import Keyword, Launch, LogMessage, Suite, Test
 from robotframework_reportportal.static import LOG_LEVEL_MAPPING, STATUS_MAPPING
 from robotframework_reportportal.variables import Variables
 

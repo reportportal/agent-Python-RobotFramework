@@ -14,10 +14,10 @@
 """This module contains model that stores Robot Framework variables."""
 
 from os import path
-from typing import Optional, Union, Dict, Tuple, Any, List
+from typing import Any, Dict, List, Optional, Tuple, Union
 from warnings import warn
 
-from reportportal_client import OutputType, ClientType
+from reportportal_client import ClientType, OutputType
 from reportportal_client.helpers import to_bool
 from reportportal_client.logs import MAX_LOG_BATCH_PAYLOAD_SIZE
 from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError

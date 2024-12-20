@@ -17,8 +17,9 @@
 import os
 from typing import Any, Dict, List, Optional, Union
 
-from robotframework_reportportal.helpers import robot_markup_to_markdown
 from reportportal_client.helpers import gen_attributes
+
+from robotframework_reportportal.helpers import robot_markup_to_markdown
 
 TEST_CASE_ID_SIGN = "test_case_id:"
 

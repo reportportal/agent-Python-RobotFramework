@@ -19,10 +19,11 @@ from datetime import datetime, timedelta, timezone
 
 if sys.version_info >= (3, 9):
     from zoneinfo import available_timezones, ZoneInfo
-from typing import List, Pattern, Optional
+
+from typing import List, Optional, Pattern
 from urllib.parse import unquote
 
-from robot.result import ResultVisitor, Result, TestSuite, TestCase, Keyword, Message
+from robot.result import Keyword, Message, Result, ResultVisitor, TestCase, TestSuite
 
 from robotframework_reportportal import listener
 from robotframework_reportportal.time_visitor import corrections
