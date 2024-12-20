@@ -13,14 +13,12 @@
 #  limitations under the License.s
 
 import re
-from tests.helpers import utils
 from unittest import mock
 
 from tests import REPORT_PORTAL_SERVICE
+from tests.helpers import utils
 
-
-NO_KEYWORDS_MESSAGE_PATTERN = \
-    re.compile(r'Test(?: case)? (?:contains no keywords|cannot be empty)\.')
+NO_KEYWORDS_MESSAGE_PATTERN = re.compile(r"Test(?: case)? (?:contains no keywords|cannot be empty)\.")
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
@@ -28,19 +26,19 @@ def test_no_keyword_message(mock_client_init):
     mock_client = mock_client_init.return_value
     mock_client.start_test_item.side_effect = utils.item_id_gen
 
-    result = utils.run_robot_tests(['examples/no_keywords.robot'])
+    result = utils.run_robot_tests(["examples/no_keywords.robot"])
     assert result == 1
 
     log_calls = mock_client.log.call_args_list
     assert len(log_calls) == 1
 
     log_call = log_calls[0][1]
-    assert NO_KEYWORDS_MESSAGE_PATTERN.match(log_call['message'])
-    assert log_call['item_id'].startswith('No keyword test case')
+    assert NO_KEYWORDS_MESSAGE_PATTERN.match(log_call["message"])
+    assert log_call["item_id"].startswith("No keyword test case")
 
     item_start_calls = mock_client.start_test_item.call_args_list
     item_finish_calls = mock_client.finish_test_item.call_args_list
     assert len(item_start_calls) == len(item_finish_calls) == 2
 
-    statuses = [finish[1]['status'] for finish in item_finish_calls]
-    assert statuses == ['FAILED', 'FAILED']
+    statuses = [finish[1]["status"] for finish in item_finish_calls]
+    assert statuses == ["FAILED", "FAILED"]

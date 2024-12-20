@@ -50,6 +50,7 @@ from robot.api import ExecutionResult
 
 from robotframework_reportportal.result_visitor import RobotResultsVisitor
 from robotframework_reportportal.time_visitor import TimeVisitor, corrections
+
 # noinspection PyUnresolvedReferences
 from robotframework_reportportal.variables import _variables
 
@@ -58,16 +59,18 @@ def process(infile="output.xml"):
     test_run = ExecutionResult(infile)
     test_run.visit(TimeVisitor())
     if corrections:
-        logging.warning("{0} is missing some of its starttime/endtime. "
-                        "This might cause inconsistencies with your "
-                        "duration report.".format(infile))
+        logging.warning(
+            "{0} is missing some of its starttime/endtime. "
+            "This might cause inconsistencies with your "
+            "duration report.".format(infile)
+        )
     test_run.visit(RobotResultsVisitor())
 
 
 def main():
     argument_list = sys.argv[1:]
     short_options = "hv:"
-    long_options = ["help", "variable=", "loglevel=", 'timezone=']
+    long_options = ["help", "variable=", "loglevel=", "timezone="]
     try:
         arguments, values = getopt.getopt(argument_list, short_options, long_options)
     except getopt.error:
@@ -84,7 +87,7 @@ def main():
             numeric_level = getattr(logging, current_value.upper(), None)
             logging.basicConfig(level=numeric_level)
         elif current_argument == "--timezone":
-            _variables['RP_TIME_ZONE_OFFSET'] = current_value
+            _variables["RP_TIME_ZONE_OFFSET"] = current_value
 
     try:
         process(*values)

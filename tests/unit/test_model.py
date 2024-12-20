@@ -17,15 +17,17 @@ import pytest
 from robotframework_reportportal.model import Keyword
 
 
-@pytest.mark.parametrize('self_type, parent_type, expected', [
-    ('SETUP', 'KEYWORD', 'STEP'),
-    ('SETUP', 'TEST', 'BEFORE_TEST'),
-    ('TEARDOWN', 'SUITE', 'AFTER_SUITE'),
-    ('TEST', 'SUITE', 'STEP')
-])
+@pytest.mark.parametrize(
+    "self_type, parent_type, expected",
+    [
+        ("SETUP", "KEYWORD", "STEP"),
+        ("SETUP", "TEST", "BEFORE_TEST"),
+        ("TEARDOWN", "SUITE", "AFTER_SUITE"),
+        ("TEST", "SUITE", "STEP"),
+    ],
+)
 def test_keyword_get_type(kwd_attributes, self_type, parent_type, expected):
     """Test for the get_type() method of the Keyword model."""
-    kwd = Keyword(name='Test keyword', robot_attributes=kwd_attributes,
-                  parent_type=parent_type)
+    kwd = Keyword(name="Test keyword", robot_attributes=kwd_attributes, parent_type=parent_type)
     kwd.keyword_type = self_type
     assert kwd.get_type() == expected

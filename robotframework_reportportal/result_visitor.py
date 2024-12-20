@@ -26,6 +26,7 @@ from robot.result import ResultVisitor, Result, TestSuite, TestCase, Keyword, Me
 
 from robotframework_reportportal import listener
 from robotframework_reportportal.time_visitor import corrections
+
 # noinspection PyUnresolvedReferences
 from robotframework_reportportal.variables import _variables
 
@@ -40,22 +41,22 @@ def to_timestamp(time_str: str) -> Optional[str]:
     if not time_str:
         return None
 
-    timezone_offset_str: Optional[str] = _variables.get('RP_TIME_ZONE_OFFSET', None)
-    dt = datetime.strptime(time_str, '%Y%m%d %H:%M:%S.%f')
+    timezone_offset_str: Optional[str] = _variables.get("RP_TIME_ZONE_OFFSET", None)
+    dt = datetime.strptime(time_str, "%Y%m%d %H:%M:%S.%f")
 
     if timezone_offset_str:
         if timezone_offset_str in AVAILABLE_TIMEZONES:
             tz = ZoneInfo(timezone_offset_str)
             dt = dt.replace(tzinfo=tz)
         else:
-            hours, minutes = map(int, timezone_offset_str.split(':'))
+            hours, minutes = map(int, timezone_offset_str.split(":"))
             offset = timedelta(hours=hours, minutes=minutes)
             dt = dt.replace(tzinfo=timezone(offset))
     return str(int(dt.timestamp() * 1000))
 
 
 class RobotResultsVisitor(ResultVisitor):
-    _link_pattern: Pattern = re.compile("src=[\"\']([^\"\']+)[\"\']")
+    _link_pattern: Pattern = re.compile("src=[\"']([^\"']+)[\"']")
 
     def start_result(self, result: Result) -> bool:
         if "RP_LAUNCH" not in _variables:
@@ -67,15 +68,15 @@ class RobotResultsVisitor(ResultVisitor):
     def start_suite(self, suite: TestSuite) -> bool:
         ts = to_timestamp(suite.starttime if suite.id not in corrections else corrections[suite.id][0])
         attrs = {
-            'id': suite.id,
-            'longname': suite.longname,
-            'doc': suite.doc,
-            'metadata': suite.metadata,
-            'source': suite.source,
-            'suites': suite.suites,
-            'tests': suite.tests,
-            'totaltests': getattr(suite.statistics, 'all', suite.statistics).total,
-            'starttime': ts
+            "id": suite.id,
+            "longname": suite.longname,
+            "doc": suite.doc,
+            "metadata": suite.metadata,
+            "source": suite.source,
+            "suites": suite.suites,
+            "tests": suite.tests,
+            "totaltests": getattr(suite.statistics, "all", suite.statistics).total,
+            "starttime": ts,
         }
         listener.start_suite(suite.name, attrs, ts)
         return True
@@ -83,37 +84,37 @@ class RobotResultsVisitor(ResultVisitor):
     def end_suite(self, suite: TestSuite) -> None:
         ts = to_timestamp(suite.endtime if suite.id not in corrections else corrections[suite.id][1])
         attrs = {
-            'id': suite.id,
-            'longname': suite.longname,
-            'doc': suite.doc,
-            'metadata': suite.metadata,
-            'source': suite.source,
-            'suites': suite.suites,
-            'tests': suite.tests,
-            'totaltests': getattr(suite.statistics, 'all', suite.statistics).total,
-            'endtime': ts,
-            'elapsedtime': suite.elapsedtime,
-            'status': suite.status,
-            'statistics': suite.statistics,
-            'message': suite.message,
+            "id": suite.id,
+            "longname": suite.longname,
+            "doc": suite.doc,
+            "metadata": suite.metadata,
+            "source": suite.source,
+            "suites": suite.suites,
+            "tests": suite.tests,
+            "totaltests": getattr(suite.statistics, "all", suite.statistics).total,
+            "endtime": ts,
+            "elapsedtime": suite.elapsedtime,
+            "status": suite.status,
+            "statistics": suite.statistics,
+            "message": suite.message,
         }
         listener.end_suite(None, attrs, ts)
 
     def start_test(self, test: TestCase) -> bool:
         ts = to_timestamp(test.starttime if test.id not in corrections else corrections[test.id][0])
         attrs = {
-            'id': test.id,
-            'longname': test.longname,
+            "id": test.id,
+            "longname": test.longname,
             # 'originalname': test.originalname,
-            'doc': test.doc,
-            'tags': list(test.tags),
+            "doc": test.doc,
+            "tags": list(test.tags),
             # for backward compatibility with Robot < 4.0 mark every test case
             # as critical if not set
-            'critical': getattr(test, 'critical', 'yes'),
-            'source': test.source,
-            'template': '',
+            "critical": getattr(test, "critical", "yes"),
+            "source": test.source,
+            "template": "",
             # 'lineno': test.lineno,
-            'starttime': ts,
+            "starttime": ts,
         }
         listener.start_test(test.name, attrs, ts)
         return True
@@ -121,35 +122,35 @@ class RobotResultsVisitor(ResultVisitor):
     def end_test(self, test: TestCase) -> None:
         ts = to_timestamp(test.endtime if test.id not in corrections else corrections[test.id][1])
         attrs = {
-            'id': test.id,
-            'longname': test.longname,
+            "id": test.id,
+            "longname": test.longname,
             # 'originalname': test.originalname,
-            'doc': test.doc,
-            'tags': list(test.tags),
+            "doc": test.doc,
+            "tags": list(test.tags),
             # for backward compatibility with Robot < 4.0 mark every test case
             # as critical if not set
-            'critical': getattr(test, 'critical', 'yes'),
-            'template': '',
+            "critical": getattr(test, "critical", "yes"),
+            "template": "",
             # 'lineno': test.lineno,
-            'endtime': ts,
-            'elapsedtime': test.elapsedtime,
-            'source': test.source,
-            'status': test.status,
-            'message': test.message,
+            "endtime": ts,
+            "elapsedtime": test.elapsedtime,
+            "source": test.source,
+            "status": test.status,
+            "message": test.message,
         }
         listener.end_test(test.name, attrs, ts)
 
     def start_keyword(self, kw: Keyword) -> bool:
         ts = to_timestamp(kw.starttime if kw.id not in corrections else corrections[kw.id][0])
         attrs = {
-            'type': string.capwords(kw.type),
-            'kwname': kw.kwname,
-            'libname': kw.libname,
-            'doc': kw.doc,
-            'args': kw.args,
-            'assign': kw.assign,
-            'tags': kw.tags,
-            'starttime': ts,
+            "type": string.capwords(kw.type),
+            "kwname": kw.kwname,
+            "libname": kw.libname,
+            "doc": kw.doc,
+            "args": kw.args,
+            "assign": kw.assign,
+            "tags": kw.tags,
+            "starttime": ts,
         }
         listener.start_keyword(kw.name, attrs, ts)
         return True
@@ -157,27 +158,27 @@ class RobotResultsVisitor(ResultVisitor):
     def end_keyword(self, kw: Keyword) -> None:
         ts = to_timestamp(kw.endtime if kw.id not in corrections else corrections[kw.id][1])
         attrs = {
-            'type': string.capwords(kw.type),
-            'kwname': kw.kwname,
-            'libname': kw.libname,
-            'doc': kw.doc,
-            'args': kw.args,
-            'assign': kw.assign,
-            'tags': kw.tags,
-            'endtime': ts,
-            'elapsedtime': kw.elapsedtime,
-            'status': 'PASS' if kw.assign else kw.status,
+            "type": string.capwords(kw.type),
+            "kwname": kw.kwname,
+            "libname": kw.libname,
+            "doc": kw.doc,
+            "args": kw.args,
+            "assign": kw.assign,
+            "tags": kw.tags,
+            "endtime": ts,
+            "elapsedtime": kw.elapsedtime,
+            "status": "PASS" if kw.assign else kw.status,
         }
         listener.end_keyword(kw.name, attrs, ts)
 
     def start_message(self, msg: Message) -> bool:
         if msg.message:
             message = {
-                'message': msg.message,
-                'level': msg.level,
+                "message": msg.message,
+                "level": msg.level,
             }
             try:
-                m = self.parse_message(message['message'])
+                m = self.parse_message(message["message"])
                 message["message"] = m[0]
                 listener.log_message_with_image(message, m[1])
             except (AttributeError, IOError):

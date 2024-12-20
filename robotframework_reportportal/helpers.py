@@ -28,15 +28,15 @@ def replace_patterns(text: str, patterns: Iterable[Tuple[re.Pattern, str]]) -> s
     return result
 
 
-BARE_LINK_PATTERN = re.compile(r'\[\s*([^]|]+)]')
-NAMED_LINK_PATTERN = re.compile(r'\[\s*([^]|]+)\|\s*([^]]+)]')
+BARE_LINK_PATTERN = re.compile(r"\[\s*([^]|]+)]")
+NAMED_LINK_PATTERN = re.compile(r"\[\s*([^]|]+)\|\s*([^]]+)]")
 
 ROBOT_MARKUP_REPLACEMENT_PATTERS = [
-    (BARE_LINK_PATTERN, r'<\1>'),
-    (NAMED_LINK_PATTERN, r'[\2](\1)'),
+    (BARE_LINK_PATTERN, r"<\1>"),
+    (NAMED_LINK_PATTERN, r"[\2](\1)"),
 ]
 
-PATTERN_MATCHES_EMPTY_STRING: re.Pattern = re.compile('^$')
+PATTERN_MATCHES_EMPTY_STRING: re.Pattern = re.compile("^$")
 
 
 def robot_markup_to_markdown(text: str) -> str:
@@ -52,7 +52,7 @@ def translate_glob_to_regex(pattern: Optional[str]) -> Optional[re.Pattern]:
     """
     if pattern is None:
         return None
-    if pattern == '':
+    if pattern == "":
         return PATTERN_MATCHES_EMPTY_STRING
     return re.compile(fnmatch.translate(pattern))
 
@@ -86,22 +86,22 @@ def _unescape(binary_string: str, stop_at: int = -1):
             continue
         else:
             if len(join_list) > 0:
-                for bb in binascii.unhexlify(''.join(join_list)):
+                for bb in binascii.unhexlify("".join(join_list)):
                     result.append(bb)
                     if stop_at > 0:
                         if len(result) >= stop_at:
                             break
                 join_list = list()
-        if b == '\\' and binary_string[i + 1] == 'x':
+        if b == "\\" and binary_string[i + 1] == "x":
             skip_next = True
             join_idx = i + 2
             continue
-        for bb in b.encode('utf-8'):
+        for bb in b.encode("utf-8"):
             result.append(bb)
             if stop_at > 0:
                 if len(result) >= stop_at:
                     break
     if len(join_list) > 0:
-        for bb in binascii.unhexlify(''.join(join_list)):
+        for bb in binascii.unhexlify("".join(join_list)):
             result.append(bb)
     return result

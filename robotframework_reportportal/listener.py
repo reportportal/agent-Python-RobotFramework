@@ -33,17 +33,18 @@ from robotframework_reportportal.static import MAIN_SUITE_ID, PABOT_WITHOUT_LAUN
 from robotframework_reportportal.variables import Variables
 
 logger = logging.getLogger(__name__)
-VARIABLE_PATTERN = re.compile(r'^\s*\${[^}]*}\s*=\s*')
+VARIABLE_PATTERN = re.compile(r"^\s*\${[^}]*}\s*=\s*")
 IMAGE_PATTERN = re.compile(
     r'</td></tr><tr><td colspan="\d+"><a href="[^"]+"(?: target="_blank")?>'
-    r'<img src="([^"]+)" width="\d+(?:px|pt)?"/?></a>')
+    r'<img src="([^"]+)" width="\d+(?:px|pt)?"/?></a>'
+)
 
-DEFAULT_BINARY_FILE_TYPE = 'application/octet-stream'
+DEFAULT_BINARY_FILE_TYPE = "application/octet-stream"
 TRUNCATION_SIGN = "...'"
-REMOVED_KEYWORD_LOG = 'Keyword data removed using --RemoveKeywords option.'
-WKUS_KEYWORD_NAME = 'BuiltIn.Wait Until Keyword Succeeds'
-FOR_KEYWORD_NAME = 'BuiltIn.For'
-WHILE_KEYWORD_NAME = 'BuiltIn.While'
+REMOVED_KEYWORD_LOG = "Keyword data removed using --RemoveKeywords option."
+WKUS_KEYWORD_NAME = "BuiltIn.Wait Until Keyword Succeeds"
+FOR_KEYWORD_NAME = "BuiltIn.For"
+WHILE_KEYWORD_NAME = "BuiltIn.While"
 
 
 def check_rp_enabled(func):
@@ -61,8 +62,7 @@ def check_rp_enabled(func):
 
 class _KeywordMatch(ABC):
     @abstractmethod
-    def match(self, kw: Keyword) -> bool:
-        ...
+    def match(self, kw: Keyword) -> bool: ...
 
 
 class _KeywordNameMatch(_KeywordMatch):
@@ -123,51 +123,53 @@ class listener:
 
         :param message: Message passed by the Robot Framework
         """
-        if isinstance(message['message'], LogMessage):
-            msg = message['message']
+        if isinstance(message["message"], LogMessage):
+            msg = message["message"]
         else:
-            msg = LogMessage(message['message'])
-            msg.level = message['level']
+            msg = LogMessage(message["message"])
+            msg.level = message["level"]
         if not msg.launch_log:
-            msg.item_id = getattr(self.current_item, 'rp_item_id', None)
+            msg.item_id = getattr(self.current_item, "rp_item_id", None)
 
         message_str = msg.message
         if is_binary(message_str):
             variable_match = VARIABLE_PATTERN.search(message_str)
             if variable_match:
                 # Treat as partial binary data
-                msg_content = message_str[variable_match.end():]
+                msg_content = message_str[variable_match.end() :]
                 # remove trailing `'"...`, add `...'`
-                msg.message = (message_str[variable_match.start():variable_match.end()]
-                               + str(msg_content.encode('utf-8'))[:-5] + TRUNCATION_SIGN)
+                msg.message = (
+                    message_str[variable_match.start() : variable_match.end()]
+                    + str(msg_content.encode("utf-8"))[:-5]
+                    + TRUNCATION_SIGN
+                )
             else:
                 # Do not log full binary data, since it's usually corrupted
                 content_type = guess_content_type_from_bytes(_unescape(message_str, 128))
-                msg.message = (f'Binary data of type "{content_type}" logging skipped, as it was processed as text and'
-                               ' hence corrupted.')
-                msg.level = 'WARN'
-        elif message.get('html', 'no') == 'yes':
+                msg.message = (
+                    f'Binary data of type "{content_type}" logging skipped, as it was processed as text and'
+                    " hence corrupted."
+                )
+                msg.level = "WARN"
+        elif message.get("html", "no") == "yes":
             image_match = IMAGE_PATTERN.match(message_str)
             if image_match:
                 image_path = image_match.group(1)
-                msg.message = f'Image attached: {image_path}'
+                msg.message = f"Image attached: {image_path}"
                 if os.path.exists(image_path):
                     image_type_by_name = guess_type(image_path)[0]
-                    with open(image_path, 'rb') as fh:
+                    with open(image_path, "rb") as fh:
                         image_data = fh.read()
                         image_type_by_data = guess_content_type_from_bytes(image_data)
                         if image_type_by_name and image_type_by_data and image_type_by_name != image_type_by_data:
                             logger.warning(
                                 f'Image type mismatch: type by file name "{image_type_by_name}" '
-                                f'!= type by file content "{image_type_by_data}"')
+                                f'!= type by file content "{image_type_by_data}"'
+                            )
                             mime_type = DEFAULT_BINARY_FILE_TYPE
                         else:
                             mime_type = image_type_by_name or image_type_by_data or DEFAULT_BINARY_FILE_TYPE
-                        msg.attachment = {
-                            'name': os.path.basename(image_path),
-                            'data': image_data,
-                            'mime': mime_type
-                        }
+                        msg.attachment = {"name": os.path.basename(image_path), "data": image_data, "mime": mime_type}
         return msg
 
     def _add_current_item(self, item: Union[Keyword, Launch, Suite, Test]) -> None:
@@ -185,7 +187,7 @@ class listener:
 
     def __post_skipped_keyword(self, kwd: Keyword) -> None:
         self._do_start_keyword(kwd)
-        skipped_logs = getattr(kwd, 'skipped_logs', [])
+        skipped_logs = getattr(kwd, "skipped_logs", [])
         for log_message in skipped_logs:
             self._log_message(log_message)
         skipped_kwds = kwd.skipped_keywords
@@ -200,7 +202,7 @@ class listener:
         if isinstance(to_post, Keyword):
             if not to_post.posted:
                 self._do_start_keyword(to_post)
-        skipped_kwds = getattr(to_post, 'skipped_keywords', None)
+        skipped_kwds = getattr(to_post, "skipped_keywords", None)
         if skipped_kwds:
             to_post.skipped_keywords = []
             for skipped_kwd in skipped_kwds:
@@ -212,14 +214,14 @@ class listener:
         :param message: Internal message object to send
         """
         if message.attachment:
-            logger.debug(f'ReportPortal - Log Message with Attachment: {message}')
+            logger.debug(f"ReportPortal - Log Message with Attachment: {message}")
         else:
-            logger.debug(f'ReportPortal - Log Message: {message}')
+            logger.debug(f"ReportPortal - Log Message: {message}")
 
         current_item = self.current_item
-        if current_item and not getattr(current_item, 'posted', True) and message.level not in ['ERROR', 'WARN']:
+        if current_item and not getattr(current_item, "posted", True) and message.level not in ["ERROR", "WARN"]:
             self.current_item.skipped_logs.append(message)
-        elif getattr(current_item, 'matched_filter', None) is not WKUS_KEYWORD_MATCH:
+        elif getattr(current_item, "matched_filter", None) is not WKUS_KEYWORD_MATCH:
             # Post everything skipped by '--removekeywords' option
             self._post_skipped_keywords(current_item)
             self.service.log(message=message)
@@ -241,18 +243,18 @@ class listener:
         :param image: Path to image
         """
         mes = self._build_msg_struct(msg)
-        with open(image, 'rb') as fh:
+        with open(image, "rb") as fh:
             mes.attachment = {
-                'name': os.path.basename(image),
-                'data': fh.read(),
-                'mime': guess_type(image)[0] or DEFAULT_BINARY_FILE_TYPE
+                "name": os.path.basename(image),
+                "data": fh.read(),
+                "mime": guess_type(image)[0] or DEFAULT_BINARY_FILE_TYPE,
             }
         self._log_message(mes)
 
     @property
     def parent_id(self) -> Optional[str]:
         """Get rp_item_id attribute of the current item."""
-        return getattr(self.current_item, 'rp_item_id', None)
+        return getattr(self.current_item, "rp_item_id", None)
 
     @property
     def service(self) -> RobotService:
@@ -273,34 +275,35 @@ class listener:
         try:
             # noinspection PyUnresolvedReferences
             from robot.running.context import EXECUTION_CONTEXTS
+
             current_context = EXECUTION_CONTEXTS.current
             if current_context:
                 # noinspection PyProtectedMember
                 for pattern_str in set(current_context.output._settings.remove_keywords):
                     pattern_str_upper = pattern_str.upper()
-                    if 'ALL' == pattern_str_upper:
+                    if "ALL" == pattern_str_upper:
                         self._remove_keyword_data = True
                         break
-                    if 'PASSED' == pattern_str_upper:
+                    if "PASSED" == pattern_str_upper:
                         self._remove_keywords = True
                         break
-                    if pattern_str_upper in {'NOT_RUN', 'NOTRUN', 'NOT RUN'}:
-                        self._keyword_filters.append(_KeywordStatusMatch('NOT RUN'))
+                    if pattern_str_upper in {"NOT_RUN", "NOTRUN", "NOT RUN"}:
+                        self._keyword_filters.append(_KeywordStatusMatch("NOT RUN"))
                         continue
-                    if pattern_str_upper in {'FOR', 'WHILE', 'WUKS'}:
-                        if pattern_str_upper == 'WUKS':
+                    if pattern_str_upper in {"FOR", "WHILE", "WUKS"}:
+                        if pattern_str_upper == "WUKS":
                             self._keyword_filters.append(WKUS_KEYWORD_MATCH)
-                        elif pattern_str_upper == 'FOR':
+                        elif pattern_str_upper == "FOR":
                             self._keyword_filters.append(FOR_KEYWORD_MATCH)
                         else:
                             self._keyword_filters.append(WHILE_KEYWORD_NAME)
                         continue
-                    if ':' in pattern_str:
-                        pattern_type, pattern = pattern_str.split(':', 1)
+                    if ":" in pattern_str:
+                        pattern_type, pattern = pattern_str.split(":", 1)
                         pattern_type = pattern_type.strip().upper()
-                        if 'NAME' == pattern_type.upper():
+                        if "NAME" == pattern_type.upper():
                             self._keyword_filters.append(_KeywordNameMatch(pattern.strip()))
-                        elif 'TAG' == pattern_type.upper():
+                        elif "TAG" == pattern_type.upper():
                             self._keyword_filters.append(_KeywordTagMatch(pattern.strip()))
         except ImportError:
             warn('Unable to locate Robot Framework context. "removekeywords" feature will not work.', stacklevel=2)
@@ -317,13 +320,14 @@ class listener:
         launch.doc = self.variables.launch_doc or launch.doc
         if self.variables.pabot_used and not self._variables.launch_id:
             warn(PABOT_WITHOUT_LAUNCH_ID_MSG, stacklevel=2)
-        logger.debug(f'ReportPortal - Start Launch: {launch.robot_attributes}')
+        logger.debug(f"ReportPortal - Start Launch: {launch.robot_attributes}")
         self.service.start_launch(
             launch=launch,
             mode=self.variables.mode,
             ts=ts,
             rerun=self.variables.rerun,
-            rerun_of=self.variables.rerun_of)
+            rerun_of=self.variables.rerun_of,
+        )
 
     def finish_launch(self, attributes: Dict[str, Any], ts: Optional[Any] = None) -> None:
         """Finish started launch at the ReportPortal.
@@ -332,7 +336,7 @@ class listener:
         :param ts:         Timestamp(used by the ResultVisitor)
         """
         launch = Launch(self.variables.launch_name, attributes, None)
-        logger.debug(f'ReportPortal - End Launch: {launch.robot_attributes}')
+        logger.debug(f"ReportPortal - End Launch: {launch.robot_attributes}")
         self.service.finish_launch(launch=launch, ts=ts)
 
     @check_rp_enabled
@@ -343,13 +347,13 @@ class listener:
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
-        if attributes['id'] == MAIN_SUITE_ID:
+        if attributes["id"] == MAIN_SUITE_ID:
             self.start_launch(attributes, ts)
             if self.variables.pabot_used:
-                name = f'{name}.{self.variables.pabot_pool_id}'
-            logger.debug(f'ReportPortal - Create global Suite: {attributes}')
+                name = f"{name}.{self.variables.pabot_pool_id}"
+            logger.debug(f"ReportPortal - Create global Suite: {attributes}")
         else:
-            logger.debug(f'ReportPortal - Start Suite: {attributes}')
+            logger.debug(f"ReportPortal - Start Suite: {attributes}")
         suite = Suite(name, attributes)
         suite.remove_data = self._remove_keywords
         suite.rp_parent_item_id = self.parent_id
@@ -367,16 +371,16 @@ class listener:
         :param ts:         Timestamp(used by the ResultVisitor)
         """
         suite = self._remove_current_item().update(attributes)
-        if suite.remove_data and attributes['status'] == 'FAIL':
+        if suite.remove_data and attributes["status"] == "FAIL":
             self._post_skipped_keywords(suite)
-        logger.debug(f'ReportPortal - End Suite: {suite.robot_attributes}')
+        logger.debug(f"ReportPortal - End Suite: {suite.robot_attributes}")
         self.service.finish_suite(suite=suite, ts=ts)
-        if attributes['id'] == MAIN_SUITE_ID:
+        if attributes["id"] == MAIN_SUITE_ID:
             self.finish_launch(attributes, ts)
 
     def _log_keyword_data_removed(self, item_id: str) -> None:
         msg = LogMessage(REMOVED_KEYWORD_LOG)
-        msg.level = 'INFO'
+        msg.level = "INFO"
         msg.item_id = item_id
         self._log_message(msg)
 
@@ -388,13 +392,13 @@ class listener:
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
-        if 'source' not in attributes:
+        if "source" not in attributes:
             # no 'source' parameter at this level for Robot versions < 4
             attributes = attributes.copy()
-            attributes['source'] = getattr(self.current_item, 'source', None)
+            attributes["source"] = getattr(self.current_item, "source", None)
         test = Test(name=name, robot_attributes=attributes, test_attributes=self.variables.test_attributes)
         test.remove_data = self._remove_keywords
-        logger.debug(f'ReportPortal - Start Test: {attributes}')
+        logger.debug(f"ReportPortal - Start Test: {attributes}")
         test.rp_parent_item_id = self.parent_id
         test.rp_item_id = self.service.start_test(test=test, ts=ts)
         self._add_current_item(test)
@@ -410,18 +414,18 @@ class listener:
         :param ts:         Timestamp(used by the ResultVisitor)
         """
         test = self.current_item.update(attributes)
-        if not test.critical and test.status == 'FAIL':
-            test.status = 'SKIP'
-        if test.remove_data and attributes['status'] == 'FAIL':
+        if not test.critical and test.status == "FAIL":
+            test.status = "SKIP"
+        if test.remove_data and attributes["status"] == "FAIL":
             self._post_skipped_keywords(test)
         if test.message:
-            self.log_message({'message': test.message, 'level': 'DEBUG'})
-        logger.debug(f'ReportPortal - End Test: {test.robot_attributes}')
+            self.log_message({"message": test.message, "level": "DEBUG"})
+        logger.debug(f"ReportPortal - End Test: {test.robot_attributes}")
         self._remove_current_item()
         self.service.finish_test(test=test, ts=ts)
 
     def _do_start_keyword(self, keyword: Keyword, ts: Optional[str] = None) -> None:
-        logger.debug(f'ReportPortal - Start Keyword: {keyword.robot_attributes}')
+        logger.debug(f"ReportPortal - Start Keyword: {keyword.robot_attributes}")
         keyword.rp_item_id = self.service.start_keyword(keyword=keyword, ts=ts)
         keyword.posted = True
 
@@ -440,7 +444,7 @@ class listener:
         kwd.remove_data = skip_kwd or self._remove_keyword_data
 
         if kwd.remove_data:
-            kwd.matched_filter = getattr(parent, 'matched_filter', None)
+            kwd.matched_filter = getattr(parent, "matched_filter", None)
         else:
             for m in self._keyword_filters:
                 if m.match(kwd):
@@ -460,7 +464,7 @@ class listener:
         self._add_current_item(kwd)
 
     def _do_end_keyword(self, keyword: Keyword, ts: Optional[str] = None) -> None:
-        logger.debug(f'ReportPortal - End Keyword: {keyword.robot_attributes}')
+        logger.debug(f"ReportPortal - End Keyword: {keyword.robot_attributes}")
         self.service.finish_keyword(keyword=keyword, ts=ts)
 
     @check_rp_enabled
@@ -472,7 +476,7 @@ class listener:
         :param ts:         Timestamp(used by the ResultVisitor)
         """
         kwd = self.current_item.update(attributes)
-        if kwd.status == 'FAIL' and not kwd.posted and kwd.matched_filter is not WKUS_KEYWORD_MATCH:
+        if kwd.status == "FAIL" and not kwd.posted and kwd.matched_filter is not WKUS_KEYWORD_MATCH:
             self._post_skipped_keywords(kwd)
 
         if kwd.matched_filter is WKUS_KEYWORD_MATCH and WKUS_KEYWORD_MATCH.match(kwd):
@@ -491,7 +495,7 @@ class listener:
         :param log_path: Path to the log file
         """
         if self.variables.attach_log:
-            message = {'message': 'Execution log', 'level': 'INFO'}
+            message = {"message": "Execution log", "level": "INFO"}
             self.log_message_with_image(message, log_path)
 
     def report_file(self, report_path: str) -> None:
@@ -500,7 +504,7 @@ class listener:
         :param report_path: Path to the report file
         """
         if self.variables.attach_report:
-            message = {'message': 'Execution report', 'level': 'INFO'}
+            message = {"message": "Execution report", "level": "INFO"}
             self.log_message_with_image(message, report_path)
 
     def xunit_file(self, xunit_path: str) -> None:
@@ -509,7 +513,7 @@ class listener:
         :param xunit_path: Path to the XUnit file
         """
         if self.variables.attach_xunit:
-            message = {'message': 'XUnit result file', 'level': 'INFO'}
+            message = {"message": "XUnit result file", "level": "INFO"}
             self.log_message_with_image(message, xunit_path)
 
     @check_rp_enabled

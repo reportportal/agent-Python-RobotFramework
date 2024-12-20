@@ -13,14 +13,15 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License
 """
-import os
 
-from pytest import fixture
+import os
 from unittest import mock
 
+from pytest import fixture
+
 from robotframework_reportportal.listener import listener
-from robotframework_reportportal.variables import Variables
 from robotframework_reportportal.result_visitor import RobotResultsVisitor
+from robotframework_reportportal.variables import Variables
 
 
 @fixture()
@@ -28,16 +29,16 @@ def visitor():
     return RobotResultsVisitor()
 
 
-@mock.patch('robotframework_reportportal.variables.strtobool', mock.Mock())
-@mock.patch('robotframework_reportportal.variables.get_variable', mock.Mock())
+@mock.patch("robotframework_reportportal.variables.strtobool", mock.Mock())
+@mock.patch("robotframework_reportportal.variables.get_variable", mock.Mock())
 @fixture()
 def mock_variables():
     mock_variables = Variables()
-    mock_variables.endpoint = 'http://localhost:8080'
-    mock_variables.launch_name = 'Robot'
-    mock_variables.project = 'default_personal'
-    mock_variables.api_key = 'test_api_key'
-    mock_variables.launch_attributes = ''
+    mock_variables.endpoint = "http://localhost:8080"
+    mock_variables.launch_name = "Robot"
+    mock_variables.project = "default_personal"
+    mock_variables.api_key = "test_api_key"
+    mock_variables.launch_attributes = ""
     mock_variables.launch_id = None
     mock_variables.launch_doc = None
     mock_variables.log_batch_size = 1
@@ -63,40 +64,40 @@ def mock_listener(mock_variables):
 def kwd_attributes():
     """Keyword attributes."""
     return {
-        'args': ('Kw Body Start',),
-        'assign': (),
-        'doc': 'Logs the given message with the given level.',
-        'kwname': 'Log',
-        'libname': 'BuiltIn',
-        'starttime': '1621947055434',
-        'tags': [],
-        'type': 'Keyword'
+        "args": ("Kw Body Start",),
+        "assign": (),
+        "doc": "Logs the given message with the given level.",
+        "kwname": "Log",
+        "libname": "BuiltIn",
+        "starttime": "1621947055434",
+        "tags": [],
+        "type": "Keyword",
     }
 
 
 @fixture()
 def suite_attributes():
     return {
-        'id': 's1',
-        'doc': '',
-        'longname': 'Suite',
-        'metadata': {},
-        'source': os.getcwd() + '/robot/test.robot',
-        'suites': [],
-        'tests': ['Test'],
-        'starttime': '20210407 12:24:27.116',
-        'totaltests': 1
+        "id": "s1",
+        "doc": "",
+        "longname": "Suite",
+        "metadata": {},
+        "source": os.getcwd() + "/robot/test.robot",
+        "suites": [],
+        "tests": ["Test"],
+        "starttime": "20210407 12:24:27.116",
+        "totaltests": 1,
     }
 
 
 @fixture()
 def test_attributes():
     return {
-        'id': 's1-t1',
-        'doc': '',
-        'longname': 'Suite.Test',
-        'tags': [],
-        'source': os.getcwd() + '/robot/test.robot',
-        'template': '',
-        'starttime': '20210407 12:24:27.116'
+        "id": "s1-t1",
+        "doc": "",
+        "longname": "Suite.Test",
+        "tags": [],
+        "source": os.getcwd() + "/robot/test.robot",
+        "template": "",
+        "starttime": "20210407 12:24:27.116",
     }

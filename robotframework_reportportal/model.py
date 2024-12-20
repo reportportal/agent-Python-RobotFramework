@@ -20,7 +20,7 @@ from typing import Any, Dict, List, Optional, Union
 from robotframework_reportportal.helpers import robot_markup_to_markdown
 from reportportal_client.helpers import gen_attributes
 
-TEST_CASE_ID_SIGN = 'test_case_id:'
+TEST_CASE_ID_SIGN = "test_case_id:"
 
 
 class LogMessage(str):
@@ -36,7 +36,7 @@ class LogMessage(str):
         """Initialize required attributes."""
         self.attachment = None
         self.item_id = None
-        self.level = 'INFO'
+        self.level = "INFO"
         self.launch_log = False
         self.message = message
 
@@ -59,9 +59,9 @@ class Keyword:
     start_time: str
     status: str
     tags: List[str]
-    type: str = 'KEYWORD'
+    type: str = "KEYWORD"
     skipped_logs: List[LogMessage]
-    skipped_keywords: List['Keyword']
+    skipped_keywords: List["Keyword"]
     posted: bool
     remove_data: bool
     matched_filter: Any
@@ -74,21 +74,21 @@ class Keyword:
         :param parent_type:       Type of the parent test item
         """
         self.robot_attributes = robot_attributes
-        self.args = robot_attributes['args']
-        self.assign = robot_attributes['assign']
-        self.doc = robot_markup_to_markdown(robot_attributes['doc'])
-        self.end_time = robot_attributes.get('endtime')
-        self.keyword_name = robot_attributes['kwname']
-        self.keyword_type = robot_attributes['type']
-        self.libname = robot_attributes['libname']
+        self.args = robot_attributes["args"]
+        self.assign = robot_attributes["assign"]
+        self.doc = robot_markup_to_markdown(robot_attributes["doc"])
+        self.end_time = robot_attributes.get("endtime")
+        self.keyword_name = robot_attributes["kwname"]
+        self.keyword_type = robot_attributes["type"]
+        self.libname = robot_attributes["libname"]
         self.name = name
         self.rp_item_id = None
         self.rp_parent_item_id = None
         self.parent_type = parent_type
-        self.start_time = robot_attributes['starttime']
-        self.status = robot_attributes.get('status')
-        self.tags = robot_attributes['tags']
-        self.type = 'KEYWORD'
+        self.start_time = robot_attributes["starttime"]
+        self.status = robot_attributes.get("status")
+        self.tags = robot_attributes["tags"]
+        self.type = "KEYWORD"
         self.skipped_keywords = []
         self.skipped_logs = []
         self.posted = True
@@ -97,31 +97,31 @@ class Keyword:
 
     def get_name(self) -> str:
         """Get name of the keyword suitable for ReportPortal."""
-        assign = ', '.join(self.assign)
-        assignment = '{0} = '.format(assign) if self.assign else ''
-        arguments = ', '.join(self.args)
-        full_name = f'{assignment}{self.name} ({arguments})'
+        assign = ", ".join(self.assign)
+        assignment = "{0} = ".format(assign) if self.assign else ""
+        arguments = ", ".join(self.args)
+        full_name = f"{assignment}{self.name} ({arguments})"
         return full_name[:256]
 
     def get_type(self) -> str:
         """Get keyword type."""
-        if self.keyword_type.lower() in ('setup', 'teardown'):
-            if self.parent_type.lower() == 'keyword':
-                return 'STEP'
-            if self.keyword_type.lower() == 'setup':
-                return 'BEFORE_{0}'.format(self.parent_type.upper())
-            if self.keyword_type.lower() == 'teardown':
-                return 'AFTER_{0}'.format(self.parent_type.upper())
+        if self.keyword_type.lower() in ("setup", "teardown"):
+            if self.parent_type.lower() == "keyword":
+                return "STEP"
+            if self.keyword_type.lower() == "setup":
+                return "BEFORE_{0}".format(self.parent_type.upper())
+            if self.keyword_type.lower() == "teardown":
+                return "AFTER_{0}".format(self.parent_type.upper())
         else:
-            return 'STEP'
+            return "STEP"
 
-    def update(self, attributes: Dict[str, Any]) -> 'Keyword':
+    def update(self, attributes: Dict[str, Any]) -> "Keyword":
         """Update keyword attributes on keyword finish.
 
         :param attributes: Suite attributes passed through the listener
         """
-        self.end_time = attributes.get('endtime', '')
-        self.status = attributes.get('status')
+        self.end_time = attributes.get("endtime", "")
+        self.status = attributes.get("status")
         return self
 
 
@@ -144,7 +144,7 @@ class Suite:
     suites: List[str]
     tests: List[str]
     total_tests: int
-    type: str = 'SUITE'
+    type: str = "SUITE"
     skipped_keywords: List[Keyword]
     remove_data: bool
 
@@ -155,22 +155,22 @@ class Suite:
         :param robot_attributes: Suite attributes passed through the listener
         """
         self.robot_attributes = robot_attributes
-        self.doc = robot_markup_to_markdown(robot_attributes['doc'])
-        self.end_time = robot_attributes.get('endtime', '')
-        self.longname = robot_attributes['longname']
-        self.message = robot_attributes.get('message')
-        self.metadata = robot_attributes['metadata']
+        self.doc = robot_markup_to_markdown(robot_attributes["doc"])
+        self.end_time = robot_attributes.get("endtime", "")
+        self.longname = robot_attributes["longname"]
+        self.message = robot_attributes.get("message")
+        self.metadata = robot_attributes["metadata"]
         self.name = name
-        self.robot_id = robot_attributes['id']
+        self.robot_id = robot_attributes["id"]
         self.rp_item_id = None
         self.rp_parent_item_id = None
-        self.start_time = robot_attributes.get('starttime')
-        self.statistics = robot_attributes.get('statistics')
-        self.status = robot_attributes.get('status')
-        self.suites = robot_attributes['suites']
-        self.tests = robot_attributes['tests']
-        self.total_tests = robot_attributes['totaltests']
-        self.type = 'SUITE'
+        self.start_time = robot_attributes.get("starttime")
+        self.statistics = robot_attributes.get("statistics")
+        self.status = robot_attributes.get("status")
+        self.suites = robot_attributes["suites"]
+        self.tests = robot_attributes["tests"]
+        self.total_tests = robot_attributes["totaltests"]
+        self.type = "SUITE"
         self.skipped_keywords = []
         self.remove_data = False
 
@@ -179,23 +179,23 @@ class Suite:
         """Get Suite attributes."""
         if self.metadata is None or not self.metadata:
             return None
-        return [{'key': key, 'value': value} for key, value in self.metadata.items()]
+        return [{"key": key, "value": value} for key, value in self.metadata.items()]
 
     @property
     def source(self) -> str:
         """Return the test case source file path."""
-        if self.robot_attributes.get('source') is not None:
-            return os.path.relpath(self.robot_attributes['source'], os.getcwd())
+        if self.robot_attributes.get("source") is not None:
+            return os.path.relpath(self.robot_attributes["source"], os.getcwd())
 
-    def update(self, attributes: Dict[str, Any]) -> 'Suite':
+    def update(self, attributes: Dict[str, Any]) -> "Suite":
         """Update suite attributes on suite finish.
 
         :param attributes: Suite attributes passed through the listener
         """
-        self.end_time = attributes.get('endtime', '')
-        self.message = attributes.get('message')
-        self.status = attributes.get('status')
-        self.statistics = attributes.get('statistics')
+        self.end_time = attributes.get("endtime", "")
+        self.message = attributes.get("message")
+        self.status = attributes.get("status")
+        self.statistics = attributes.get("statistics")
         return self
 
 
@@ -203,7 +203,7 @@ class Launch(Suite):
     """Class represents Robot Framework test suite."""
 
     launch_attributes: Optional[List[Dict[str, str]]]
-    type: str = 'LAUNCH'
+    type: str = "LAUNCH"
 
     def __init__(self, name: str, robot_attributes: Dict[str, Any], launch_attributes: Optional[List[str]]):
         """Initialize required attributes.
@@ -214,7 +214,7 @@ class Launch(Suite):
         """
         super().__init__(name, robot_attributes)
         self.launch_attributes = gen_attributes(launch_attributes or [])
-        self.type = 'LAUNCH'
+        self.type = "LAUNCH"
 
     @property
     def attributes(self) -> Optional[List[Dict[str, str]]]:
@@ -240,7 +240,7 @@ class Test:
     start_time: str
     status: str
     template: str
-    type: str = 'TEST'
+    type: str = "TEST"
     skipped_keywords: List[Keyword]
     remove_data: bool
 
@@ -252,29 +252,29 @@ class Test:
         """
         # for backward compatibility with Robot < 4.0 mark every test case
         # as critical if not set
-        self._critical = robot_attributes.get('critical', 'yes')
-        self._tags = robot_attributes['tags']
+        self._critical = robot_attributes.get("critical", "yes")
+        self._tags = robot_attributes["tags"]
         self.test_attributes = gen_attributes(test_attributes)
         self.robot_attributes = robot_attributes
-        self.doc = robot_markup_to_markdown(robot_attributes['doc'])
-        self.end_time = robot_attributes.get('endtime', '')
-        self.longname = robot_attributes['longname']
-        self.message = robot_attributes.get('message')
+        self.doc = robot_markup_to_markdown(robot_attributes["doc"])
+        self.end_time = robot_attributes.get("endtime", "")
+        self.longname = robot_attributes["longname"]
+        self.message = robot_attributes.get("message")
         self.name = name
-        self.robot_id = robot_attributes['id']
+        self.robot_id = robot_attributes["id"]
         self.rp_item_id = None
         self.rp_parent_item_id = None
-        self.start_time = robot_attributes['starttime']
-        self.status = robot_attributes.get('status')
-        self.template = robot_attributes['template']
-        self.type = 'TEST'
+        self.start_time = robot_attributes["starttime"]
+        self.status = robot_attributes.get("status")
+        self.template = robot_attributes["template"]
+        self.type = "TEST"
         self.skipped_keywords = []
         self.remove_data = False
 
     @property
     def critical(self) -> bool:
         """Form unique value for RF 4.0+ and older versions."""
-        return self._critical in ('yes', True)
+        return self._critical in ("yes", True)
 
     @property
     def tags(self) -> List[str]:
@@ -289,8 +289,8 @@ class Test:
     @property
     def source(self) -> str:
         """Return the test case source file path."""
-        if self.robot_attributes['source'] is not None:
-            return os.path.relpath(self.robot_attributes['source'], os.getcwd())
+        if self.robot_attributes["source"] is not None:
+            return os.path.relpath(self.robot_attributes["source"], os.getcwd())
 
     @property
     def code_ref(self) -> str:
@@ -300,8 +300,8 @@ class Test:
         """
         line_number = self.robot_attributes.get("lineno")
         if line_number is not None:
-            return '{0}:{1}'.format(self.source, line_number)
-        return '{0}:{1}'.format(self.source, self.name)
+            return "{0}:{1}".format(self.source, line_number)
+        return "{0}:{1}".format(self.source, self.name)
 
     @property
     def test_case_id(self) -> Optional[str]:
@@ -309,17 +309,17 @@ class Test:
         # use test case id from tags if specified
         for tag in self._tags:
             if tag.startswith(TEST_CASE_ID_SIGN):
-                return tag.split(':')[1]
+                return tag.split(":")[1]
         # generate it if not
-        return '{0}:{1}'.format(self.source, self.name)
+        return "{0}:{1}".format(self.source, self.name)
 
-    def update(self, attributes: Dict[str, Any]) -> 'Test':
+    def update(self, attributes: Dict[str, Any]) -> "Test":
         """Update test attributes on test finish.
 
         :param attributes: Suite attributes passed through the listener
         """
-        self._tags = attributes.get('tags', self._tags)
-        self.end_time = attributes.get('endtime', '')
-        self.message = attributes.get('message')
-        self.status = attributes.get('status')
+        self._tags = attributes.get("tags", self._tags)
+        self.end_time = attributes.get("endtime", "")
+        self.message = attributes.get("message")
+        self.status = attributes.get("status")
         return self

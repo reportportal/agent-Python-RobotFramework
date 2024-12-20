@@ -17,12 +17,12 @@ from unittest import mock
 from tests import REPORT_PORTAL_SERVICE
 from tests.helpers import utils
 
-EXAMPLE_TEST = 'examples/dynamic_test_case_id.robot'
+EXAMPLE_TEST = "examples/dynamic_test_case_id.robot"
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
 def test_case_id_simple(mock_client_init):
-    result = utils.run_robot_tests([EXAMPLE_TEST], arguments={'--metadata': 'Scope:Smoke'})
+    result = utils.run_robot_tests([EXAMPLE_TEST], arguments={"--metadata": "Scope:Smoke"})
     assert result == 0  # the test successfully passed
 
     mock_client = mock_client_init.return_value
@@ -35,7 +35,7 @@ def test_case_id_simple(mock_client_init):
     assert len(item_start_calls) == len(item_finish_calls) == 3
 
     test_item_start = item_start_calls[-2]
-    assert test_item_start[1]['test_case_id'] == f'{EXAMPLE_TEST}:Test set dynamic Test Case ID'
+    assert test_item_start[1]["test_case_id"] == f"{EXAMPLE_TEST}:Test set dynamic Test Case ID"
 
     test_item_finish = item_finish_calls[-2]
-    assert test_item_finish[1]['test_case_id'] == 'dynamic_tags.robot[Smoke]'
+    assert test_item_finish[1]["test_case_id"] == "dynamic_tags.robot[Smoke]"

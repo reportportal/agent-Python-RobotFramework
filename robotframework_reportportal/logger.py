@@ -42,8 +42,13 @@ from robot.api import logger
 from robotframework_reportportal.model import LogMessage
 
 
-def write(msg: str, level: str = 'INFO', html: bool = False, attachment: Optional[Dict[str, str]] = None,
-          launch_log: bool = False) -> None:
+def write(
+    msg: str,
+    level: str = "INFO",
+    html: bool = False,
+    attachment: Optional[Dict[str, str]] = None,
+    launch_log: bool = False,
+) -> None:
     """Write the message to the log file using the given level.
 
     Valid log levels are ``TRACE``, ``DEBUG``, ``INFO`` (default since RF 2.9.1), ``WARN``,
@@ -78,8 +83,13 @@ def debug(msg: str, html: bool = False, attachment: Optional[Dict[str, str]] = N
     write(msg, "DEBUG", html, attachment, launch_log)
 
 
-def info(msg: str, html: bool = False, also_console: bool = False, attachment: Optional[Dict[str, str]] = None,
-         launch_log: bool = False):
+def info(
+    msg: str,
+    html: bool = False,
+    also_console: bool = False,
+    attachment: Optional[Dict[str, str]] = None,
+    launch_log: bool = False,
+):
     """Write the message to the log file using the ``INFO`` level.
 
     If ``also_console`` argument is set to ``True``, the message is written both to the log file and to the console.
@@ -91,15 +101,15 @@ def info(msg: str, html: bool = False, also_console: bool = False, attachment: O
 
 def warn(msg: str, html: bool = False, attachment: Optional[Dict[str, str]] = None, launch_log: bool = False) -> None:
     """Write the message to the log file using the ``WARN`` level."""
-    write(msg, 'WARN', html, attachment, launch_log)
+    write(msg, "WARN", html, attachment, launch_log)
 
 
 def error(msg: str, html: bool = False, attachment: Optional[Dict[str, str]] = None, launch_log: bool = False) -> None:
     """Write the message to the log file using the ``ERROR`` level."""
-    write(msg, 'ERROR', html, attachment, launch_log)
+    write(msg, "ERROR", html, attachment, launch_log)
 
 
-def console(msg: str, newline: bool = True, stream: str = 'stdout') -> None:
+def console(msg: str, newline: bool = True, stream: str = "stdout") -> None:
     """Write the message to the console.
 
     If the ``newline`` argument is ``True``, a newline character is automatically added to the message.
