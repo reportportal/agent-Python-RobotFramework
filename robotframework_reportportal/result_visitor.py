@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+"""Robot Framework test report sender to ReportPortal."""
+
 import re
 import string
 import sys
@@ -20,7 +22,7 @@ from datetime import datetime, timedelta, timezone
 if sys.version_info >= (3, 9):
     from zoneinfo import available_timezones, ZoneInfo
 
-from typing import List, Optional, Pattern
+from typing import List, Optional, Pattern, Tuple
 from urllib.parse import unquote
 
 from robot.result import Keyword, Message, Result, ResultVisitor, TestCase, TestSuite
@@ -39,6 +41,7 @@ else:
 
 
 def to_timestamp(time_str: str) -> Optional[str]:
+    """Converts time string to timestamp with given timezone offset."""
     if not time_str:
         return None
 
@@ -57,6 +60,8 @@ def to_timestamp(time_str: str) -> Optional[str]:
 
 
 class RobotResultsVisitor(ResultVisitor):
+    """Visitor for Robot Framework result XML report."""
+
     _link_pattern: Pattern = re.compile("src=[\"']([^\"']+)[\"']")
 
     def start_result(self, result: Result) -> bool:
@@ -67,6 +72,8 @@ class RobotResultsVisitor(ResultVisitor):
         return True
 
     def start_suite(self, suite: TestSuite) -> bool:
+        """Start suite."""
+
         ts = to_timestamp(suite.starttime if suite.id not in corrections else corrections[suite.id][0])
         attrs = {
             "id": suite.id,
@@ -83,6 +90,8 @@ class RobotResultsVisitor(ResultVisitor):
         return True
 
     def end_suite(self, suite: TestSuite) -> None:
+        """End suite."""
+
         ts = to_timestamp(suite.endtime if suite.id not in corrections else corrections[suite.id][1])
         attrs = {
             "id": suite.id,
@@ -102,6 +111,8 @@ class RobotResultsVisitor(ResultVisitor):
         listener.end_suite(None, attrs, ts)
 
     def start_test(self, test: TestCase) -> bool:
+        """Start test."""
+
         ts = to_timestamp(test.starttime if test.id not in corrections else corrections[test.id][0])
         attrs = {
             "id": test.id,
@@ -121,6 +132,8 @@ class RobotResultsVisitor(ResultVisitor):
         return True
 
     def end_test(self, test: TestCase) -> None:
+        """End test."""
+
         ts = to_timestamp(test.endtime if test.id not in corrections else corrections[test.id][1])
         attrs = {
             "id": test.id,
@@ -142,6 +155,8 @@ class RobotResultsVisitor(ResultVisitor):
         listener.end_test(test.name, attrs, ts)
 
     def start_keyword(self, kw: Keyword) -> bool:
+        """Start keyword."""
+
         ts = to_timestamp(kw.starttime if kw.id not in corrections else corrections[kw.id][0])
         attrs = {
             "type": string.capwords(kw.type),
@@ -157,6 +172,8 @@ class RobotResultsVisitor(ResultVisitor):
         return True
 
     def end_keyword(self, kw: Keyword) -> None:
+        """End keyword."""
+
         ts = to_timestamp(kw.endtime if kw.id not in corrections else corrections[kw.id][1])
         attrs = {
             "type": string.capwords(kw.type),
@@ -173,13 +190,15 @@ class RobotResultsVisitor(ResultVisitor):
         listener.end_keyword(kw.name, attrs, ts)
 
     def start_message(self, msg: Message) -> bool:
+        """Start message."""
+
         if msg.message:
             message = {
                 "message": msg.message,
                 "level": msg.level,
             }
             try:
-                m = self.parse_message(message["message"])
+                m = self.split_message_and_image(message["message"])
                 message["message"] = m[0]
                 listener.log_message_with_image(message, m[1])
             except (AttributeError, IOError):
@@ -190,6 +209,8 @@ class RobotResultsVisitor(ResultVisitor):
                     return False
         return True
 
-    def parse_message(self, msg: str) -> List[str]:
+    def split_message_and_image(self, msg: str) -> Tuple[str, str]:
+        """Split message and image."""
+
         m = self._link_pattern.search(msg)
-        return [m.group(), unquote(m.group(1))]
+        return m.group(), unquote(m.group(1))

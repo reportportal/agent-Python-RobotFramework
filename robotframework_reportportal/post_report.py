@@ -56,6 +56,8 @@ from robotframework_reportportal.variables import _variables
 
 
 def process(infile="output.xml"):
+    """Process the given file."""
+
     test_run = ExecutionResult(infile)
     test_run.visit(TimeVisitor())
     if corrections:
@@ -68,6 +70,8 @@ def process(infile="output.xml"):
 
 
 def main():
+    """Main entry point for the script."""
+
     argument_list = sys.argv[1:]
     short_options = "hv:"
     long_options = ["help", "variable=", "loglevel=", "timezone="]
