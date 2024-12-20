@@ -12,6 +12,8 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+"""This module provides a visitor for the robot framework results to correct the start and end times of the nodes."""
+
 import logging
 
 from robot.api import ResultVisitor
@@ -21,11 +23,12 @@ corrections = {}
 
 
 class TimeVisitor(ResultVisitor):
+    """Visitor for the robot framework results to correct the start and end times of the nodes."""
 
     @staticmethod
     def _correct_starts(o, node_class):
         """
-        starttime wants to be the oldest start time of its children.
+        Starttime wants to be the oldest start time of its children.
         only correcting null starttime.
         """
         if o.starttime:
