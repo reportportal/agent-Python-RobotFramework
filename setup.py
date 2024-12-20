@@ -18,7 +18,7 @@ import os
 from setuptools import setup
 
 
-__version__ = '5.5.9'
+__version__ = '5.6.0'
 
 
 def read_file(fname):
@@ -49,7 +49,6 @@ setup(
               'agent'],
     classifiers=[
         'Framework :: Robot Framework',
-        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',

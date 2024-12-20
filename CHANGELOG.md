@@ -3,6 +3,8 @@
 ## [Unreleased]
 ### Added
 - Support for `Python 3.13`, by @HardNorth
+### Removed
+- `Python 3.7` support, by @HardNorth
 
 ## [5.5.8]
 ### Added

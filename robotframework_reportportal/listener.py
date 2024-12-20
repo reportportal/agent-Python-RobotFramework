@@ -184,15 +184,15 @@ class listener:
         return self._items.last()
 
     def __post_skipped_keyword(self, kwd: Keyword) -> None:
+        self._do_start_keyword(kwd)
         skipped_logs = getattr(kwd, 'skipped_logs', [])
         for log_message in skipped_logs:
             self._log_message(log_message)
         skipped_kwds = kwd.skipped_keywords
         kwd.skipped_keywords = []
         for skipped_kwd in skipped_kwds:
-            self._do_start_keyword(kwd)
             self.__post_skipped_keyword(skipped_kwd)
-            self._do_end_keyword(kwd)
+        self._do_end_keyword(kwd)
 
     def _post_skipped_keywords(self, to_post: Optional[Any]) -> None:
         if not to_post:
@@ -474,6 +474,11 @@ class listener:
         kwd = self.current_item.update(attributes)
         if kwd.status == 'FAIL' and not kwd.posted and kwd.matched_filter is not WKUS_KEYWORD_MATCH:
             self._post_skipped_keywords(kwd)
+
+        if kwd.matched_filter is WKUS_KEYWORD_MATCH and WKUS_KEYWORD_MATCH.match(kwd):
+            last_iteration = kwd.skipped_keywords[-1]
+            self._post_skipped_keywords(last_iteration)
+            self._do_end_keyword(last_iteration, ts)
 
         self._remove_current_item()
         if not kwd.posted:
