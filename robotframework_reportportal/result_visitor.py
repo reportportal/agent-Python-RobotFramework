@@ -22,7 +22,7 @@ from datetime import datetime, timedelta, timezone
 if sys.version_info >= (3, 9):
     from zoneinfo import available_timezones, ZoneInfo
 
-from typing import List, Optional, Pattern, Tuple
+from typing import Optional, Pattern, Tuple
 from urllib.parse import unquote
 
 from robot.result import Keyword, Message, Result, ResultVisitor, TestCase, TestSuite
