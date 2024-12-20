@@ -69,7 +69,7 @@ def process(infile="output.xml"):
 
 
 def main():
-    """Main entry point for the script."""
+    """Start the script."""
     argument_list = sys.argv[1:]
     short_options = "hv:"
     long_options = ["help", "variable=", "loglevel=", "timezone="]
