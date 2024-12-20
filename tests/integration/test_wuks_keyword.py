@@ -19,7 +19,7 @@ from tests.helpers import utils
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
-def test_wkus_keyword(mock_client_init):
+def test_wuks_keyword(mock_client_init):
     mock_client = mock_client_init.return_value
     mock_client.start_test_item.side_effect = utils.item_id_gen
 
