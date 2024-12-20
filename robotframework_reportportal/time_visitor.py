@@ -28,8 +28,10 @@ class TimeVisitor(ResultVisitor):
     @staticmethod
     def _correct_starts(o, node_class):
         """
-        Starttime wants to be the oldest start time of its children.
-        only correcting null starttime.
+        Correct items start time.
+
+        Start time of a parent item should to be the oldest start time of its children so correct it if it's null or
+        newer than on any child item.
         """
         if o.starttime:
             corrected = False
@@ -48,8 +50,10 @@ class TimeVisitor(ResultVisitor):
     @staticmethod
     def _correct_ends(o, node_class):
         """
-        endtime wants to be the newest end time of its children.
-        only correcting null endtime.
+        Correct items end time.
+
+        End time of a parent item should to be the newest end time of its children so correct it if it's null or
+        older than on any child item.
         """
         if o.endtime:
             corrected = False
@@ -65,19 +69,25 @@ class TimeVisitor(ResultVisitor):
             _stack.pop()
 
     def start_suite(self, suite):
+        """Correct start time of the suite."""
         self._correct_starts(suite, "suite")
 
     def end_suite(self, suite):
+        """Correct end time of the suite."""
         self._correct_ends(suite, "suite")
 
     def start_test(self, test):
+        """Correct start time of the test."""
         self._correct_starts(test, "test")
 
     def end_test(self, test):
+        """Correct end time of the test."""
         self._correct_ends(test, "test")
 
     def start_keyword(self, keyword):
+        """Correct start time of the keyword."""
         self._correct_starts(keyword, "kw")
 
     def end_keyword(self, keyword):
+        """Correct end time of the keyword."""
         self._correct_ends(keyword, "kw")
