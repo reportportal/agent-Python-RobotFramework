@@ -37,3 +37,6 @@ def test_wuks_keyword_remove(mock_client_init):
 
     statuses = [finish[1]["status"] for finish in item_finish_calls]
     assert statuses == ["PASSED"] * 2 + ["SKIPPED"] * 2 + ["PASSED"] * 4
+
+    calls = utils.get_log_calls(mock_client)
+    assert len(calls) == 3

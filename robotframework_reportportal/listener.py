@@ -185,11 +185,21 @@ class listener:
         """Get the last item from the self._items queue."""
         return self._items.last()
 
+    def __post_log_message(self, message: LogMessage) -> None:
+        """Send log message to the Report Portal at skipped Keyword reporting.
+
+        :param message: Internal message object to send
+        """
+        if message.attachment:
+            logger.debug(f"ReportPortal - Log Message with Attachment: {message}")
+        else:
+            logger.debug(f"ReportPortal - Log Message: {message}")
+            self.service.log(message=message)
+
     def __post_skipped_keyword(self, kwd: Keyword) -> None:
         self._do_start_keyword(kwd)
-        skipped_logs = getattr(kwd, "skipped_logs", [])
-        for log_message in skipped_logs:
-            self._log_message(log_message)
+        for log_message in kwd.skipped_logs:
+            self.__post_log_message(log_message)
         skipped_kwds = kwd.skipped_keywords
         kwd.skipped_keywords = []
         for skipped_kwd in skipped_kwds:
@@ -202,6 +212,8 @@ class listener:
         if isinstance(to_post, Keyword):
             if not to_post.posted:
                 self._do_start_keyword(to_post)
+                for log_message in to_post.skipped_logs:
+                    self.__post_log_message(log_message)
         skipped_kwds = getattr(to_post, "skipped_keywords", None)
         if skipped_kwds:
             to_post.skipped_keywords = []
