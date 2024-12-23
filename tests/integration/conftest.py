@@ -14,8 +14,6 @@
 
 """This module contains common Pytest fixtures and hooks for unit tests."""
 
-import sys
-
 KEYWORDS_EXPECTED_TEST_NAMES = ["Invalid Password"]
 KEYWORDS_EXPECTED_CODE_REF_SUFFIXES = ["6"] * 6
 
@@ -46,12 +44,6 @@ def pytest_generate_tests(metafunc):
         option_args = [
             ("examples/templates/keyword.robot", KEYWORDS_EXPECTED_TEST_NAMES, KEYWORDS_EXPECTED_CODE_REF_SUFFIXES),
             ("examples/templates/settings.robot", SETTINGS_EXPECTED_TEST_NAMES, SETTINGS_EXPECTED_CODE_REF_SUFFIXES),
-        ]
-        if sys.version_info >= (3, 6):
-            pass
-            # TODO: Uncomment as soon as DataDriver fix its compatibility with
-            #  Robot 6.1
-            # option_args.append(('examples/templates/datadriver.robot',
-            #                     DATADRIVER_EXPECTED_TEST_NAMES,
-            #                     DATADRIVER_EXPECTED_CODE_REF_SUFFIXES))
+            ('examples/templates/datadriver.robot', DATADRIVER_EXPECTED_TEST_NAMES,
+             DATADRIVER_EXPECTED_CODE_REF_SUFFIXES)]
         metafunc.parametrize(func_options, option_args)
