@@ -17,21 +17,21 @@ limitations under the License
 import os
 from unittest import mock
 
-from pytest import fixture
+import pytest
 
 from robotframework_reportportal.listener import listener
 from robotframework_reportportal.result_visitor import RobotResultsVisitor
 from robotframework_reportportal.variables import Variables
 
 
-@fixture()
+@pytest.fixture
 def visitor():
     return RobotResultsVisitor()
 
 
 @mock.patch("robotframework_reportportal.variables.strtobool", mock.Mock())
 @mock.patch("robotframework_reportportal.variables.get_variable", mock.Mock())
-@fixture()
+@pytest.fixture
 def mock_variables():
     mock_variables = Variables()
     mock_variables.endpoint = "http://localhost:8080"
@@ -53,14 +53,14 @@ def mock_variables():
     return mock_variables
 
 
-@fixture()
+@pytest.fixture
 def mock_listener(mock_variables):
     mock_listener = listener()
     mock_listener._variables = mock_variables
     return mock_listener
 
 
-@fixture()
+@pytest.fixture
 def kwd_attributes():
     """Keyword attributes."""
     return {
@@ -75,7 +75,7 @@ def kwd_attributes():
     }
 
 
-@fixture()
+@pytest.fixture
 def suite_attributes():
     return {
         "id": "s1",
@@ -90,7 +90,7 @@ def suite_attributes():
     }
 
 
-@fixture()
+@pytest.fixture
 def test_attributes():
     return {
         "id": "s1-t1",

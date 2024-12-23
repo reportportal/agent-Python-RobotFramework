@@ -273,6 +273,8 @@ class listener:
 
     def _process_keyword_skip(self):
         try:
+            self._keyword_filters = []
+
             # noinspection PyUnresolvedReferences
             from robot.running.context import EXECUTION_CONTEXTS
 
