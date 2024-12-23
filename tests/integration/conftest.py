@@ -44,6 +44,10 @@ def pytest_generate_tests(metafunc):
         option_args = [
             ("examples/templates/keyword.robot", KEYWORDS_EXPECTED_TEST_NAMES, KEYWORDS_EXPECTED_CODE_REF_SUFFIXES),
             ("examples/templates/settings.robot", SETTINGS_EXPECTED_TEST_NAMES, SETTINGS_EXPECTED_CODE_REF_SUFFIXES),
-            ('examples/templates/datadriver.robot', DATADRIVER_EXPECTED_TEST_NAMES,
-             DATADRIVER_EXPECTED_CODE_REF_SUFFIXES)]
+            (
+                "examples/templates/datadriver.robot",
+                DATADRIVER_EXPECTED_TEST_NAMES,
+                DATADRIVER_EXPECTED_CODE_REF_SUFFIXES,
+            ),
+        ]
         metafunc.parametrize(func_options, option_args)
