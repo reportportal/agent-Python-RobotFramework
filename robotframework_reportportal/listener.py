@@ -21,7 +21,7 @@ import uuid
 from abc import ABC, abstractmethod
 from functools import wraps
 from mimetypes import guess_type
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union, Callable
 from warnings import warn
 
 from reportportal_client.helpers import LifoQueue, guess_content_type_from_bytes, is_binary
@@ -45,8 +45,8 @@ REMOVED_KEYWORD_LOG = "Keyword data removed using --removeKeywords option."
 REMOVED_WKUS_KEYWORD_LOG = "{number} failing items removed using the --remove-keywords option."
 REMOVED_FOR_WHILE_KEYWORD_LOG = "{number} passing items removed using the --remove-keywords option."
 WKUS_KEYWORD_NAME = "BuiltIn.Wait Until Keyword Succeeds"
-FOR_KEYWORD_NAME = "BuiltIn.For"
-WHILE_KEYWORD_NAME = "BuiltIn.While"
+FOR_KEYWORD_TYPE = "FOR"
+WHILE_KEYWORD_TYPE = "WHILE"
 
 
 def check_rp_enabled(func):
@@ -67,39 +67,58 @@ class _KeywordMatch(ABC):
     def match(self, kw: Keyword) -> bool: ...
 
 
-class _KeywordNameMatch(_KeywordMatch):
-    pattern: Optional[re.Pattern]
+class _KeywordFieldEqual(_KeywordMatch):
+    expected_value: Optional[str]
+    extract_func: Callable[[Keyword], str]
 
-    def __init__(self, pattern: Optional[str]):
-        self.pattern = translate_glob_to_regex(pattern)
+    def __init__(self, expected_value: Optional[str], extract_func: Callable[[Keyword], str] = None) -> None:
+        self.expected_value = expected_value
+        self.extract_func = extract_func
 
     def match(self, kw: Keyword) -> bool:
-        return match_pattern(self.pattern, kw.name)
+        return self.extract_func(kw) == self.expected_value
+
+
+class _KeywordPatternMatch(_KeywordMatch):
+    pattern: Optional[re.Pattern]
+    extract_func: Optional[Callable[[Keyword], str]]
+
+    def __init__(self, pattern: Optional[str], extract_func: Callable[[Keyword], str] = None):
+        self.pattern = translate_glob_to_regex(pattern)
+        self.extract_func = extract_func
+
+    def match(self, kw: Keyword) -> bool:
+        return match_pattern(self.pattern, self.extract_func(kw))
+
+
+class _KeywordNameMatch(_KeywordPatternMatch):
+    def __init__(self, pattern: Optional[str]) -> None:
+        super().__init__(pattern, lambda kw: kw.name)
+
+
+class _KeywordTypeEqual(_KeywordFieldEqual):
+    def __init__(self, expected_value: Optional[str]) -> None:
+        super().__init__(expected_value, lambda kw: kw.keyword_type)
 
 
 class _KeywordTagMatch(_KeywordMatch):
     pattern: Optional[re.Pattern]
 
-    def __init__(self, pattern: Optional[str]):
+    def __init__(self, pattern: Optional[str]) -> None:
         self.pattern = translate_glob_to_regex(pattern)
 
     def match(self, kw: Keyword) -> bool:
         return next((True for t in kw.tags if match_pattern(self.pattern, t)), False)
 
 
-class _KeywordStatusMatch(_KeywordMatch):
-    status: str
-
-    def __init__(self, status: str):
-        self.status = status.upper()
-
-    def match(self, kw: Keyword) -> bool:
-        return kw.status.upper() == self.status
+class _KeywordStatusEqual(_KeywordFieldEqual):
+    def __init__(self, status: str) -> None:
+        super().__init__(status, lambda kw: kw.status)
 
 
 WKUS_KEYWORD_MATCH = _KeywordNameMatch(WKUS_KEYWORD_NAME)
-FOR_KEYWORD_MATCH = _KeywordNameMatch(FOR_KEYWORD_NAME)
-WHILE_KEYWORD_NAME = _KeywordNameMatch(WHILE_KEYWORD_NAME)
+FOR_KEYWORD_MATCH = _KeywordTypeEqual(FOR_KEYWORD_TYPE)
+WHILE_KEYWORD_NAME = _KeywordTypeEqual(WHILE_KEYWORD_TYPE)
 
 
 # noinspection PyPep8Naming
@@ -299,7 +318,7 @@ class listener:
                         self._remove_keywords = True
                         break
                     if pattern_str_upper in {"NOT_RUN", "NOTRUN", "NOT RUN"}:
-                        self._keyword_filters.append(_KeywordStatusMatch("NOT RUN"))
+                        self._keyword_filters.append(_KeywordStatusEqual("NOT RUN"))
                         continue
                     if pattern_str_upper in {"FOR", "WHILE", "WUKS"}:
                         if pattern_str_upper == "WUKS":
@@ -433,8 +452,6 @@ class listener:
             test.status = "SKIP"
         if test.remove_data and attributes["status"] == "FAIL":
             self._post_skipped_keywords(test)
-        if test.message:
-            self.log_message({"message": test.message, "level": "DEBUG"})
         logger.debug(f"ReportPortal - End Test: {test.robot_attributes}")
         self._remove_current_item()
         self.service.finish_test(test=test, ts=ts)
