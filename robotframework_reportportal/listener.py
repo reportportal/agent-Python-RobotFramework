@@ -41,7 +41,9 @@ IMAGE_PATTERN = re.compile(
 
 DEFAULT_BINARY_FILE_TYPE = "application/octet-stream"
 TRUNCATION_SIGN = "...'"
-REMOVED_KEYWORD_LOG = "Keyword data removed using --RemoveKeywords option."
+REMOVED_KEYWORD_LOG = "Keyword data removed using --removeKeywords option."
+REMOVED_WKUS_KEYWORD_LOG = "{number} failing items removed using the --remove-keywords option."
+REMOVED_FOR_WHILE_KEYWORD_LOG = "{number} passing items removed using the --remove-keywords option."
 WKUS_KEYWORD_NAME = "BuiltIn.Wait Until Keyword Succeeds"
 FOR_KEYWORD_NAME = "BuiltIn.For"
 WHILE_KEYWORD_NAME = "BuiltIn.While"
@@ -194,7 +196,7 @@ class listener:
             logger.debug(f"ReportPortal - Log Message with Attachment: {message}")
         else:
             logger.debug(f"ReportPortal - Log Message: {message}")
-            self.service.log(message=message)
+        self.service.log(message=message)
 
     def __post_skipped_keyword(self, kwd: Keyword) -> None:
         self._do_start_keyword(kwd)
@@ -225,18 +227,13 @@ class listener:
 
         :param message: Internal message object to send
         """
-        if message.attachment:
-            logger.debug(f"ReportPortal - Log Message with Attachment: {message}")
-        else:
-            logger.debug(f"ReportPortal - Log Message: {message}")
-
         current_item = self.current_item
         if current_item and not getattr(current_item, "posted", True) and message.level not in ["ERROR", "WARN"]:
             self.current_item.skipped_logs.append(message)
         elif getattr(current_item, "matched_filter", None) is not WKUS_KEYWORD_MATCH:
             # Post everything skipped by '--removekeywords' option
             self._post_skipped_keywords(current_item)
-            self.service.log(message=message)
+            self.__post_log_message(message)
 
     @check_rp_enabled
     def log_message(self, message: Dict) -> None:
@@ -374,7 +371,7 @@ class listener:
         suite.rp_item_id = self.service.start_suite(suite=suite, ts=ts)
         self._add_current_item(suite)
         if suite.remove_data:
-            self._log_keyword_data_removed(suite.rp_item_id)
+            self._log_keyword_data_removed(suite.rp_item_id, suite.start_time)
 
     @check_rp_enabled
     def end_suite(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
@@ -392,11 +389,15 @@ class listener:
         if attributes["id"] == MAIN_SUITE_ID:
             self.finish_launch(attributes, ts)
 
-    def _log_keyword_data_removed(self, item_id: str) -> None:
-        msg = LogMessage(REMOVED_KEYWORD_LOG)
-        msg.level = "INFO"
+    def _log_data_removed(self, item_id: str, timestamp: str, message: str) -> None:
+        msg = LogMessage(message)
+        msg.level = "DEBUG"
         msg.item_id = item_id
-        self._log_message(msg)
+        msg.timestamp = timestamp
+        self.__post_log_message(msg)
+
+    def _log_keyword_data_removed(self, item_id: str, timestamp: str) -> None:
+        self._log_data_removed(item_id, timestamp, REMOVED_KEYWORD_LOG)
 
     @check_rp_enabled
     def start_test(self, name: str, attributes: Dict, ts: Optional[Any] = None) -> None:
@@ -417,7 +418,7 @@ class listener:
         test.rp_item_id = self.service.start_test(test=test, ts=ts)
         self._add_current_item(test)
         if test.remove_data:
-            self._log_keyword_data_removed(test.rp_item_id)
+            self._log_keyword_data_removed(test.rp_item_id, test.start_time)
 
     @check_rp_enabled
     def end_test(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
@@ -472,8 +473,6 @@ class listener:
             kwd.posted = False
         else:
             self._do_start_keyword(kwd, ts)
-            if kwd.remove_data:
-                self._log_keyword_data_removed(kwd.rp_item_id)
 
         self._add_current_item(kwd)
 
@@ -494,9 +493,31 @@ class listener:
             self._post_skipped_keywords(kwd)
 
         if kwd.matched_filter is WKUS_KEYWORD_MATCH and WKUS_KEYWORD_MATCH.match(kwd):
-            last_iteration = kwd.skipped_keywords[-1]
-            self._post_skipped_keywords(last_iteration)
-            self._do_end_keyword(last_iteration, ts)
+            skipped_kwds = kwd.skipped_keywords
+            skipped_kwds_num = len(skipped_kwds)
+            if skipped_kwds_num > 2:
+                self._log_data_removed(
+                    kwd.rp_item_id,
+                    kwd.start_time,
+                    REMOVED_WKUS_KEYWORD_LOG.format(number=len(kwd.skipped_keywords) - 2),
+                )
+            if skipped_kwds_num > 1:
+                first_iteration = kwd.skipped_keywords[0]
+                self._post_skipped_keywords(first_iteration)
+                self._do_end_keyword(first_iteration)
+            if skipped_kwds_num > 0:
+                last_iteration = kwd.skipped_keywords[-1]
+                self._post_skipped_keywords(last_iteration)
+                self._do_end_keyword(last_iteration, ts)
+
+        elif (kwd.matched_filter is FOR_KEYWORD_MATCH and FOR_KEYWORD_MATCH.match(kwd)) or (
+            kwd.matched_filter is WHILE_KEYWORD_NAME and WHILE_KEYWORD_NAME.match(kwd)
+        ):
+            self._log_data_removed(
+                kwd.rp_item_id, kwd.start_time, REMOVED_FOR_WHILE_KEYWORD_LOG.format(number=len(kwd.skipped_keywords))
+            )
+        elif kwd.posted and kwd.remove_data:
+            self._log_keyword_data_removed(kwd.rp_item_id, kwd.start_time)
 
         self._remove_current_item()
         if not kwd.posted:

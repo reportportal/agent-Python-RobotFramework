@@ -21,14 +21,24 @@ from tests.helpers import utils
 
 
 @pytest.mark.parametrize(
-    "file, exit_code, statuses, log_number",
+    "file, exit_code, expected_statuses, log_number",
     [
-        ("examples/wuks_keyword.robot", 0, ["PASSED"] * 2 + ["SKIPPED"] * 2 + ["PASSED"] * 4, 3),
-        ("examples/wuks_keyword_failed.robot", 1, ["FAILED"] * 2 + ["SKIPPED"] * 2 + ["FAILED"] * 4, 5),
+        (
+            "examples/wuks_keyword.robot",
+            0,
+            ["PASSED"] * 2 + ["FAILED"] * 3 + ["PASSED"] * 2 + ["SKIPPED"] * 2 + ["PASSED"] * 4,
+            6,
+        ),
+        (
+            "examples/wuks_keyword_failed.robot",
+            1,
+            ["PASSED"] * 2 + ["FAILED"] * 3 + ["PASSED"] * 2 + ["FAILED"] * 6,
+            7,
+        ),
     ],
 )
 @mock.patch(REPORT_PORTAL_SERVICE)
-def test_wuks_keyword_remove(mock_client_init, file, exit_code, statuses, log_number):
+def test_wuks_keyword_remove(mock_client_init, file, exit_code, expected_statuses, log_number):
     mock_client = mock_client_init.return_value
     mock_client.start_test_item.side_effect = utils.item_id_gen
 
@@ -42,10 +52,10 @@ def test_wuks_keyword_remove(mock_client_init, file, exit_code, statuses, log_nu
     item_start_calls = mock_client.start_test_item.call_args_list
     item_finish_calls = mock_client.finish_test_item.call_args_list
     assert len(item_start_calls) == len(item_finish_calls)
-    assert len(item_finish_calls) == 8
+    assert len(item_finish_calls) == 13
 
     statuses = [finish[1]["status"] for finish in item_finish_calls]
-    assert statuses == statuses
+    assert statuses == expected_statuses
 
     calls = utils.get_log_calls(mock_client)
     assert len(calls) == log_number

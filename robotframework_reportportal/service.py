@@ -261,6 +261,6 @@ class RobotService:
             "item_id": message.item_id,
             "level": LOG_LEVEL_MAPPING.get(message.level, "INFO"),
             "message": message.message,
-            "time": ts or timestamp(),
+            "time": ts or to_epoch(message.timestamp) or timestamp(),
         }
         self.rp.log(**sl_rq)

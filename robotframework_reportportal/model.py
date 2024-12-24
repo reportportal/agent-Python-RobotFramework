@@ -32,6 +32,7 @@ class LogMessage(str):
     item_id: Optional[str]
     level: str
     message: str
+    timestamp: Optional[str]
 
     def __init__(self, message: str):
         """Initialize required attributes."""
@@ -40,6 +41,7 @@ class LogMessage(str):
         self.level = "INFO"
         self.launch_log = False
         self.message = message
+        self.timestamp = None
 
 
 class Keyword:
