@@ -14,17 +14,26 @@
 
 from unittest import mock
 
+import pytest
+
 from tests import REPORT_PORTAL_SERVICE
 from tests.helpers import utils
 
 
+@pytest.mark.parametrize(
+    "file, exit_code, statuses, log_number",
+    [
+        ("examples/wuks_keyword.robot", 0, ["PASSED"] * 2 + ["SKIPPED"] * 2 + ["PASSED"] * 4, 3),
+        ("examples/wuks_keyword_failed.robot", 1, ["FAILED"] * 2 + ["SKIPPED"] * 2 + ["FAILED"] * 4, 5),
+    ],
+)
 @mock.patch(REPORT_PORTAL_SERVICE)
-def test_wuks_keyword_remove(mock_client_init):
+def test_wuks_keyword_remove(mock_client_init, file, exit_code, statuses, log_number):
     mock_client = mock_client_init.return_value
     mock_client.start_test_item.side_effect = utils.item_id_gen
 
-    result = utils.run_robot_tests(["examples/wuks_keyword.robot"], arguments={"--remove-keywords": "WUKS"})
-    assert result == 0
+    result = utils.run_robot_tests([file], arguments={"--remove-keywords": "WUKS"})
+    assert result == exit_code
 
     launch_start = mock_client.start_launch.call_args_list
     launch_finish = mock_client.finish_launch.call_args_list
@@ -36,7 +45,7 @@ def test_wuks_keyword_remove(mock_client_init):
     assert len(item_finish_calls) == 8
 
     statuses = [finish[1]["status"] for finish in item_finish_calls]
-    assert statuses == ["PASSED"] * 2 + ["SKIPPED"] * 2 + ["PASSED"] * 4
+    assert statuses == statuses
 
     calls = utils.get_log_calls(mock_client)
-    assert len(calls) == 3
+    assert len(calls) == log_number
