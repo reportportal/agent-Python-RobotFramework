@@ -33,7 +33,16 @@ def test_wuks_keyword(mock_client_init):
     item_start_calls = mock_client.start_test_item.call_args_list
     item_finish_calls = mock_client.finish_test_item.call_args_list
     assert len(item_start_calls) == len(item_finish_calls)
-    assert len(item_finish_calls) == 13
+    assert len(item_finish_calls) == 18
 
     statuses = [finish[1]["status"] for finish in item_finish_calls]
-    assert statuses == ["PASSED"] * 2 + ["FAILED"] * 3 + ["PASSED"] * 2 + ["SKIPPED"] * 2 + ["PASSED"] * 4
+    assert (
+        statuses
+        == ["PASSED"] * 2
+        + ["FAILED"] * 3
+        + ["PASSED"] * 2
+        + ["FAILED"] * 3
+        + ["PASSED"] * 2
+        + ["SKIPPED"] * 2
+        + ["PASSED"] * 4
+    )
