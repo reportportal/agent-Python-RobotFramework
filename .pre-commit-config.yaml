@@ -20,7 +20,7 @@ repos:
     rev: 24.10.0
     hooks:
       - id: black
-        args: [ 'robotframework_reportportal', 'tests' ]
+        args: [ '--check', 'robotframework_reportportal', 'tests' ]
   - repo: https://github.com/pycqa/isort
     rev: 5.13.2
     hooks:
