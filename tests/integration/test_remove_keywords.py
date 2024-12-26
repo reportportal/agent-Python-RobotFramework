@@ -52,7 +52,7 @@ def test_wuks_keyword_remove(mock_client_init, file, exit_code, expected_statuse
     item_start_calls = mock_client.start_test_item.call_args_list
     item_finish_calls = mock_client.finish_test_item.call_args_list
     assert len(item_start_calls) == len(item_finish_calls)
-    assert len(item_finish_calls) == 13
+    assert len(item_finish_calls) == len(expected_statuses)
 
     statuses = [finish[1]["status"] for finish in item_finish_calls]
     assert statuses == expected_statuses
@@ -61,13 +61,32 @@ def test_wuks_keyword_remove(mock_client_init, file, exit_code, expected_statuse
     assert len(calls) == log_number
 
 
+@pytest.mark.parametrize(
+    "file, keyword_to_remove, exit_code, expected_statuses, log_number",
+    [
+        (
+            "examples/for_keyword.robot",
+            "FOR",
+            0,
+            ["PASSED"] * 5,
+            2,
+        ),
+        (
+            "examples/while_keyword.robot",
+            "WHILE",
+            0,
+            ["PASSED"] * 7,
+            5,
+        ),
+    ],
+)
 @mock.patch(REPORT_PORTAL_SERVICE)
-def test_for_keyword_remove(mock_client_init):
+def test_for_keyword_remove(mock_client_init, file, keyword_to_remove, exit_code, expected_statuses, log_number):
     mock_client = mock_client_init.return_value
     mock_client.start_test_item.side_effect = utils.item_id_gen
 
-    result = utils.run_robot_tests(["examples/for_keyword.robot"], arguments={"--remove-keywords": "FOR"})
-    assert result == 0
+    result = utils.run_robot_tests([file], arguments={"--remove-keywords": keyword_to_remove})
+    assert result == exit_code
 
     launch_start = mock_client.start_launch.call_args_list
     launch_finish = mock_client.finish_launch.call_args_list
@@ -76,10 +95,10 @@ def test_for_keyword_remove(mock_client_init):
     item_start_calls = mock_client.start_test_item.call_args_list
     item_finish_calls = mock_client.finish_test_item.call_args_list
     assert len(item_start_calls) == len(item_finish_calls)
-    assert len(item_finish_calls) == 5
+    assert len(item_finish_calls) == len(expected_statuses)
 
     statuses = [finish[1]["status"] for finish in item_finish_calls]
-    assert statuses == ["PASSED"] * 5
+    assert statuses == expected_statuses
 
     calls = utils.get_log_calls(mock_client)
-    assert len(calls) == 2
+    assert len(calls) == log_number
