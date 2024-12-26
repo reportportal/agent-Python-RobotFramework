@@ -1,6 +1,9 @@
 # Changelog
 
 ## [Unreleased]
+### Changed
+- Client version updated on [5.6.0](https://github.com/reportportal/client-Python/releases/tag/5.6.0), by @HardNorth
+- Test end message now posts to the Test description, by @HardNorth
 ### Added
 - Support for `Python 3.13`, by @HardNorth
 ### Removed

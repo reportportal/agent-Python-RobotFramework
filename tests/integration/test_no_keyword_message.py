@@ -15,10 +15,12 @@
 import re
 from unittest import mock
 
+from docutils.nodes import description
+
 from tests import REPORT_PORTAL_SERVICE
 from tests.helpers import utils
 
-NO_KEYWORDS_MESSAGE_PATTERN = re.compile(r"Test(?: case)? (?:contains no keywords|cannot be empty)\.")
+NO_KEYWORDS_MESSAGE_PATTERN = re.compile(r"Message:\s+Test(?: case)? (?:contains no keywords|cannot be empty)\.")
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
@@ -29,16 +31,18 @@ def test_no_keyword_message(mock_client_init):
     result = utils.run_robot_tests(["examples/no_keywords.robot"])
     assert result == 1
 
-    log_calls = mock_client.log.call_args_list
-    assert len(log_calls) == 1
-
-    log_call = log_calls[0][1]
-    assert NO_KEYWORDS_MESSAGE_PATTERN.match(log_call["message"])
-    assert log_call["item_id"].startswith("No keyword test case")
+    launch_start = mock_client.start_launch.call_args_list
+    launch_finish = mock_client.finish_launch.call_args_list
+    assert len(launch_start) == len(launch_finish) == 1
 
     item_start_calls = mock_client.start_test_item.call_args_list
     item_finish_calls = mock_client.finish_test_item.call_args_list
-    assert len(item_start_calls) == len(item_finish_calls) == 2
+    assert len(item_start_calls) == len(item_finish_calls)
+    assert len(item_finish_calls) == 2
 
     statuses = [finish[1]["status"] for finish in item_finish_calls]
     assert statuses == ["FAILED", "FAILED"]
+
+    test_finish_call = item_finish_calls[0][1]
+    assert "description" in test_finish_call
+    assert NO_KEYWORDS_MESSAGE_PATTERN.match(test_finish_call["description"])

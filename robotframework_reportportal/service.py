@@ -204,6 +204,15 @@ class RobotService:
         :param issue: Corresponding issue if it exists
         :param ts:    End time
         """
+        description = None
+        if test.doc:
+            description = test.doc
+        if test.message:
+            message = f"Message:\n\n{test.message}"
+            if description:
+                description += f"\n---{message}"
+            else:
+                description = message
         fta_rq = {
             "attributes": test.attributes,
             "end_time": ts or to_epoch(test.end_time) or timestamp(),
@@ -212,6 +221,8 @@ class RobotService:
             "status": STATUS_MAPPING[test.status],
             "test_case_id": test.test_case_id,
         }
+        if description:
+            fta_rq["description"] = description
         logger.debug("ReportPortal - Finish test: request_body={0}".format(fta_rq))
         self.rp.finish_test_item(**fta_rq)
 
