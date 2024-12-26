@@ -479,11 +479,13 @@ class listener:
 
         if kwd.remove_data:
             kwd.matched_filter = getattr(parent, "matched_filter", None)
+            kwd.skip_origin = getattr(parent, "skip_origin", None)
         else:
             for m in self._keyword_filters:
                 if m.match(kwd):
                     kwd.remove_data = True
                     kwd.matched_filter = m
+                    kwd.skip_origin = kwd
                     break
 
         if skip_kwd:
@@ -542,7 +544,7 @@ class listener:
                 last_iteration = kwd.skipped_keywords[-1]
                 self._post_skipped_keywords(last_iteration)
                 self._do_end_keyword(last_iteration, ts)
-        elif kwd.posted and kwd.remove_data:
+        elif kwd.posted and kwd.remove_data and kwd.skip_origin is kwd:
             self._log_keyword_data_removed(kwd.rp_item_id, kwd.start_time)
 
         self._remove_current_item()

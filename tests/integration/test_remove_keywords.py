@@ -78,6 +78,13 @@ def test_wuks_keyword_remove(mock_client_init, file, exit_code, expected_statuse
             ["PASSED"] * 7,
             5,
         ),
+        (
+            "examples/for_keyword_failed.robot",
+            "FOR",
+            1,
+            ["FAILED"] * 2 + ["PASSED"] + ["FAILED"] * 4,
+            3,
+        ),
     ],
 )
 @mock.patch(REPORT_PORTAL_SERVICE)
