@@ -103,7 +103,7 @@ class Keyword:
         assign = ", ".join(self.assign)
         assignment = "{0} = ".format(assign) if self.assign else ""
         arguments = ", ".join(self.args)
-        full_name = f"{assignment}{self.name} ({arguments})"
+        full_name = f"{self.keyword_type} {assignment}{self.name} ({arguments})"
         return full_name[:256]
 
     def get_type(self) -> str:
