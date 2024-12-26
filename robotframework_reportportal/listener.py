@@ -531,16 +531,16 @@ class listener:
                 self._post_skipped_keywords(last_iteration)
                 self._do_end_keyword(last_iteration, ts)
 
-        elif (
-            (kwd.matched_filter is FOR_KEYWORD_MATCH and FOR_KEYWORD_MATCH.match(kwd))
-            or (kwd.matched_filter is WHILE_KEYWORD_NAME and WHILE_KEYWORD_NAME.match(kwd))
-        ) and kwd.status != "FAIL":
+        elif (kwd.matched_filter is FOR_KEYWORD_MATCH and FOR_KEYWORD_MATCH.match(kwd)) or (
+            kwd.matched_filter is WHILE_KEYWORD_NAME and WHILE_KEYWORD_NAME.match(kwd)
+        ):
             skipped_kwds = kwd.skipped_keywords
             skipped_kwds_num = len(skipped_kwds)
-            if skipped_kwds_num > 0:
+            if skipped_kwds_num > 1:
                 self._log_data_removed(
                     kwd.rp_item_id, kwd.start_time, REMOVED_FOR_WHILE_KEYWORD_LOG.format(number=skipped_kwds_num - 1)
                 )
+            if kwd.status != "FAIL":
                 last_iteration = kwd.skipped_keywords[-1]
                 self._post_skipped_keywords(last_iteration)
                 self._do_end_keyword(last_iteration, ts)

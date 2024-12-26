@@ -62,7 +62,7 @@ def test_wuks_keyword_remove(mock_client_init, file, exit_code, expected_statuse
 
 
 @pytest.mark.parametrize(
-    "file, keyword_to_remove, exit_code, expected_statuses, log_number",
+    "file, keyword_to_remove, exit_code, expected_statuses, log_number, skip_idx, skip_message",
     [
         (
             "examples/for_keyword.robot",
@@ -70,6 +70,8 @@ def test_wuks_keyword_remove(mock_client_init, file, exit_code, expected_statuse
             0,
             ["PASSED"] * 5,
             2,
+            0,
+            "2 passing items removed using the --remove-keywords option.",
         ),
         (
             "examples/while_keyword.robot",
@@ -77,6 +79,8 @@ def test_wuks_keyword_remove(mock_client_init, file, exit_code, expected_statuse
             0,
             ["PASSED"] * 7,
             5,
+            2,
+            "2 passing items removed using the --remove-keywords option.",
         ),
         (
             "examples/for_keyword_failed.robot",
@@ -84,11 +88,15 @@ def test_wuks_keyword_remove(mock_client_init, file, exit_code, expected_statuse
             1,
             ["FAILED"] * 2 + ["PASSED"] + ["FAILED"] * 4,
             3,
+            0,
+            "1 passing items removed using the --remove-keywords option.",
         ),
     ],
 )
 @mock.patch(REPORT_PORTAL_SERVICE)
-def test_for_keyword_remove(mock_client_init, file, keyword_to_remove, exit_code, expected_statuses, log_number):
+def test_for_keyword_remove(
+    mock_client_init, file, keyword_to_remove, exit_code, expected_statuses, log_number, skip_idx, skip_message
+):
     mock_client = mock_client_init.return_value
     mock_client.start_test_item.side_effect = utils.item_id_gen
 
@@ -107,5 +115,6 @@ def test_for_keyword_remove(mock_client_init, file, keyword_to_remove, exit_code
     statuses = [finish[1]["status"] for finish in item_finish_calls]
     assert statuses == expected_statuses
 
-    calls = utils.get_log_calls(mock_client)
-    assert len(calls) == log_number
+    log_calls = utils.get_log_calls(mock_client)
+    assert len(log_calls) == log_number
+    assert sorted(log_calls, key=lambda x: x[1]["time"])[skip_idx][1]["message"] == skip_message
