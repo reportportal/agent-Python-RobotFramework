@@ -91,6 +91,15 @@ def test_wuks_keyword_remove(mock_client_init, file, exit_code, expected_statuse
             0,
             "1 passing items removed using the --remove-keywords option.",
         ),
+        (
+            "examples/while_keyword_failed.robot",
+            "WHILE",
+            1,
+            ["PASSED"] + ["FAILED"] * 2 + ["PASSED"] * 2 + ["FAILED"] * 4,
+            6,
+            2,
+            "1 passing items removed using the --remove-keywords option.",
+        ),
     ],
 )
 @mock.patch(REPORT_PORTAL_SERVICE)
