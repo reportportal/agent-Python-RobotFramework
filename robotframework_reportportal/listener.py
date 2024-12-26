@@ -41,7 +41,8 @@ IMAGE_PATTERN = re.compile(
 
 DEFAULT_BINARY_FILE_TYPE = "application/octet-stream"
 TRUNCATION_SIGN = "...'"
-REMOVED_KEYWORD_LOG = "Keyword data removed using --removeKeywords option."
+REMOVED_KEYWORD_DATA_LOG = "Keyword data removed using --removeKeywords option."
+REMOVED_KEYWORD_CONTENT_LOG = "Content removed using the --remove-keywords option."
 REMOVED_WKUS_KEYWORD_LOG = "{number} failing items removed using the --remove-keywords option."
 REMOVED_FOR_WHILE_KEYWORD_LOG = "{number} passing items removed using the --remove-keywords option."
 WKUS_KEYWORD_NAME = "BuiltIn.Wait Until Keyword Succeeds"
@@ -129,7 +130,7 @@ class listener:
     _service: Optional[RobotService]
     _variables: Optional[Variables]
     _keyword_filters: List[_KeywordMatch] = []
-    _remove_keyword_data: bool = False
+    _remove_keyword_content: bool = False
     _remove_keywords: bool = False
     ROBOT_LISTENER_API_VERSION = 2
 
@@ -314,7 +315,7 @@ class listener:
                 for pattern_str in set(current_context.output._settings.remove_keywords):
                     pattern_str_upper = pattern_str.upper()
                     if "ALL" == pattern_str_upper:
-                        self._remove_keyword_data = True
+                        self._remove_keyword_content = True
                         break
                     if "PASSED" == pattern_str_upper:
                         self._remove_keywords = True
@@ -418,7 +419,7 @@ class listener:
         self.__post_log_message(msg)
 
     def _log_keyword_data_removed(self, item_id: str, timestamp: str) -> None:
-        self._log_data_removed(item_id, timestamp, REMOVED_KEYWORD_LOG)
+        self._log_data_removed(item_id, timestamp, REMOVED_KEYWORD_DATA_LOG)
 
     @check_rp_enabled
     def start_test(self, name: str, attributes: Dict, ts: Optional[Any] = None) -> None:
@@ -458,6 +459,9 @@ class listener:
         self._remove_current_item()
         self.service.finish_test(test=test, ts=ts)
 
+    def _log_keyword_content_removed(self, item_id: str, timestamp: str) -> None:
+        self._log_data_removed(item_id, timestamp, REMOVED_KEYWORD_CONTENT_LOG)
+
     def _do_start_keyword(self, keyword: Keyword, ts: Optional[str] = None) -> None:
         logger.debug(f"ReportPortal - Start Keyword: {keyword.robot_attributes}")
         keyword.rp_item_id = self.service.start_keyword(keyword=keyword, ts=ts)
@@ -475,7 +479,7 @@ class listener:
         parent = self.current_item
         kwd.rp_parent_item_id = parent.rp_item_id
         skip_kwd = parent.remove_data
-        kwd.remove_data = skip_kwd or self._remove_keyword_data
+        kwd.remove_data = skip_kwd or self._remove_keyword_content
 
         if kwd.remove_data:
             kwd.matched_filter = getattr(parent, "matched_filter", None)
@@ -494,6 +498,8 @@ class listener:
             kwd.posted = False
         else:
             self._do_start_keyword(kwd, ts)
+            if self._remove_keyword_content:
+                self._log_keyword_content_removed(kwd.rp_item_id, kwd.start_time)
 
         self._add_current_item(kwd)
 
