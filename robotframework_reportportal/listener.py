@@ -21,7 +21,7 @@ import uuid
 from abc import ABC, abstractmethod
 from functools import wraps
 from mimetypes import guess_type
-from typing import Any, Dict, List, Optional, Union, Callable
+from typing import Any, Callable, Dict, List, Optional, Union
 from warnings import warn
 
 from reportportal_client.helpers import LifoQueue, guess_content_type_from_bytes, is_binary

@@ -210,7 +210,7 @@ class RobotService:
         if test.message:
             message = f"Message:\n\n{test.message}"
             if description:
-                description += f"\n---{message}"
+                description += f"\n\n---\n\n{message}"
             else:
                 description = message
         fta_rq = {
