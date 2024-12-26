@@ -23,8 +23,13 @@ from tests.helpers import utils
 @pytest.mark.parametrize(
     "test, idx_to_check, step_name, suite_name",
     [
-        ("examples/before_after/before_suite_with_steps.robot", 1, "Log suite setup", "Before Suite With Steps"),
-        ("examples/before_after/after_suite_with_steps.robot", 3, "Log suite tear down", "After Suite With Steps"),
+        ("examples/before_after/before_suite_with_steps.robot", 1, "SETUP Log suite setup", "Before Suite With Steps"),
+        (
+            "examples/before_after/after_suite_with_steps.robot",
+            3,
+            "TEARDOWN Log suite tear down",
+            "After Suite With Steps",
+        ),
     ],
 )
 @mock.patch(REPORT_PORTAL_SERVICE)
