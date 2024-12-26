@@ -239,6 +239,8 @@ class listener:
         if skipped_kwds:
             to_post.skipped_keywords = []
             for skipped_kwd in skipped_kwds:
+                if skipped_kwd.posted:
+                    continue
                 self.__post_skipped_keyword(skipped_kwd)
 
     def _log_message(self, message: LogMessage) -> None:
@@ -527,9 +529,10 @@ class listener:
                 self._post_skipped_keywords(last_iteration)
                 self._do_end_keyword(last_iteration, ts)
 
-        elif (kwd.matched_filter is FOR_KEYWORD_MATCH and FOR_KEYWORD_MATCH.match(kwd)) or (
-            kwd.matched_filter is WHILE_KEYWORD_NAME and WHILE_KEYWORD_NAME.match(kwd)
-        ):
+        elif (
+            (kwd.matched_filter is FOR_KEYWORD_MATCH and FOR_KEYWORD_MATCH.match(kwd))
+            or (kwd.matched_filter is WHILE_KEYWORD_NAME and WHILE_KEYWORD_NAME.match(kwd))
+        ) and kwd.status != "FAIL":
             skipped_kwds = kwd.skipped_keywords
             skipped_kwds_num = len(skipped_kwds)
             if skipped_kwds_num > 0:

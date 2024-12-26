@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation  Example of 'Wait Until Keyword Succeeds' keyword reporting
+Documentation  Example of failing 'Wait Until Keyword Succeeds' keyword reporting
 
 *** Variables ***
 ${countval}  0
