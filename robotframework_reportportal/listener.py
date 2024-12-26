@@ -517,12 +517,13 @@ class listener:
             skipped_kwds = kwd.skipped_keywords
             skipped_kwds_num = len(skipped_kwds)
             if skipped_kwds_num > 2:
-                self._log_data_removed(
-                    kwd.rp_item_id,
-                    kwd.start_time,
-                    REMOVED_WKUS_KEYWORD_LOG.format(number=len(kwd.skipped_keywords) - 2),
-                )
-            if skipped_kwds_num > 1:
+
+                if kwd.status == "FAIL":
+                    message = REMOVED_WKUS_KEYWORD_LOG.format(number=len(kwd.skipped_keywords) - 1)
+                else:
+                    message = REMOVED_WKUS_KEYWORD_LOG.format(number=len(kwd.skipped_keywords) - 2)
+                self._log_data_removed(kwd.rp_item_id, kwd.start_time, message)
+            if skipped_kwds_num > 1 and kwd.status != "FAIL":
                 first_iteration = kwd.skipped_keywords[0]
                 self._post_skipped_keywords(first_iteration)
                 self._do_end_keyword(first_iteration)

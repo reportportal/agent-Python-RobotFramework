@@ -21,47 +21,6 @@ from tests.helpers import utils
 
 
 @pytest.mark.parametrize(
-    "file, exit_code, expected_statuses, log_number",
-    [
-        (
-            "examples/wuks_keyword.robot",
-            0,
-            ["PASSED"] * 2 + ["FAILED"] * 3 + ["PASSED"] * 2 + ["SKIPPED"] * 2 + ["PASSED"] * 4,
-            6,
-        ),
-        (
-            "examples/wuks_keyword_failed.robot",
-            1,
-            ["PASSED"] * 2 + ["FAILED"] * 3 + ["PASSED"] * 2 + ["FAILED"] * 6,
-            7,
-        ),
-    ],
-)
-@mock.patch(REPORT_PORTAL_SERVICE)
-def test_wuks_keyword_remove(mock_client_init, file, exit_code, expected_statuses, log_number):
-    mock_client = mock_client_init.return_value
-    mock_client.start_test_item.side_effect = utils.item_id_gen
-
-    result = utils.run_robot_tests([file], arguments={"--remove-keywords": "WUKS"})
-    assert result == exit_code
-
-    launch_start = mock_client.start_launch.call_args_list
-    launch_finish = mock_client.finish_launch.call_args_list
-    assert len(launch_start) == len(launch_finish) == 1
-
-    item_start_calls = mock_client.start_test_item.call_args_list
-    item_finish_calls = mock_client.finish_test_item.call_args_list
-    assert len(item_start_calls) == len(item_finish_calls)
-    assert len(item_finish_calls) == len(expected_statuses)
-
-    statuses = [finish[1]["status"] for finish in item_finish_calls]
-    assert statuses == expected_statuses
-
-    calls = utils.get_log_calls(mock_client)
-    assert len(calls) == log_number
-
-
-@pytest.mark.parametrize(
     "file, keyword_to_remove, exit_code, expected_statuses, log_number, skip_idx, skip_message",
     [
         (
@@ -100,10 +59,28 @@ def test_wuks_keyword_remove(mock_client_init, file, exit_code, expected_statuse
             2,
             "1 passing items removed using the --remove-keywords option.",
         ),
+        (
+            "examples/wuks_keyword.robot",
+            "WUKS",
+            0,
+            ["PASSED"] * 2 + ["FAILED"] * 3 + ["PASSED"] * 2 + ["SKIPPED"] * 2 + ["PASSED"] * 4,
+            6,
+            0,
+            "1 failing items removed using the --remove-keywords option.",
+        ),
+        (
+            "examples/wuks_keyword_failed.robot",
+            "WUKS",
+            1,
+            ["PASSED"] * 2 + ["FAILED"] * 6,
+            4,
+            0,
+            "2 failing items removed using the --remove-keywords option.",
+        ),
     ],
 )
 @mock.patch(REPORT_PORTAL_SERVICE)
-def test_for_keyword_remove(
+def test_for_and_while_keyword_remove(
     mock_client_init, file, keyword_to_remove, exit_code, expected_statuses, log_number, skip_idx, skip_message
 ):
     mock_client = mock_client_init.return_value
