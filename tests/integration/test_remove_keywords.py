@@ -59,3 +59,27 @@ def test_wuks_keyword_remove(mock_client_init, file, exit_code, expected_statuse
 
     calls = utils.get_log_calls(mock_client)
     assert len(calls) == log_number
+
+
+@mock.patch(REPORT_PORTAL_SERVICE)
+def test_for_keyword_remove(mock_client_init):
+    mock_client = mock_client_init.return_value
+    mock_client.start_test_item.side_effect = utils.item_id_gen
+
+    result = utils.run_robot_tests(["examples/for_keyword.robot"], arguments={"--remove-keywords": "FOR"})
+    assert result == 0
+
+    launch_start = mock_client.start_launch.call_args_list
+    launch_finish = mock_client.finish_launch.call_args_list
+    assert len(launch_start) == len(launch_finish) == 1
+
+    item_start_calls = mock_client.start_test_item.call_args_list
+    item_finish_calls = mock_client.finish_test_item.call_args_list
+    assert len(item_start_calls) == len(item_finish_calls)
+    assert len(item_finish_calls) == 5
+
+    statuses = [finish[1]["status"] for finish in item_finish_calls]
+    assert statuses == ["PASSED"] * 5
+
+    calls = utils.get_log_calls(mock_client)
+    assert len(calls) == 2
