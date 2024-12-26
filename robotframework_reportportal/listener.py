@@ -517,7 +517,6 @@ class listener:
             skipped_kwds = kwd.skipped_keywords
             skipped_kwds_num = len(skipped_kwds)
             if skipped_kwds_num > 2:
-
                 if kwd.status == "FAIL":
                     message = REMOVED_WKUS_KEYWORD_LOG.format(number=len(kwd.skipped_keywords) - 1)
                 else:
