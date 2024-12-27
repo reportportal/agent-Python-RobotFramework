@@ -176,6 +176,39 @@ from tests.helpers import utils
             1,
             "Content removed using the --remove-keywords option.",
         ),
+        (
+            "examples/for_keyword_failed.robot",
+            "PASSED",
+            1,
+            ["FAILED"] + ["PASSED"] + ["SKIPPED"] * 2 + ["PASSED"] * 2 + ["FAILED"] * 5,
+            3,
+            0,
+            "apple",
+        ),
+        (
+            "examples/while_keyword_failed.robot",
+            "PASSED",
+            1,
+            ["PASSED"] + ["FAILED"] + ["PASSED"] * 2 + ["SKIPPED"] * 2 + ["PASSED"] * 3 + ["FAILED"] * 5,
+            7,
+            0,
+            "Length is 3.",
+        ),
+        (
+            "examples/wuks_keyword_failed.robot",
+            "PASSED",
+            1,
+            ["FAILED"]
+            + ["PASSED"] * 2
+            + ["FAILED"] * 3
+            + ["PASSED"] * 2
+            + ["FAILED"] * 3
+            + ["PASSED"] * 2
+            + ["FAILED"] * 5,
+            10,
+            0,
+            "Keyword 'Fail on first try' failed after retrying 3 times. The last error was: To less executions",
+        ),
     ],
 )
 @mock.patch(REPORT_PORTAL_SERVICE)

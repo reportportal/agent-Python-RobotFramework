@@ -243,6 +243,7 @@ class Test:
     status: str
     template: str
     type: str = "TEST"
+    skipped_keywords: List[Keyword]
     remove_data: bool = False
 
     def __init__(self, name: str, robot_attributes: Dict[str, Any], test_attributes: List[str]):
@@ -269,6 +270,7 @@ class Test:
         self.status = robot_attributes.get("status")
         self.template = robot_attributes["template"]
         self.type = "TEST"
+        self.skipped_keywords = []
 
     @property
     def critical(self) -> bool:

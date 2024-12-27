@@ -234,13 +234,24 @@ class listener:
         if isinstance(to_post, Keyword):
             if not to_post.posted:
                 self._do_start_keyword(to_post)
-                for log_message in to_post.skipped_logs:
+                log_messages = to_post.skipped_logs
+                to_post.skipped_logs = []
+                for log_message in log_messages:
                     self.__post_log_message(log_message)
-        skipped_kwds = getattr(to_post, "skipped_keywords", None)
+        skipped_kwds = to_post.skipped_keywords
         if skipped_kwds:
             to_post.skipped_keywords = []
             for skipped_kwd in skipped_kwds:
                 if skipped_kwd.posted:
+                    log_messages = skipped_kwd.skipped_logs
+                    skipped_kwd.skipped_logs = []
+                    for log_message in log_messages:
+                        self.__post_log_message(log_message)
+                    skipped_child_kwds = skipped_kwd.skipped_keywords
+                    for skipped_child_kwd in skipped_child_kwds:
+                        if skipped_child_kwd.posted:
+                            continue
+                        self.__post_skipped_keyword(skipped_child_kwd)
                     continue
                 self.__post_skipped_keyword(skipped_kwd)
 
@@ -457,8 +468,11 @@ class listener:
         test = self.current_item.update(attributes)
         if not test.critical and test.status == "FAIL":
             test.status = "SKIP"
-        if test.remove_data and attributes["status"] == "FAIL":
+        if attributes["status"] == "FAIL" and self._remove_passed_keywords:
             self._post_skipped_keywords(test)
+        elif self._remove_passed_keywords:
+            for kwd in test.skipped_keywords:
+                self._log_keyword_content_removed(kwd.rp_item_id, kwd.start_time)
         logger.debug(f"ReportPortal - End Test: {test.robot_attributes}")
         self._remove_current_item()
         self.service.finish_test(test=test, ts=ts)
@@ -504,7 +518,9 @@ class listener:
         else:
             self._do_start_keyword(kwd, ts)
             if skip_data:
-                self._log_keyword_content_removed(kwd.rp_item_id, kwd.start_time)
+                kwd.skip_origin = kwd
+            if self._remove_passed_keywords:
+                parent.skipped_keywords.append(kwd)
 
         self._add_current_item(kwd)
 
@@ -553,7 +569,10 @@ class listener:
             self._post_skipped_keywords(last_iteration)
             self._do_end_keyword(last_iteration, ts)
         elif kwd.posted and kwd.remove_data and kwd.skip_origin is kwd:
-            self._log_keyword_data_removed(kwd.rp_item_id, kwd.start_time)
+            if self._remove_all_keyword_content:
+                self._log_keyword_content_removed(kwd.rp_item_id, kwd.start_time)
+            elif not self._remove_passed_keywords:
+                self._log_keyword_data_removed(kwd.rp_item_id, kwd.start_time)
 
         self._remove_current_item()
         if not kwd.posted:
