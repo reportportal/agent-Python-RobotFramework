@@ -158,6 +158,15 @@ from tests.helpers import utils
             0,
             "Content removed using the --remove-keywords option.",
         ),
+        (
+            "examples/while_keyword.robot",
+            "PASSED",
+            0,
+            ["PASSED"] * 4,
+            2,
+            1,
+            "Content removed using the --remove-keywords option.",
+        ),
     ],
 )
 @mock.patch(REPORT_PORTAL_SERVICE)

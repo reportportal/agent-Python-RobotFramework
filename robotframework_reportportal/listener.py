@@ -256,10 +256,8 @@ class listener:
             return
 
         if (
-            not getattr(current_item, "posted", True)
-            and getattr(current_item, "remove_data", False)
-            and message.level not in ["ERROR", "WARN"]
-        ):
+            not getattr(current_item, "posted", True) or getattr(current_item, "remove_data", False)
+        ) and message.level not in ["ERROR", "WARN"]:
             self.current_item.skipped_logs.append(message)
         elif (
             getattr(current_item, "matched_filter", None) is not WKUS_KEYWORD_MATCH
