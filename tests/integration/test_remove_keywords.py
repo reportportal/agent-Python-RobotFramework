@@ -69,6 +69,15 @@ from tests.helpers import utils
             "1 failing items removed using the --remove-keywords option.",
         ),
         (
+            "examples/wuks_keyword_failed.robot",
+            "WUKS",
+            1,
+            ["PASSED"] * 2 + ["FAILED"] * 6,
+            4,
+            0,
+            "2 failing items removed using the --remove-keywords option.",
+        ),
+        (
             "examples/rkie_keyword.robot",
             "ALL",
             0,
