@@ -250,7 +250,16 @@ class listener:
         :param message: Internal message object to send
         """
         current_item = self.current_item
-        if current_item and not getattr(current_item, "posted", True) and message.level not in ["ERROR", "WARN"]:
+        if not current_item:
+            # top-level log message
+            self.__post_log_message(message)
+            return
+
+        if (
+            not getattr(current_item, "posted", True)
+            and getattr(current_item, "remove_data", False)
+            and message.level not in ["ERROR", "WARN"]
+        ):
             self.current_item.skipped_logs.append(message)
         elif (
             getattr(current_item, "matched_filter", None) is not WKUS_KEYWORD_MATCH
