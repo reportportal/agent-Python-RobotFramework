@@ -252,7 +252,10 @@ class listener:
         current_item = self.current_item
         if current_item and not getattr(current_item, "posted", True) and message.level not in ["ERROR", "WARN"]:
             self.current_item.skipped_logs.append(message)
-        elif getattr(current_item, "matched_filter", None) is not WKUS_KEYWORD_MATCH:
+        elif (
+            getattr(current_item, "matched_filter", None) is not WKUS_KEYWORD_MATCH
+            and not self._remove_keyword_content
+        ):
             # Post everything skipped by '--removekeywords' option
             self._post_skipped_keywords(current_item)
             self.__post_log_message(message)

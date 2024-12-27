@@ -77,6 +77,24 @@ from tests.helpers import utils
             0,
             "Content removed using the --remove-keywords option.",
         ),
+        (
+            "examples/wuks_keyword.robot",
+            "ALL",
+            0,
+            ["PASSED"] * 3,
+            1,
+            0,
+            "Content removed using the --remove-keywords option.",
+        ),
+        (
+            "examples/wuks_keyword_failed.robot",
+            "ALL",
+            1,
+            ["FAILED"] * 3,
+            1,
+            0,
+            "Content removed using the --remove-keywords option.",
+        ),
     ],
 )
 @mock.patch(REPORT_PORTAL_SERVICE)
