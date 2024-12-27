@@ -131,6 +131,15 @@ from tests.helpers import utils
             1,
             "Content removed using the --remove-keywords option.",
         ),
+        (
+            "examples/rkie_keyword.robot",
+            "PASSED",
+            0,
+            ["PASSED"] * 4,
+            2,
+            0,
+            "Content removed using the --remove-keywords option.",
+        ),
     ],
 )
 @mock.patch(REPORT_PORTAL_SERVICE)

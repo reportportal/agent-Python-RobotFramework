@@ -130,8 +130,8 @@ class listener:
     _service: Optional[RobotService]
     _variables: Optional[Variables]
     _keyword_filters: List[_KeywordMatch] = []
-    _remove_keyword_content: bool = False
-    _remove_keywords: bool = False
+    _remove_all_keyword_content: bool = False
+    _remove_passed_keywords: bool = False
     ROBOT_LISTENER_API_VERSION = 2
 
     def __init__(self) -> None:
@@ -254,7 +254,7 @@ class listener:
             self.current_item.skipped_logs.append(message)
         elif (
             getattr(current_item, "matched_filter", None) is not WKUS_KEYWORD_MATCH
-            and not self._remove_keyword_content
+            and not self._remove_all_keyword_content
         ):
             # Post everything skipped by '--removekeywords' option
             self._post_skipped_keywords(current_item)
@@ -318,10 +318,10 @@ class listener:
                 for pattern_str in set(current_context.output._settings.remove_keywords):
                     pattern_str_upper = pattern_str.upper()
                     if "ALL" == pattern_str_upper:
-                        self._remove_keyword_content = True
+                        self._remove_all_keyword_content = True
                         break
                     if "PASSED" == pattern_str_upper:
-                        self._remove_keywords = True
+                        self._remove_passed_keywords = True
                         break
                     if pattern_str_upper in {"NOT_RUN", "NOTRUN", "NOT RUN"}:
                         self._keyword_filters.append(_KeywordStatusEqual("NOT RUN"))
@@ -391,12 +391,9 @@ class listener:
         else:
             logger.debug(f"ReportPortal - Start Suite: {attributes}")
         suite = Suite(name, attributes)
-        suite.remove_data = self._remove_keywords
         suite.rp_parent_item_id = self.parent_id
         suite.rp_item_id = self.service.start_suite(suite=suite, ts=ts)
         self._add_current_item(suite)
-        if suite.remove_data:
-            self._log_keyword_data_removed(suite.rp_item_id, suite.start_time)
 
     @check_rp_enabled
     def end_suite(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
@@ -437,13 +434,10 @@ class listener:
             attributes = attributes.copy()
             attributes["source"] = getattr(self.current_item, "source", None)
         test = Test(name=name, robot_attributes=attributes, test_attributes=self.variables.test_attributes)
-        test.remove_data = self._remove_keywords
         logger.debug(f"ReportPortal - Start Test: {attributes}")
         test.rp_parent_item_id = self.parent_id
         test.rp_item_id = self.service.start_test(test=test, ts=ts)
         self._add_current_item(test)
-        if test.remove_data:
-            self._log_keyword_data_removed(test.rp_item_id, test.start_time)
 
     @check_rp_enabled
     def end_test(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
@@ -482,7 +476,8 @@ class listener:
         parent = self.current_item
         kwd.rp_parent_item_id = parent.rp_item_id
         skip_kwd = parent.remove_data
-        kwd.remove_data = skip_kwd or self._remove_keyword_content
+        skip_data = self._remove_all_keyword_content or self._remove_passed_keywords
+        kwd.remove_data = skip_kwd or skip_data
 
         if kwd.remove_data:
             kwd.matched_filter = getattr(parent, "matched_filter", None)
@@ -501,7 +496,7 @@ class listener:
             kwd.posted = False
         else:
             self._do_start_keyword(kwd, ts)
-            if self._remove_keyword_content:
+            if skip_data:
                 self._log_keyword_content_removed(kwd.rp_item_id, kwd.start_time)
 
         self._add_current_item(kwd)
