@@ -516,10 +516,8 @@ class listener:
         :param ts:         Timestamp(used by the ResultVisitor)
         """
         kwd = self.current_item.update(attributes)
-        if kwd.status == "FAIL" and not kwd.posted and kwd.matched_filter is not WKUS_KEYWORD_MATCH:
-            self._post_skipped_keywords(kwd)
 
-        if kwd.matched_filter is WKUS_KEYWORD_MATCH and WKUS_KEYWORD_MATCH.match(kwd):
+        if kwd.matched_filter is WKUS_KEYWORD_MATCH and kwd.skip_origin is kwd:
             skipped_kwds = kwd.skipped_keywords
             skipped_kwds_num = len(skipped_kwds)
             if skipped_kwds_num > 2:
@@ -537,19 +535,18 @@ class listener:
                 self._post_skipped_keywords(last_iteration)
                 self._do_end_keyword(last_iteration, ts)
 
-        elif (kwd.matched_filter is FOR_KEYWORD_MATCH and FOR_KEYWORD_MATCH.match(kwd)) or (
-            kwd.matched_filter is WHILE_KEYWORD_NAME and WHILE_KEYWORD_NAME.match(kwd)
-        ):
+        elif (
+            (kwd.matched_filter is FOR_KEYWORD_MATCH) or (kwd.matched_filter is WHILE_KEYWORD_NAME)
+        ) and kwd.skip_origin is kwd:
             skipped_kwds = kwd.skipped_keywords
             skipped_kwds_num = len(skipped_kwds)
             if skipped_kwds_num > 1:
                 self._log_data_removed(
                     kwd.rp_item_id, kwd.start_time, REMOVED_FOR_WHILE_KEYWORD_LOG.format(number=skipped_kwds_num - 1)
                 )
-            if kwd.status != "FAIL":
-                last_iteration = kwd.skipped_keywords[-1]
-                self._post_skipped_keywords(last_iteration)
-                self._do_end_keyword(last_iteration, ts)
+            last_iteration = kwd.skipped_keywords[-1]
+            self._post_skipped_keywords(last_iteration)
+            self._do_end_keyword(last_iteration, ts)
         elif kwd.posted and kwd.remove_data and kwd.skip_origin is kwd:
             self._log_keyword_data_removed(kwd.rp_item_id, kwd.start_time)
 
