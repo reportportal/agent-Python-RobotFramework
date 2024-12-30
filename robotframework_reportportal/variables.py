@@ -67,6 +67,7 @@ class Variables:
     launch_uuid_print_output: Optional[OutputType]
     client_type: ClientType
     http_timeout: Optional[Union[Tuple[float, float], float]]
+    remove_keywords: bool
 
     def __init__(self) -> None:
         """Initialize instance attributes."""
@@ -109,6 +110,8 @@ class Variables:
             self.http_timeout = (connect_timeout, read_timeout)
         else:
             self.http_timeout = connect_timeout or read_timeout
+
+        self.remove_keywords = to_bool(get_variable("RP_REMOVE_KEYWORDS", default="False"))
 
         self.api_key = get_variable("RP_API_KEY")
         if not self.api_key:

@@ -131,7 +131,7 @@ class listener:
     _variables: Optional[Variables]
     _keyword_filters: List[_KeywordMatch] = []
     _remove_all_keyword_content: bool = False
-    _remove_passed_keywords: bool = False
+    _remove_data_passed_tests: bool = False
     ROBOT_LISTENER_API_VERSION = 2
 
     def __init__(self) -> None:
@@ -324,6 +324,9 @@ class listener:
         return self._variables
 
     def _process_keyword_skip(self):
+        if not self.variables.remove_keywords:
+            return
+
         try:
             self._keyword_filters = []
 
@@ -339,7 +342,7 @@ class listener:
                         self._remove_all_keyword_content = True
                         break
                     if "PASSED" == pattern_str_upper:
-                        self._remove_passed_keywords = True
+                        self._remove_data_passed_tests = True
                         break
                     if pattern_str_upper in {"NOT_RUN", "NOTRUN", "NOT RUN"}:
                         self._keyword_filters.append(_KeywordStatusEqual("NOT RUN"))
@@ -360,7 +363,7 @@ class listener:
                         elif "TAG" == pattern_type.upper():
                             self._keyword_filters.append(_KeywordTagMatch(pattern.strip()))
         except ImportError:
-            warn('Unable to locate Robot Framework context. "removekeywords" feature will not work.', stacklevel=2)
+            warn('Unable to locate Robot Framework context. "--remove-keywords" feature will not work.', stacklevel=2)
 
     def start_launch(self, attributes: Dict[str, Any], ts: Optional[Any] = None) -> None:
         """Start a new launch at the ReportPortal.
@@ -468,9 +471,9 @@ class listener:
         test = self.current_item.update(attributes)
         if not test.critical and test.status == "FAIL":
             test.status = "SKIP"
-        if attributes["status"] == "FAIL" and self._remove_passed_keywords:
+        if attributes["status"] == "FAIL" and self._remove_data_passed_tests:
             self._post_skipped_keywords(test)
-        elif self._remove_passed_keywords:
+        elif self._remove_data_passed_tests:
             for kwd in test.skipped_keywords:
                 self._log_keyword_content_removed(kwd.rp_item_id, kwd.start_time)
         logger.debug(f"ReportPortal - End Test: {test.robot_attributes}")
@@ -497,7 +500,7 @@ class listener:
         parent = self.current_item
         kwd.rp_parent_item_id = parent.rp_item_id
         skip_kwd = parent.remove_data
-        skip_data = self._remove_all_keyword_content or self._remove_passed_keywords
+        skip_data = self._remove_all_keyword_content or self._remove_data_passed_tests
         kwd.remove_data = skip_kwd or skip_data
 
         if kwd.remove_data:
@@ -519,7 +522,7 @@ class listener:
             self._do_start_keyword(kwd, ts)
             if skip_data:
                 kwd.skip_origin = kwd
-            if self._remove_passed_keywords:
+            if self._remove_data_passed_tests:
                 parent.skipped_keywords.append(kwd)
 
         self._add_current_item(kwd)
@@ -571,7 +574,7 @@ class listener:
         elif kwd.posted and kwd.remove_data and kwd.skip_origin is kwd:
             if self._remove_all_keyword_content:
                 self._log_keyword_content_removed(kwd.rp_item_id, kwd.start_time)
-            elif not self._remove_passed_keywords:
+            elif not self._remove_data_passed_tests:
                 self._log_keyword_data_removed(kwd.rp_item_id, kwd.start_time)
 
         self._remove_current_item()

@@ -93,6 +93,8 @@ NOT REQUIRED:
 --variable RP_VERIFY_SSL:"True"
     - Default value is "True", disables SSL verification for HTTP requests.
       Also, you can specify a full path to your certificate as the value.
+--variable RP_REMOVE_KEYWORDS:"True"
+    - Default value is "False", remove  keywords from reporting, passed with '--remove-keywords' Robot's argument.
 ```
 
 ### Logging

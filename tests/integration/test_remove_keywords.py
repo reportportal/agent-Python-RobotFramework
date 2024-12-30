@@ -18,6 +18,30 @@ import pytest
 
 from tests import REPORT_PORTAL_SERVICE
 from tests.helpers import utils
+from tests.helpers.utils import DEFAULT_VARIABLES
+
+
+@mock.patch(REPORT_PORTAL_SERVICE)
+def test_remove_keyword_not_provided(mock_client_init):
+    mock_client = mock_client_init.return_value
+    mock_client.start_test_item.side_effect = utils.item_id_gen
+
+    result = utils.run_robot_tests(
+        ["examples/for_keyword.robot"], variables=DEFAULT_VARIABLES, arguments={"--remove-keywords": "FOR"}
+    )
+    assert result == 0
+
+    launch_start = mock_client.start_launch.call_args_list
+    launch_finish = mock_client.finish_launch.call_args_list
+    assert len(launch_start) == len(launch_finish) == 1
+
+    item_start_calls = mock_client.start_test_item.call_args_list
+    item_finish_calls = mock_client.finish_test_item.call_args_list
+    assert len(item_start_calls) == len(item_finish_calls)
+    assert len(item_finish_calls) == 9
+
+    statuses = [finish[1]["status"] for finish in item_finish_calls]
+    assert statuses == ["PASSED"] * 9
 
 
 @pytest.mark.parametrize(
@@ -218,7 +242,9 @@ def test_for_and_while_keyword_remove(
     mock_client = mock_client_init.return_value
     mock_client.start_test_item.side_effect = utils.item_id_gen
 
-    result = utils.run_robot_tests([file], arguments={"--remove-keywords": keyword_to_remove})
+    variables = DEFAULT_VARIABLES.copy()
+    variables["RP_REMOVE_KEYWORDS"] = True
+    result = utils.run_robot_tests([file], variables=variables, arguments={"--remove-keywords": keyword_to_remove})
     assert result == exit_code
 
     launch_start = mock_client.start_launch.call_args_list
