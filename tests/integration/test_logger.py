@@ -33,7 +33,7 @@ def test_launch_log(mock_client_init):
 
 @mock.patch(REPORT_PORTAL_SERVICE)
 def test_binary_file_log(mock_client_init):
-    result = utils.run_robot_tests(["examples/binary_file_read.robot"])
+    result = utils.run_robot_tests(["examples/binary_file_log_as_text.robot"])
     assert result == 0  # the test successfully passed
 
     mock_client = mock_client_init.return_value
