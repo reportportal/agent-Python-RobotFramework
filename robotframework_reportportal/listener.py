@@ -344,9 +344,6 @@ class listener:
                     if "PASSED" == pattern_str_upper:
                         self._remove_data_passed_tests = True
                         break
-                    if pattern_str_upper in {"NOT_RUN", "NOTRUN", "NOT RUN"}:
-                        self._keyword_filters.append(_KeywordStatusEqual("NOT RUN"))
-                        continue
                     if pattern_str_upper in {"FOR", "WHILE", "WUKS"}:
                         if pattern_str_upper == "WUKS":
                             self._keyword_filters.append(WKUS_KEYWORD_MATCH)
