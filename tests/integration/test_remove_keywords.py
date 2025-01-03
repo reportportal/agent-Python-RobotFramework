@@ -233,6 +233,15 @@ def test_remove_keyword_not_provided(mock_client_init):
             0,
             "Keyword 'Fail on first try' failed after retrying 3 times. The last error was: To less executions",
         ),
+        (
+            "examples/binary_file_log_as_image.robot",
+            "tag:binary",
+            0,
+            ["PASSED"] * 3,
+            1,
+            0,
+            "Content removed using the --remove-keywords option.",
+        ),
     ],
 )
 @mock.patch(REPORT_PORTAL_SERVICE)

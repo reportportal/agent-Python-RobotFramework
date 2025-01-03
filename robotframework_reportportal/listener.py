@@ -41,7 +41,6 @@ IMAGE_PATTERN = re.compile(
 
 DEFAULT_BINARY_FILE_TYPE = "application/octet-stream"
 TRUNCATION_SIGN = "...'"
-REMOVED_KEYWORD_DATA_LOG = "Keyword data removed using --removeKeywords option."
 REMOVED_KEYWORD_CONTENT_LOG = "Content removed using the --remove-keywords option."
 REMOVED_WKUS_KEYWORD_LOG = "{number} failing items removed using the --remove-keywords option."
 REMOVED_FOR_WHILE_KEYWORD_LOG = "{number} passing items removed using the --remove-keywords option."
@@ -422,22 +421,10 @@ class listener:
         :param ts:         Timestamp(used by the ResultVisitor)
         """
         suite = self._remove_current_item().update(attributes)
-        if suite.remove_data and attributes["status"] == "FAIL":
-            self._post_skipped_keywords(suite)
         logger.debug(f"ReportPortal - End Suite: {suite.robot_attributes}")
         self.service.finish_suite(suite=suite, ts=ts)
         if attributes["id"] == MAIN_SUITE_ID:
             self.finish_launch(attributes, ts)
-
-    def _log_data_removed(self, item_id: str, timestamp: str, message: str) -> None:
-        msg = LogMessage(message)
-        msg.level = "DEBUG"
-        msg.item_id = item_id
-        msg.timestamp = timestamp
-        self.__post_log_message(msg)
-
-    def _log_keyword_data_removed(self, item_id: str, timestamp: str) -> None:
-        self._log_data_removed(item_id, timestamp, REMOVED_KEYWORD_DATA_LOG)
 
     @check_rp_enabled
     def start_test(self, name: str, attributes: Dict, ts: Optional[Any] = None) -> None:
@@ -476,6 +463,13 @@ class listener:
         logger.debug(f"ReportPortal - End Test: {test.robot_attributes}")
         self._remove_current_item()
         self.service.finish_test(test=test, ts=ts)
+
+    def _log_data_removed(self, item_id: str, timestamp: str, message: str) -> None:
+        msg = LogMessage(message)
+        msg.level = "DEBUG"
+        msg.item_id = item_id
+        msg.timestamp = timestamp
+        self.__post_log_message(msg)
 
     def _log_keyword_content_removed(self, item_id: str, timestamp: str) -> None:
         self._log_data_removed(item_id, timestamp, REMOVED_KEYWORD_CONTENT_LOG)
@@ -572,7 +566,7 @@ class listener:
             if self._remove_all_keyword_content:
                 self._log_keyword_content_removed(kwd.rp_item_id, kwd.start_time)
             elif not self._remove_data_passed_tests:
-                self._log_keyword_data_removed(kwd.rp_item_id, kwd.start_time)
+                self._log_keyword_content_removed(kwd.rp_item_id, kwd.start_time)
 
         self._remove_current_item()
         if not kwd.posted:
