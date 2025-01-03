@@ -9,7 +9,7 @@ ${PUG_IMAGE}        res/pug/lucky.jpg
 Read Binary File
     [Tags]          binary
     [Arguments]     ${file}
-    ${data}         Get Binary File     ${file}
+    ${data}         Get Binary File   ${file}
     Log             ${data}
 
 *** Test Cases ***

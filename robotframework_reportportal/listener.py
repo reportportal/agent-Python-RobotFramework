@@ -563,9 +563,9 @@ class listener:
             self._post_skipped_keywords(last_iteration)
             self._do_end_keyword(last_iteration, ts)
         elif kwd.posted and kwd.remove_data and kwd.skip_origin is kwd:
-            if self._remove_all_keyword_content:
-                self._log_keyword_content_removed(kwd.rp_item_id, kwd.start_time)
-            elif not self._remove_data_passed_tests:
+            if (self._remove_all_keyword_content or not self._remove_data_passed_tests) and (
+                kwd.skipped_keywords or kwd.skipped_logs
+            ):
                 self._log_keyword_content_removed(kwd.rp_item_id, kwd.start_time)
 
         self._remove_current_item()
