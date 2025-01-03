@@ -42,9 +42,10 @@ IMAGE_PATTERN = re.compile(
 DEFAULT_BINARY_FILE_TYPE = "application/octet-stream"
 TRUNCATION_SIGN = "...'"
 REMOVED_KEYWORD_CONTENT_LOG = "Content removed using the --remove-keywords option."
-REMOVED_WKUS_KEYWORD_LOG = "{number} failing items removed using the --remove-keywords option."
+REMOVED_WUKS_KEYWORD_LOG = "{number} failing items removed using the --remove-keywords option."
 REMOVED_FOR_WHILE_KEYWORD_LOG = "{number} passing items removed using the --remove-keywords option."
-WKUS_KEYWORD_NAME = "BuiltIn.Wait Until Keyword Succeeds"
+WUKS_KEYWORD_NAME = "BuiltIn.Wait Until Keyword Succeeds"
+RKIE_KEYWORD_NAME = "BuiltIn.Run Keyword And Ignore Error"
 FOR_KEYWORD_TYPE = "FOR"
 WHILE_KEYWORD_TYPE = "WHILE"
 
@@ -116,7 +117,7 @@ class _KeywordStatusEqual(_KeywordFieldEqual):
         super().__init__(status, lambda kw: kw.status)
 
 
-WKUS_KEYWORD_MATCH = _KeywordNameMatch(WKUS_KEYWORD_NAME)
+WUKS_KEYWORD_MATCH = _KeywordNameMatch(WUKS_KEYWORD_NAME)
 FOR_KEYWORD_MATCH = _KeywordTypeEqual(FOR_KEYWORD_TYPE)
 WHILE_KEYWORD_NAME = _KeywordTypeEqual(WHILE_KEYWORD_TYPE)
 
@@ -265,17 +266,20 @@ class listener:
             self.__post_log_message(message)
             return
 
-        if (
-            not getattr(current_item, "posted", True) or getattr(current_item, "remove_data", False)
-        ) and message.level not in ["ERROR", "WARN"]:
-            self.current_item.skipped_logs.append(message)
-        elif (
-            getattr(current_item, "matched_filter", None) is not WKUS_KEYWORD_MATCH
-            and not self._remove_all_keyword_content
-        ):
-            # Post everything skipped by '--removekeywords' option
-            self._post_skipped_keywords(current_item)
+        if not getattr(current_item, "remove_data", False) and getattr(current_item, "posted", True):
             self.__post_log_message(message)
+        else:
+            if message.level not in {"ERROR", "WARN"}:
+                self.current_item.skipped_logs.append(message)
+            else:
+                matched_filter = getattr(current_item, "matched_filter", None)
+                wuks_or_rkie = matched_filter is WUKS_KEYWORD_MATCH
+                if not wuks_or_rkie and not self._remove_all_keyword_content:
+                    # Post everything skipped by '--removekeywords' option
+                    self._post_skipped_keywords(current_item)
+                    self.__post_log_message(message)
+                else:
+                    self.current_item.skipped_logs.append(message)
 
     @check_rp_enabled
     def log_message(self, message: Dict) -> None:
@@ -345,7 +349,7 @@ class listener:
                         break
                     if pattern_str_upper in {"FOR", "WHILE", "WUKS"}:
                         if pattern_str_upper == "WUKS":
-                            self._keyword_filters.append(WKUS_KEYWORD_MATCH)
+                            self._keyword_filters.append(WUKS_KEYWORD_MATCH)
                         elif pattern_str_upper == "FOR":
                             self._keyword_filters.append(FOR_KEYWORD_MATCH)
                         else:
@@ -532,14 +536,14 @@ class listener:
         """
         kwd = self.current_item.update(attributes)
 
-        if kwd.matched_filter is WKUS_KEYWORD_MATCH and kwd.skip_origin is kwd:
+        if kwd.matched_filter is WUKS_KEYWORD_MATCH and kwd.skip_origin is kwd:
             skipped_kwds = kwd.skipped_keywords
             skipped_kwds_num = len(skipped_kwds)
             if skipped_kwds_num > 2:
                 if kwd.status == "FAIL":
-                    message = REMOVED_WKUS_KEYWORD_LOG.format(number=len(kwd.skipped_keywords) - 1)
+                    message = REMOVED_WUKS_KEYWORD_LOG.format(number=len(kwd.skipped_keywords) - 1)
                 else:
-                    message = REMOVED_WKUS_KEYWORD_LOG.format(number=len(kwd.skipped_keywords) - 2)
+                    message = REMOVED_WUKS_KEYWORD_LOG.format(number=len(kwd.skipped_keywords) - 2)
                 self._log_data_removed(kwd.rp_item_id, kwd.start_time, message)
             if skipped_kwds_num > 1 and kwd.status != "FAIL":
                 first_iteration = kwd.skipped_keywords[0]
