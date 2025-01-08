@@ -150,7 +150,9 @@ class listener:
         else:
             msg = LogMessage(message["message"])
             msg.level = message["level"]
-        msg.item_id = self.current_item.rp_item_id
+        current_item = self.current_item
+        if current_item:
+            msg.item_id = current_item.rp_item_id
 
         message_str = msg.message
         if is_binary(message_str):
