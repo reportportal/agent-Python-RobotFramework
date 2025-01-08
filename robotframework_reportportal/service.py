@@ -269,7 +269,7 @@ class RobotService:
         """
         sl_rq = {
             "attachment": message.attachment,
-            "item_id": message.item_id,
+            "item_id": None if message.launch_log else message.item_id,
             "level": LOG_LEVEL_MAPPING.get(message.level, "INFO"),
             "message": message.message,
             "time": ts or to_epoch(message.timestamp) or timestamp(),

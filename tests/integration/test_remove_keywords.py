@@ -102,6 +102,21 @@ def test_remove_keyword_not_provided(mock_client_init):
             "2 failing items removed using the --remove-keywords option.",
         ),
         (
+            "examples/wuks_keyword_warnings.robot",
+            "WUKS",
+            0,
+            ["PASSED"] * 3
+            + ["FAILED"] * 3
+            + ["PASSED"] * 3
+            + ["FAILED"] * 3
+            + ["PASSED"] * 2
+            + ["SKIPPED"] * 3
+            + ["PASSED"] * 4,
+            10,
+            6,
+            "To less executions warning",
+        ),
+        (
             "examples/rkie_keyword.robot",
             "ALL",
             0,
@@ -242,10 +257,19 @@ def test_remove_keyword_not_provided(mock_client_init):
             0,
             "Content removed using the --remove-keywords option.",
         ),
+        (
+            "examples/binary_file_log_as_text.robot",
+            "tag:binary",
+            0,
+            ["PASSED"] * 5,
+            3,
+            2,
+            'Binary data of type "image/jpeg" logging skipped, as it was processed as text and hence corrupted.',
+        ),
     ],
 )
 @mock.patch(REPORT_PORTAL_SERVICE)
-def test_for_and_while_keyword_remove(
+def test_keyword_remove(
     mock_client_init, file, keyword_to_remove, exit_code, expected_statuses, log_number, skip_idx, skip_message
 ):
     mock_client = mock_client_init.return_value

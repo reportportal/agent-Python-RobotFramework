@@ -27,7 +27,7 @@ from warnings import warn
 from reportportal_client.helpers import LifoQueue, guess_content_type_from_bytes, is_binary
 
 from robotframework_reportportal.helpers import _unescape, match_pattern, translate_glob_to_regex
-from robotframework_reportportal.model import Keyword, Launch, LogMessage, Suite, Test
+from robotframework_reportportal.model import Keyword, Launch, LogMessage, Suite, Test, Entity
 from robotframework_reportportal.service import RobotService
 from robotframework_reportportal.static import MAIN_SUITE_ID, PABOT_WITHOUT_LAUNCH_ID_MSG
 from robotframework_reportportal.variables import Variables
@@ -150,8 +150,7 @@ class listener:
         else:
             msg = LogMessage(message["message"])
             msg.level = message["level"]
-        if not msg.launch_log:
-            msg.item_id = getattr(self.current_item, "rp_item_id", None)
+        msg.item_id = self.current_item.rp_item_id
 
         message_str = msg.message
         if is_binary(message_str):
@@ -218,42 +217,52 @@ class listener:
             logger.debug(f"ReportPortal - Log Message: {message}")
         self.service.log(message=message)
 
-    def __post_skipped_keyword(self, kwd: Keyword) -> None:
+    def __post_skipped_keyword(self, kwd: Keyword, clean_data_remove: bool) -> None:
         self._do_start_keyword(kwd)
+        if clean_data_remove:
+            kwd.remove_data = False
         for log_message in kwd.skipped_logs:
             self.__post_log_message(log_message)
-        skipped_kwds = kwd.skipped_keywords
+        skipped_keywords = kwd.skipped_keywords
         kwd.skipped_keywords = []
-        for skipped_kwd in skipped_kwds:
-            self.__post_skipped_keyword(skipped_kwd)
-        self._do_end_keyword(kwd)
+        for skipped_kwd in skipped_keywords:
+            self.__post_skipped_keyword(skipped_kwd, clean_data_remove)
+        if kwd.status != "NOT SET":
+            self._do_end_keyword(kwd)
 
-    def _post_skipped_keywords(self, to_post: Optional[Any]) -> None:
+    def _post_skipped_keywords(self, to_post: Optional[Any], clean_data_remove: bool = False) -> None:
         if not to_post:
             return
         if isinstance(to_post, Keyword):
             if not to_post.posted:
                 self._do_start_keyword(to_post)
+                if clean_data_remove:
+                    to_post.remove_data = False
                 log_messages = to_post.skipped_logs
                 to_post.skipped_logs = []
                 for log_message in log_messages:
                     self.__post_log_message(log_message)
-        skipped_kwds = to_post.skipped_keywords
-        if skipped_kwds:
+        skipped_keywords = to_post.skipped_keywords
+        if skipped_keywords:
             to_post.skipped_keywords = []
-            for skipped_kwd in skipped_kwds:
+            for skipped_kwd in skipped_keywords:
                 if skipped_kwd.posted:
                     log_messages = skipped_kwd.skipped_logs
                     skipped_kwd.skipped_logs = []
                     for log_message in log_messages:
                         self.__post_log_message(log_message)
-                    skipped_child_kwds = skipped_kwd.skipped_keywords
-                    for skipped_child_kwd in skipped_child_kwds:
+                    skipped_child_keywords = skipped_kwd.skipped_keywords
+                    for skipped_child_kwd in skipped_child_keywords:
                         if skipped_child_kwd.posted:
                             continue
-                        self.__post_skipped_keyword(skipped_child_kwd)
+                        self.__post_skipped_keyword(skipped_child_kwd, clean_data_remove)
                     continue
-                self.__post_skipped_keyword(skipped_kwd)
+                self.__post_skipped_keyword(skipped_kwd, clean_data_remove)
+
+    def __find_root_keyword_with_removed_data(self, keyword: Entity) -> Entity:
+        if keyword.parent.remove_data and keyword.parent.type == "KEYWORD":
+            return self.__find_root_keyword_with_removed_data(keyword.parent)
+        return keyword
 
     def _log_message(self, message: LogMessage) -> None:
         """Send log message to the Report Portal.
@@ -274,10 +283,8 @@ class listener:
             else:
                 if not self._remove_all_keyword_content:
                     # Post everything skipped by '--removekeywords' option
-                    self._post_skipped_keywords(current_item)
+                    self._post_skipped_keywords(self.__find_root_keyword_with_removed_data(current_item), True)
                     self.__post_log_message(message)
-                else:
-                    self.current_item.skipped_logs.append(message)
 
     @check_rp_enabled
     def log_message(self, message: Dict) -> None:
@@ -303,11 +310,6 @@ class listener:
                 "mime": guess_type(image)[0] or DEFAULT_BINARY_FILE_TYPE,
             }
         self._log_message(mes)
-
-    @property
-    def parent_id(self) -> Optional[str]:
-        """Get rp_item_id attribute of the current item."""
-        return getattr(self.current_item, "rp_item_id", None)
 
     @property
     def service(self) -> RobotService:
@@ -409,8 +411,7 @@ class listener:
             logger.debug(f"ReportPortal - Create global Suite: {attributes}")
         else:
             logger.debug(f"ReportPortal - Start Suite: {attributes}")
-        suite = Suite(name, attributes)
-        suite.rp_parent_item_id = self.parent_id
+        suite = Suite(name, attributes, self.current_item)
         suite.rp_item_id = self.service.start_suite(suite=suite, ts=ts)
         self._add_current_item(suite)
 
@@ -440,9 +441,8 @@ class listener:
             # no 'source' parameter at this level for Robot versions < 4
             attributes = attributes.copy()
             attributes["source"] = getattr(self.current_item, "source", None)
-        test = Test(name=name, robot_attributes=attributes, test_attributes=self.variables.test_attributes)
+        test = Test(name, attributes, self.variables.test_attributes, self.current_item)
         logger.debug(f"ReportPortal - Start Test: {attributes}")
-        test.rp_parent_item_id = self.parent_id
         test.rp_item_id = self.service.start_test(test=test, ts=ts)
         self._add_current_item(test)
 
@@ -489,9 +489,8 @@ class listener:
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
-        kwd = Keyword(name=name, parent_type=self.current_item.type, robot_attributes=attributes)
+        kwd = Keyword(name, attributes, self.current_item)
         parent = self.current_item
-        kwd.rp_parent_item_id = parent.rp_item_id
         skip_kwd = parent.remove_data
         skip_data = self._remove_all_keyword_content or self._remove_data_passed_tests
         kwd.remove_data = skip_kwd or skip_data
@@ -535,19 +534,19 @@ class listener:
         kwd = self.current_item.update(attributes)
 
         if kwd.matched_filter is WUKS_KEYWORD_MATCH and kwd.skip_origin is kwd:
-            skipped_kwds = kwd.skipped_keywords
-            skipped_kwds_num = len(skipped_kwds)
-            if skipped_kwds_num > 2:
+            skipped_keywords = kwd.skipped_keywords
+            skipped_keywords_num = len(skipped_keywords)
+            if skipped_keywords_num > 2:
                 if kwd.status == "FAIL":
                     message = REMOVED_WUKS_KEYWORD_LOG.format(number=len(kwd.skipped_keywords) - 1)
                 else:
                     message = REMOVED_WUKS_KEYWORD_LOG.format(number=len(kwd.skipped_keywords) - 2)
                 self._log_data_removed(kwd.rp_item_id, kwd.start_time, message)
-            if skipped_kwds_num > 1 and kwd.status != "FAIL":
+            if skipped_keywords_num > 1 and kwd.status != "FAIL":
                 first_iteration = kwd.skipped_keywords[0]
                 self._post_skipped_keywords(first_iteration)
                 self._do_end_keyword(first_iteration)
-            if skipped_kwds_num > 0:
+            if skipped_keywords_num > 0:
                 last_iteration = kwd.skipped_keywords[-1]
                 self._post_skipped_keywords(last_iteration)
                 self._do_end_keyword(last_iteration, ts)
@@ -555,11 +554,13 @@ class listener:
         elif (
             (kwd.matched_filter is FOR_KEYWORD_MATCH) or (kwd.matched_filter is WHILE_KEYWORD_NAME)
         ) and kwd.skip_origin is kwd:
-            skipped_kwds = kwd.skipped_keywords
-            skipped_kwds_num = len(skipped_kwds)
-            if skipped_kwds_num > 1:
+            skipped_keywords = kwd.skipped_keywords
+            skipped_keywords_num = len(skipped_keywords)
+            if skipped_keywords_num > 1:
                 self._log_data_removed(
-                    kwd.rp_item_id, kwd.start_time, REMOVED_FOR_WHILE_KEYWORD_LOG.format(number=skipped_kwds_num - 1)
+                    kwd.rp_item_id,
+                    kwd.start_time,
+                    REMOVED_FOR_WHILE_KEYWORD_LOG.format(number=skipped_keywords_num - 1),
                 )
             last_iteration = kwd.skipped_keywords[-1]
             self._post_skipped_keywords(last_iteration)

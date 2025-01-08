@@ -31,4 +31,9 @@ PABOT_WITHOUT_LAUNCH_ID_MSG: str = (
     "Pabot library is used but RP_LAUNCH_UUID was not provided. Please, "
     "initialize listener with the RP_LAUNCH_UUID argument."
 )
-STATUS_MAPPING: Dict[str, str] = {"PASS": "PASSED", "FAIL": "FAILED", "NOT RUN": "SKIPPED", "SKIP": "SKIPPED"}
+STATUS_MAPPING: Dict[str, str] = {
+    "PASS": "PASSED",
+    "FAIL": "FAILED",
+    "NOT RUN": "SKIPPED",
+    "SKIP": "SKIPPED",
+}
