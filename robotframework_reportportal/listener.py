@@ -27,7 +27,7 @@ from warnings import warn
 from reportportal_client.helpers import LifoQueue, guess_content_type_from_bytes, is_binary
 
 from robotframework_reportportal.helpers import _unescape, match_pattern, translate_glob_to_regex
-from robotframework_reportportal.model import Keyword, Launch, LogMessage, Suite, Test, Entity
+from robotframework_reportportal.model import Entity, Keyword, Launch, LogMessage, Suite, Test
 from robotframework_reportportal.service import RobotService
 from robotframework_reportportal.static import MAIN_SUITE_ID, PABOT_WITHOUT_LAUNCH_ID_MSG
 from robotframework_reportportal.variables import Variables
