@@ -14,5 +14,5 @@ See the License for the specific language governing permissions and
 limitations under the License
 """
 
-REPORT_PORTAL_SERVICE = 'reportportal_client.RPClient'
-REQUESTS_SERVICE = 'reportportal_client.client.requests.Session'
+REPORT_PORTAL_SERVICE = "reportportal_client.RPClient"
+REQUESTS_SERVICE = "reportportal_client.client.requests.Session"

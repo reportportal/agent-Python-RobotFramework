@@ -1,6 +1,20 @@
 # Changelog
 
 ## [Unreleased]
+### Changed
+- Client version updated on [5.6.0](https://github.com/reportportal/client-Python/releases/tag/5.6.0), by @HardNorth
+- Test end message now posts to the Test description, by @HardNorth
+- Keywords names now contain Keyword types, by @HardNorth
+### Added
+- Support for `Python 3.13`, by @HardNorth
+- `RP_REMOVE_KEYWORDS` configuration variable, by @HardNorth
+- `--remove-keywords` argument support, by @HardNorth
+### Removed
+- `Python 3.7` support, by @HardNorth
+
+## [5.5.8]
+### Added
+- Issue [#191](https://github.com/reportportal/agent-Python-RobotFramework/issues/191): Add seamless screenshot logging for Selenium and Browser libraries, by @HardNorth
 
 ## [5.5.7]
 ### Added

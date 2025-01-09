@@ -19,20 +19,15 @@ from typing import Optional
 
 from dateutil.parser import parse
 from reportportal_client import RP, create_client
-from reportportal_client.helpers import (
-    dict_to_payload,
-    get_launch_sys_attrs,
-    get_package_version,
-    timestamp
-)
+from reportportal_client.helpers import dict_to_payload, get_launch_sys_attrs, get_package_version, timestamp
 
-from robotframework_reportportal.model import Launch, Suite, Test, Keyword, LogMessage
+from robotframework_reportportal.model import Keyword, Launch, LogMessage, Suite, Test
 from robotframework_reportportal.static import LOG_LEVEL_MAPPING, STATUS_MAPPING
 from robotframework_reportportal.variables import Variables
 
 logger = logging.getLogger(__name__)
 
-TOP_LEVEL_ITEMS = {'BEFORE_SUITE', 'AFTER_SUITE'}
+TOP_LEVEL_ITEMS = {"BEFORE_SUITE", "AFTER_SUITE"}
 
 
 def to_epoch(date: Optional[str]) -> Optional[str]:
@@ -43,10 +38,10 @@ def to_epoch(date: Optional[str]) -> Optional[str]:
         parsed_date = parse(date)
     except ValueError:
         return None
-    if hasattr(parsed_date, 'timestamp'):
+    if hasattr(parsed_date, "timestamp"):
         epoch_time = parsed_date.timestamp()
     else:
-        epoch_time = float(parsed_date.strftime('%s')) + parsed_date.microsecond / 1e6
+        epoch_time = float(parsed_date.strftime("%s")) + parsed_date.microsecond / 1e6
     return str(int(epoch_time * 1000))
 
 
@@ -59,7 +54,7 @@ class RobotService:
 
     def __init__(self) -> None:
         """Initialize service attributes."""
-        self.agent_name = 'robotframework-reportportal'
+        self.agent_name = "robotframework-reportportal"
         self.agent_version = get_package_version(self.agent_name)
         self.rp = None
 
@@ -70,8 +65,7 @@ class RobotService:
         """
         attributes = cmd_attrs or []
         system_attributes = get_launch_sys_attrs()
-        system_attributes['agent'] = (
-            '{}|{}'.format(self.agent_name, self.agent_version))
+        system_attributes["agent"] = "{}|{}".format(self.agent_name, self.agent_version)
         return attributes + dict_to_payload(system_attributes)
 
     def init_service(self, variables: Variables) -> None:
@@ -80,8 +74,10 @@ class RobotService:
         :param variables: ReportPortal variables
         """
         if self.rp is None:
-            logger.debug(f'ReportPortal - Init service: endpoint={variables.endpoint}, '
-                         f'project={variables.project}, api_key={variables.api_key}')
+            logger.debug(
+                f"ReportPortal - Init service: endpoint={variables.endpoint}, "
+                f"project={variables.project}, api_key={variables.api_key}"
+            )
 
             self.rp = create_client(
                 client_type=variables.client_type,
@@ -97,7 +93,7 @@ class RobotService:
                 launch_uuid=variables.launch_id,
                 launch_uuid_print=variables.launch_uuid_print,
                 print_output=variables.launch_uuid_print_output,
-                http_timeout=variables.http_timeout
+                http_timeout=variables.http_timeout,
             )
 
     def terminate_service(self) -> None:
@@ -105,9 +101,14 @@ class RobotService:
         if self.rp:
             self.rp.close()
 
-    def start_launch(self, launch: Launch, mode: Optional[str] = None, rerun: bool = False,
-                     rerun_of: Optional[str] = None,
-                     ts: Optional[str] = None) -> Optional[str]:
+    def start_launch(
+        self,
+        launch: Launch,
+        mode: Optional[str] = None,
+        rerun: bool = False,
+        rerun_of: Optional[str] = None,
+        ts: Optional[str] = None,
+    ) -> Optional[str]:
         """Call start_launch method of the common client.
 
         :param launch:   Instance of the Launch class
@@ -119,15 +120,15 @@ class RobotService:
         :return:         launch UUID
         """
         sl_pt = {
-            'attributes': self._get_launch_attributes(launch.attributes),
-            'description': launch.doc,
-            'name': launch.name,
-            'mode': mode,
-            'rerun': rerun,
-            'rerun_of': rerun_of,
-            'start_time': ts or to_epoch(launch.start_time) or timestamp()
+            "attributes": self._get_launch_attributes(launch.attributes),
+            "description": launch.doc,
+            "name": launch.name,
+            "mode": mode,
+            "rerun": rerun,
+            "rerun_of": rerun_of,
+            "start_time": ts or to_epoch(launch.start_time) or timestamp(),
         }
-        logger.debug('ReportPortal - Start launch: request_body={0}'.format(sl_pt))
+        logger.debug("ReportPortal - Start launch: request_body={0}".format(sl_pt))
         return self.rp.start_launch(**sl_pt)
 
     def finish_launch(self, launch: Launch, ts: Optional[str] = None) -> None:
@@ -136,11 +137,8 @@ class RobotService:
         :param launch: Launch name
         :param ts:     End time
         """
-        fl_rq = {
-            'end_time': ts or to_epoch(launch.end_time) or timestamp(),
-            'status': STATUS_MAPPING[launch.status]
-        }
-        logger.debug('ReportPortal - Finish launch: request_body={0}'.format(fl_rq))
+        fl_rq = {"end_time": ts or to_epoch(launch.end_time) or timestamp(), "status": STATUS_MAPPING[launch.status]}
+        logger.debug("ReportPortal - Finish launch: request_body={0}".format(fl_rq))
         self.rp.finish_launch(**fl_rq)
 
     def start_suite(self, suite: Suite, ts: Optional[str] = None) -> Optional[str]:
@@ -151,18 +149,17 @@ class RobotService:
         :return:      Suite UUID
         """
         start_rq = {
-            'attributes': suite.attributes,
-            'description': suite.doc,
-            'item_type': suite.type,
-            'name': suite.name,
-            'parent_item_id': suite.rp_parent_item_id,
-            'start_time': ts or to_epoch(suite.start_time) or timestamp()
+            "attributes": suite.attributes,
+            "description": suite.doc,
+            "item_type": suite.type,
+            "name": suite.name,
+            "parent_item_id": suite.rp_parent_item_id,
+            "start_time": ts or to_epoch(suite.start_time) or timestamp(),
         }
-        logger.debug('ReportPortal - Start suite: request_body={0}'.format(start_rq))
+        logger.debug("ReportPortal - Start suite: request_body={0}".format(start_rq))
         return self.rp.start_test_item(**start_rq)
 
-    def finish_suite(self, suite: Suite, issue: Optional[str] = None,
-                     ts: Optional[str] = None) -> None:
+    def finish_suite(self, suite: Suite, issue: Optional[str] = None, ts: Optional[str] = None) -> None:
         """Finish started suite.
 
         :param suite: Instance of the started suite item
@@ -170,12 +167,12 @@ class RobotService:
         :param ts:    End time
         """
         fta_rq = {
-            'end_time': ts or to_epoch(suite.end_time) or timestamp(),
-            'issue': issue,
-            'item_id': suite.rp_item_id,
-            'status': STATUS_MAPPING[suite.status]
+            "end_time": ts or to_epoch(suite.end_time) or timestamp(),
+            "issue": issue,
+            "item_id": suite.rp_item_id,
+            "status": STATUS_MAPPING[suite.status],
         }
-        logger.debug('ReportPortal - Finish suite: request_body={0}'.format(fta_rq))
+        logger.debug("ReportPortal - Finish suite: request_body={0}".format(fta_rq))
         self.rp.finish_test_item(**fta_rq)
 
     def start_test(self, test: Test, ts: Optional[str] = None):
@@ -188,16 +185,16 @@ class RobotService:
         # Details at:
         # https://github.com/reportportal/agent-Python-RobotFramework/issues/56
         start_rq = {
-            'attributes': test.attributes,
-            'code_ref': test.code_ref,
-            'description': test.doc,
-            'item_type': 'STEP',
-            'name': test.name,
-            'parent_item_id': test.rp_parent_item_id,
-            'start_time': ts or to_epoch(test.start_time) or timestamp(),
-            'test_case_id': test.test_case_id
+            "attributes": test.attributes,
+            "code_ref": test.code_ref,
+            "description": test.doc,
+            "item_type": "STEP",
+            "name": test.name,
+            "parent_item_id": test.rp_parent_item_id,
+            "start_time": ts or to_epoch(test.start_time) or timestamp(),
+            "test_case_id": test.test_case_id,
         }
-        logger.debug('ReportPortal - Start test: request_body={0}'.format(start_rq))
+        logger.debug("ReportPortal - Start test: request_body={0}".format(start_rq))
         return self.rp.start_test_item(**start_rq)
 
     def finish_test(self, test: Test, issue: Optional[str] = None, ts: Optional[str] = None):
@@ -207,15 +204,26 @@ class RobotService:
         :param issue: Corresponding issue if it exists
         :param ts:    End time
         """
+        description = None
+        if test.doc:
+            description = test.doc
+        if test.message:
+            message = f"Message:\n\n{test.message}"
+            if description:
+                description += f"\n\n---\n\n{message}"
+            else:
+                description = message
         fta_rq = {
-            'attributes': test.attributes,
-            'end_time': ts or to_epoch(test.end_time) or timestamp(),
-            'issue': issue,
-            'item_id': test.rp_item_id,
-            'status': STATUS_MAPPING[test.status],
-            'test_case_id': test.test_case_id
+            "attributes": test.attributes,
+            "end_time": ts or to_epoch(test.end_time) or timestamp(),
+            "issue": issue,
+            "item_id": test.rp_item_id,
+            "status": STATUS_MAPPING[test.status],
+            "test_case_id": test.test_case_id,
         }
-        logger.debug('ReportPortal - Finish test: request_body={0}'.format(fta_rq))
+        if description:
+            fta_rq["description"] = description
+        logger.debug("ReportPortal - Finish test: request_body={0}".format(fta_rq))
         self.rp.finish_test_item(**fta_rq)
 
     def start_keyword(self, keyword: Keyword, ts: Optional[str] = None):
@@ -225,14 +233,16 @@ class RobotService:
         :param ts:      Start time
         """
         start_rq = {
-            'description': keyword.doc,
-            'has_stats': keyword.get_type() in TOP_LEVEL_ITEMS,
-            'item_type': keyword.get_type(),
-            'name': keyword.get_name(),
-            'parent_item_id': keyword.rp_parent_item_id,
-            'start_time': ts or to_epoch(keyword.start_time) or timestamp()
+            "description": keyword.doc,
+            "has_stats": keyword.get_type() in TOP_LEVEL_ITEMS,
+            "item_type": keyword.get_type(),
+            "name": keyword.get_name(),
+            "parent_item_id": keyword.rp_parent_item_id,
+            "start_time": ts or to_epoch(keyword.start_time) or timestamp(),
         }
-        logger.debug('ReportPortal - Start keyword: request_body={0}'.format(start_rq))
+        if keyword.rp_item_id:
+            start_rq["uuid"] = keyword.rp_item_id
+        logger.debug("ReportPortal - Start keyword: request_body={0}".format(start_rq))
         return self.rp.start_test_item(**start_rq)
 
     def finish_keyword(self, keyword: Keyword, issue: Optional[str] = None, ts: Optional[str] = None):
@@ -243,12 +253,12 @@ class RobotService:
         :param ts:      End time
         """
         fta_rq = {
-            'end_time': ts or to_epoch(keyword.end_time) or timestamp(),
-            'issue': issue,
-            'item_id': keyword.rp_item_id,
-            'status': STATUS_MAPPING[keyword.status]
+            "end_time": ts or to_epoch(keyword.end_time) or timestamp(),
+            "issue": issue,
+            "item_id": keyword.rp_item_id,
+            "status": STATUS_MAPPING[keyword.status],
         }
-        logger.debug('ReportPortal - Finish keyword: request_body={0}'.format(fta_rq))
+        logger.debug("ReportPortal - Finish keyword: request_body={0}".format(fta_rq))
         self.rp.finish_test_item(**fta_rq)
 
     def log(self, message: LogMessage, ts: Optional[str] = None):
@@ -258,10 +268,10 @@ class RobotService:
         :param ts:      Timestamp
         """
         sl_rq = {
-            'attachment': message.attachment,
-            'item_id': message.item_id,
-            'level': LOG_LEVEL_MAPPING.get(message.level, 'INFO'),
-            'message': message.message,
-            'time': ts or timestamp()
+            "attachment": message.attachment,
+            "item_id": None if message.launch_log else message.item_id,
+            "level": LOG_LEVEL_MAPPING.get(message.level, "INFO"),
+            "message": message.message,
+            "time": ts or to_epoch(message.timestamp) or timestamp(),
         }
         self.rp.log(**sl_rq)

@@ -14,41 +14,40 @@
 
 """This module contains common Pytest fixtures and hooks for unit tests."""
 
-import sys
+KEYWORDS_EXPECTED_TEST_NAMES = ["Invalid Password"]
+KEYWORDS_EXPECTED_CODE_REF_SUFFIXES = ["6"] * 6
 
-KEYWORDS_EXPECTED_TEST_NAMES = ['Invalid Password']
-KEYWORDS_EXPECTED_CODE_REF_SUFFIXES = ['6'] * 6
-
-SETTINGS_EXPECTED_TEST_NAMES = ['Invalid User Name', 'Invalid Password',
-                                'Invalid User Name and Password',
-                                'Empty User Name',
-                                'Empty Password',
-                                'Empty User Name and Password']
+SETTINGS_EXPECTED_TEST_NAMES = [
+    "Invalid User Name",
+    "Invalid Password",
+    "Invalid User Name and Password",
+    "Empty User Name",
+    "Empty Password",
+    "Empty User Name and Password",
+]
 SETTINGS_EXPECTED_CODE_REF_SUFFIXES = [str(x) for x in range(7, 14)]
 
-DATADRIVER_EXPECTED_TEST_NAMES = \
-    ['Login with user \'invalid\' and password \'Password\'',
-     'Login with user \'User\' and password \'invalid\'',
-     'Login with user \'invalid\' and password \'invalid\'',
-     'Login with user \'\' and password \'Password\'',
-     'Login with user \'User\' and password \'\'',
-     'Login with user \'\' and password \'\'']
-DATADRIVER_EXPECTED_CODE_REF_SUFFIXES = ['8'] * 6
+DATADRIVER_EXPECTED_TEST_NAMES = [
+    "Login with user 'invalid' and password 'Password'",
+    "Login with user 'User' and password 'invalid'",
+    "Login with user 'invalid' and password 'invalid'",
+    "Login with user '' and password 'Password'",
+    "Login with user 'User' and password ''",
+    "Login with user '' and password ''",
+]
+DATADRIVER_EXPECTED_CODE_REF_SUFFIXES = ["8"] * 6
 
 
 def pytest_generate_tests(metafunc):
-    if metafunc.function.__name__ == 'test_code_reference_template':
-        func_options = 'test,test_names,code_ref_suffixes'
+    if metafunc.function.__name__ == "test_code_reference_template":
+        func_options = "test,test_names,code_ref_suffixes"
         option_args = [
-            ('examples/templates/keyword.robot', KEYWORDS_EXPECTED_TEST_NAMES,
-             KEYWORDS_EXPECTED_CODE_REF_SUFFIXES),
-            ('examples/templates/settings.robot', SETTINGS_EXPECTED_TEST_NAMES,
-             SETTINGS_EXPECTED_CODE_REF_SUFFIXES)]
-        if sys.version_info >= (3, 6):
-            pass
-            # TODO: Uncomment as soon as DataDriver fix its compatibility with
-            #  Robot 6.1
-            # option_args.append(('examples/templates/datadriver.robot',
-            #                     DATADRIVER_EXPECTED_TEST_NAMES,
-            #                     DATADRIVER_EXPECTED_CODE_REF_SUFFIXES))
+            ("examples/templates/keyword.robot", KEYWORDS_EXPECTED_TEST_NAMES, KEYWORDS_EXPECTED_CODE_REF_SUFFIXES),
+            ("examples/templates/settings.robot", SETTINGS_EXPECTED_TEST_NAMES, SETTINGS_EXPECTED_CODE_REF_SUFFIXES),
+            (
+                "examples/templates/datadriver.robot",
+                DATADRIVER_EXPECTED_TEST_NAMES,
+                DATADRIVER_EXPECTED_CODE_REF_SUFFIXES,
+            ),
+        ]
         metafunc.parametrize(func_options, option_args)

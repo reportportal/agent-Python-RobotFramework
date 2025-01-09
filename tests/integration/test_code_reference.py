@@ -12,13 +12,12 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-from tests.helpers import utils
 from unittest import mock
 
 from tests import REPORT_PORTAL_SERVICE
+from tests.helpers import utils
 
-
-SIMPLE_TEST = 'examples/simple.robot'
+SIMPLE_TEST = "examples/simple.robot"
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
@@ -36,4 +35,4 @@ def test_code_reference_simple(mock_client_init):
     assert len(item_start_calls) == len(item_finish_calls) == 3
 
     test_item = item_start_calls[-2]
-    assert test_item[1]['code_ref'] == SIMPLE_TEST + ':3'
+    assert test_item[1]["code_ref"] == SIMPLE_TEST + ":3"

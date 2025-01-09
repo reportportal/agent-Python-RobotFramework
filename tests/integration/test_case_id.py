@@ -17,7 +17,7 @@ from unittest import mock
 from tests import REPORT_PORTAL_SERVICE
 from tests.helpers import utils
 
-SIMPLE_TEST = 'examples/simple.robot'
+SIMPLE_TEST = "examples/simple.robot"
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
@@ -28,10 +28,10 @@ def test_case_id_simple(mock_client_init):
     mock_client = mock_client_init.return_value
     item_start_calls = mock_client.start_test_item.call_args_list
     test_item = item_start_calls[-2]
-    assert test_item[1]['test_case_id'] == SIMPLE_TEST + ':Simple test'
+    assert test_item[1]["test_case_id"] == SIMPLE_TEST + ":Simple test"
 
 
-CUSTOM_TEST_CASE_ID = 'examples/custom_test_case_id.robot'
+CUSTOM_TEST_CASE_ID = "examples/custom_test_case_id.robot"
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
@@ -49,4 +49,4 @@ def test_case_id_custom_definition(mock_client_init):
     assert len(item_start_calls) == len(item_finish_calls) == 3
 
     test_item = item_start_calls[-2]
-    assert test_item[1]['test_case_id'] == 'custom'
+    assert test_item[1]["test_case_id"] == "custom"

@@ -1,4 +1,10 @@
-# ReportPortal RobotFramework agent
+# ReportPortal integration for RobotFramework
+
+A RobotFramework Listener to report test results to ReportPortal
+
+> **DISCLAIMER**: We use Google Analytics for sending anonymous usage information such as agent's and client's names,
+> and their versions after a successful launch start. This information might help us to improve both ReportPortal
+> backend and client sides. It is used by the ReportPortal team only and is not supposed for sharing with 3rd parties.
 
 [![PyPI](https://img.shields.io/pypi/v/robotframework-reportportal.svg?maxAge=259200)](https://pypi.python.org/pypi/robotframework-reportportal)
 [![Python versions](https://img.shields.io/pypi/pyversions/robotframework-reportportal.svg)](https://pypi.org/project/robotframework-reportportal)
@@ -8,7 +14,6 @@
 [![stackoverflow](https://img.shields.io/badge/reportportal-stackoverflow-orange.svg?style=flat)](http://stackoverflow.com/questions/tagged/reportportal)
 [![Build with Love](https://img.shields.io/badge/build%20with-❤%EF%B8%8F%E2%80%8D-lightgrey.svg)](http://reportportal.io?style=flat)
 
-Listener for RobotFramework to report results to ReportPortal
 
 * [Installation](https://github.com/reportportal/agent-Python-RobotFramework#installation)
 * [Usage](https://github.com/reportportal/agent-Python-RobotFramework#usage)
@@ -88,6 +93,8 @@ NOT REQUIRED:
 --variable RP_VERIFY_SSL:"True"
     - Default value is "True", disables SSL verification for HTTP requests.
       Also, you can specify a full path to your certificate as the value.
+--variable RP_REMOVE_KEYWORDS:"True"
+    - Default value is "False", remove  keywords from reporting, passed with '--remove-keywords' Robot's argument.
 ```
 
 ### Logging
@@ -122,22 +129,6 @@ ReportPortal.
 ## Send attachment (screenshots)
 
 https://github.com/reportportal/client-Python#send-attachement-screenshots
-
-## Integration with GA
-
-ReportPortal is now supporting integrations with more than 15 test frameworks
-simultaneously. In order to define the most popular agents and plan the team
-workload accordingly, we are using Google analytics.
-
-ReportPortal collects information about agent name and its version only. This
-information is sent to Google analytics on the launch start. Please help us to
-make our work effective.
-If you still want to switch Off Google analytics, please change env variable
-the way below.
-
-```bash
-export AGENT_NO_ANALYTICS=1
-```
 
 ## Copyright Notice
 
