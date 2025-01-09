@@ -235,15 +235,14 @@ class listener:
     def _post_skipped_keywords(self, to_post: Optional[Any], clean_data_remove: bool = False) -> None:
         if not to_post:
             return
-        if isinstance(to_post, Keyword):
-            if not to_post.posted:
-                self._do_start_keyword(to_post)
-                if clean_data_remove:
-                    to_post.remove_data = False
-                log_messages = to_post.skipped_logs
-                to_post.skipped_logs = []
-                for log_message in log_messages:
-                    self.__post_log_message(log_message)
+        if isinstance(to_post, Keyword) and not to_post.posted:
+            self._do_start_keyword(to_post)
+            if clean_data_remove:
+                to_post.remove_data = False
+            log_messages = to_post.skipped_logs
+            to_post.skipped_logs = []
+            for log_message in log_messages:
+                self.__post_log_message(log_message)
         skipped_keywords = to_post.skipped_keywords
         if skipped_keywords:
             to_post.skipped_keywords = []
