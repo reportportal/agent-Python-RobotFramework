@@ -20,7 +20,7 @@ on:
       - '.github/**'
       - CHANGELOG.md
       - README.md
-      - ../../CONTRIBUTING.md
+      - CONTRIBUTING.md
 
 env:
   VERSION_FILE: setup.py
