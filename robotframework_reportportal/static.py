@@ -17,21 +17,23 @@
 from typing import Dict
 
 LOG_LEVEL_MAPPING: Dict[str, str] = {
-    'INFO': 'INFO',
-    'FAIL': 'ERROR',
-    'TRACE': 'TRACE',
-    'DEBUG': 'DEBUG',
-    'HTML': 'INFO',
-    'WARN': 'WARN',
-    'ERROR': 'ERROR',
-    'SKIP': 'INFO'
+    "INFO": "INFO",
+    "FAIL": "ERROR",
+    "TRACE": "TRACE",
+    "DEBUG": "DEBUG",
+    "HTML": "INFO",
+    "WARN": "WARN",
+    "ERROR": "ERROR",
+    "SKIP": "INFO",
 }
-MAIN_SUITE_ID: str = 's1'
-PABOT_WITHOUT_LAUNCH_ID_MSG: str = ('Pabot library is used but RP_LAUNCH_UUID was not provided. Please, '
-                                    'initialize listener with the RP_LAUNCH_UUID argument.')
+MAIN_SUITE_ID: str = "s1"
+PABOT_WITHOUT_LAUNCH_ID_MSG: str = (
+    "Pabot library is used but RP_LAUNCH_UUID was not provided. Please, "
+    "initialize listener with the RP_LAUNCH_UUID argument."
+)
 STATUS_MAPPING: Dict[str, str] = {
-    'PASS': 'PASSED',
-    'FAIL': 'FAILED',
-    'NOT RUN': 'SKIPPED',
-    'SKIP': 'SKIPPED'
+    "PASS": "PASSED",
+    "FAIL": "FAILED",
+    "NOT RUN": "SKIPPED",
+    "SKIP": "SKIPPED",
 }

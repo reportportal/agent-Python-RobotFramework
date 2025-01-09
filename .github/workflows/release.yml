@@ -20,14 +20,14 @@ on:
       - '.github/**'
       - CHANGELOG.md
       - README.md
-      - CONTRIBUTING.rst
+      - ../../CONTRIBUTING.md
 
 env:
   VERSION_FILE: setup.py
   VERSION_EXTRACT_PATTERN: >-
-    __version__\s*=\s*'([^']+)
+    __version__\s*=\s*"([^"]+)
   VERSION_REPLACE_PATTERN: >-
-    __version__ = '\1'
+    __version__ = "\1"
   TMP_SUFFIX: _updated
   CHANGE_LOG_FILE: CHANGELOG.md
 
@@ -38,10 +38,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Generate versions
+        uses: HardNorth/github-version-generate@v1
+        with:
+          version-source: file
+          version-file: ${{ env.VERSION_FILE }}
+          version-file-extraction-pattern: ${{ env.VERSION_EXTRACT_PATTERN }}
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.8'
+          python-version: '3.10'
 
       - name: Install dependencies
         run: python -m pip install --upgrade pip setuptools wheel
@@ -54,13 +61,6 @@ jobs:
         with:
           user: ${{ secrets.PYPI_USERNAME }}
           password: ${{ secrets.PYPI_PASSWORD }}
-
-      - name: Generate versions
-        uses: HardNorth/github-version-generate@v1
-        with:
-          version-source: file
-          version-file: ${{ env.VERSION_FILE }}
-          version-file-extraction-pattern: ${{ env.VERSION_EXTRACT_PATTERN }}
 
       - name: Setup git credentials
         uses: oleksiyrudenko/gha-git-credentials@v2-latest
@@ -119,8 +119,8 @@ jobs:
       - name: Update version file
         id: versionFileUpdate
         run: |
-          export CURRENT_VERSION_VALUE=`echo '${{ env.CURRENT_VERSION }}' | sed -E "s/(.*)/${{ env.VERSION_REPLACE_PATTERN }}/"`
-          export NEXT_VERSION_VALUE=`echo '${{ env.NEXT_VERSION }}' | sed -E "s/(.*)/${{ env.VERSION_REPLACE_PATTERN }}/"`
+          export CURRENT_VERSION_VALUE=`echo '${{ env.CURRENT_VERSION }}' | sed -E 's/(.*)/${{ env.VERSION_REPLACE_PATTERN }}/'`
+          export NEXT_VERSION_VALUE=`echo '${{ env.NEXT_VERSION }}' | sed -E 's/(.*)/${{ env.VERSION_REPLACE_PATTERN }}/'`
           sed "s/${CURRENT_VERSION_VALUE}/${NEXT_VERSION_VALUE}/g" ${{ env.VERSION_FILE }} > ${{ env.VERSION_FILE }}${{ env.TMP_SUFFIX }}
           rm ${{ env.VERSION_FILE }}
           mv ${{ env.VERSION_FILE }}${{ env.TMP_SUFFIX }} ${{ env.VERSION_FILE }}

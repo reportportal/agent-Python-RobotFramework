@@ -1,5 +1,5 @@
 *** Settings ***
-Documentation  Example of 'Wait Until Keyword Succeeds' keyword reporting
+Documentation  Example of failing 'Wait Until Keyword Succeeds' keyword reporting
 
 *** Variables ***
 ${countval}  0
@@ -12,6 +12,6 @@ Wuks test
 Fail on first try
     ${counter}                      Evaluate            ${countval} + 1
     Set Suite Variable              ${countval}         ${counter}
-    IF                              ${countval} < 3
+    IF                              ${countval} < 4
                                     Fail                To less executions
     END

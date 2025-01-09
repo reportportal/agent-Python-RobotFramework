@@ -1,4 +1,3 @@
-"""Test Case ID library for Robot Framework."""
 #  Copyright 2024 EPAM Systems
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -12,6 +11,8 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+"""Test Case ID library for Robot Framework."""
 
 from typing import Optional
 
@@ -27,12 +28,12 @@ def case_id(test_case_id_pattern: Optional[str]) -> None:
     built_in = BuiltIn()
     if not test_case_id_pattern:
         return
-    suite_metadata = built_in.get_variable_value('${suitemetadata}')
+    suite_metadata = built_in.get_variable_value("${suitemetadata}")
     scope = None
     for key in suite_metadata:
-        if key.lower() == 'scope':
+        if key.lower() == "scope":
             scope = suite_metadata[key]
             break
     if not scope:
         return
-    built_in.set_tags('test_case_id:' + test_case_id_pattern.format(scope_var=scope))
+    built_in.set_tags("test_case_id:" + test_case_id_pattern.format(scope_var=scope))

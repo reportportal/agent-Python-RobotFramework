@@ -1,5 +1,3 @@
-"""Logging library for Robot Framework."""
-
 #  Copyright 2024 EPAM Systems
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +11,10 @@
 #  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
+
+"""Logging library for Robot Framework."""
+
+from reportportal_client.helpers import guess_content_type_from_bytes
 
 from robotframework_reportportal import logger
 
@@ -38,3 +40,24 @@ def launch_log(level, message, attachment=None):
     :param attachment: path to attachment file
     """
     logger.write(message, level, attachment=attachment, launch_log=True)
+
+
+def binary_log(level: str, message: str, file_name: str, attachment: bytes):
+    """
+    Post a log entry with binary attachment.
+
+    :param level: log entry level
+    :param message: message to post
+    :param file_name: name of the attachment file
+    :param attachment: binary data to attach
+    """
+    logger.write(
+        message,
+        level,
+        attachment={
+            "name": file_name,
+            "data": attachment,
+            "mime": guess_content_type_from_bytes(attachment),
+        },
+        launch_log=False,
+    )

@@ -17,7 +17,7 @@ from unittest import mock
 
 # noinspection PyPackageRequirements
 import pytest
-from reportportal_client import OutputType, RPClient, ThreadedRPClient, BatchedRPClient
+from reportportal_client import BatchedRPClient, OutputType, RPClient, ThreadedRPClient
 
 from tests import REPORT_PORTAL_SERVICE, REQUESTS_SERVICE
 from tests.helpers import utils
@@ -27,44 +27,40 @@ from tests.helpers import utils
 def test_agent_pass_batch_payload_size_variable(mock_client_init):
     variables = utils.DEFAULT_VARIABLES.copy()
     payload_size = 100
-    variables['RP_LOG_BATCH_PAYLOAD_SIZE'] = payload_size
-    result = utils.run_robot_tests(['examples/simple.robot'],
-                                   variables=variables)
+    variables["RP_LOG_BATCH_PAYLOAD_SIZE"] = payload_size
+    result = utils.run_robot_tests(["examples/simple.robot"], variables=variables)
     assert result == 0  # the test successfully passed
 
-    payload_variable = 'log_batch_payload_size'
+    payload_variable = "log_batch_payload_size"
     assert payload_variable in mock_client_init.call_args_list[0][1]
-    assert mock_client_init.call_args_list[0][1][
-               payload_variable] == payload_size
+    assert mock_client_init.call_args_list[0][1][payload_variable] == payload_size
 
 
 @mock.patch(REQUESTS_SERVICE)
 def test_agent_pass_launch_uuid_variable(mock_requests_init):
     variables = utils.DEFAULT_VARIABLES.copy()
-    test_launch_id = 'my_test_launch'
-    variables['RP_LAUNCH_UUID'] = test_launch_id
-    result = utils.run_robot_tests(['examples/simple.robot'],
-                                   variables=variables)
+    test_launch_id = "my_test_launch"
+    variables["RP_LAUNCH_UUID"] = test_launch_id
+    result = utils.run_robot_tests(["examples/simple.robot"], variables=variables)
     assert result == 0  # the test successfully passed
 
     mock_requests = mock_requests_init.return_value
     assert mock_requests.post.call_count == 3
     suite_start = mock_requests.post.call_args_list[0]
-    assert suite_start[0][0].endswith('/item')
-    assert suite_start[1]['json']['launchUuid'] == test_launch_id
+    assert suite_start[0][0].endswith("/item")
+    assert suite_start[1]["json"]["launchUuid"] == test_launch_id
 
 
-@pytest.mark.parametrize('variable, warn_num',
-                         [('RP_PROJECT', 1), ('RP_API_KEY', 2),
-                          ('RP_ENDPOINT', 1), ('RP_LAUNCH', 1)])
+@pytest.mark.parametrize(
+    "variable, warn_num", [("RP_PROJECT", 1), ("RP_API_KEY", 2), ("RP_ENDPOINT", 1), ("RP_LAUNCH", 1)]
+)
 @mock.patch(REPORT_PORTAL_SERVICE)
 def test_no_required_variable_warning(mock_client_init, variable, warn_num):
     variables = utils.DEFAULT_VARIABLES.copy()
     del variables[variable]
 
     with warnings.catch_warnings(record=True) as w:
-        result = utils.run_robot_tests(['examples/simple.robot'],
-                                       variables=variables)
+        result = utils.run_robot_tests(["examples/simple.robot"], variables=variables)
         assert result == 0  # the test successfully passed
 
         assert len(w) == warn_num
@@ -78,87 +74,77 @@ def test_no_required_variable_warning(mock_client_init, variable, warn_num):
 
 
 def filter_agent_call(warn):
-    category = getattr(warn, 'category', None)
+    category = getattr(warn, "category", None)
     if category:
-        return category.__name__ == 'DeprecationWarning' \
-            or category.__name__ == 'RuntimeWarning'
+        return category.__name__ == "DeprecationWarning" or category.__name__ == "RuntimeWarning"
     return False
 
 
 def filter_agent_calls(warning_list):
-    return list(
-        filter(
-            lambda call: filter_agent_call(call),
-            warning_list
-        )
-    )
+    return list(filter(lambda call: filter_agent_call(call), warning_list))
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
 def test_rp_api_key(mock_client_init):
-    api_key = 'rp_api_key'
+    api_key = "rp_api_key"
     variables = dict(utils.DEFAULT_VARIABLES)
-    variables.update({'RP_API_KEY': api_key}.items())
+    variables.update({"RP_API_KEY": api_key}.items())
 
     with warnings.catch_warnings(record=True) as w:
-        result = utils.run_robot_tests(['examples/simple.robot'],
-                                       variables=variables)
-        assert int(result) == 0, 'Exit code should be 0 (no errors)'
+        result = utils.run_robot_tests(["examples/simple.robot"], variables=variables)
+        assert int(result) == 0, "Exit code should be 0 (no errors)"
 
         assert mock_client_init.call_count == 1
 
         constructor_args = mock_client_init.call_args_list[0][1]
-        assert constructor_args['api_key'] == api_key
+        assert constructor_args["api_key"] == api_key
         assert len(filter_agent_calls(w)) == 0
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
 def test_rp_uuid(mock_client_init):
-    api_key = 'rp_api_key'
+    api_key = "rp_api_key"
     variables = dict(utils.DEFAULT_VARIABLES)
-    del variables['RP_API_KEY']
-    variables.update({'RP_UUID': api_key}.items())
+    del variables["RP_API_KEY"]
+    variables.update({"RP_UUID": api_key}.items())
 
     with warnings.catch_warnings(record=True) as w:
-        result = utils.run_robot_tests(['examples/simple.robot'],
-                                       variables=variables)
-        assert int(result) == 0, 'Exit code should be 0 (no errors)'
+        result = utils.run_robot_tests(["examples/simple.robot"], variables=variables)
+        assert int(result) == 0, "Exit code should be 0 (no errors)"
 
         assert mock_client_init.call_count == 1
 
         constructor_args = mock_client_init.call_args_list[0][1]
-        assert constructor_args['api_key'] == api_key
+        assert constructor_args["api_key"] == api_key
         assert len(filter_agent_calls(w)) == 1
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
 def test_rp_api_key_priority(mock_client_init):
-    api_key = 'rp_api_key'
+    api_key = "rp_api_key"
     variables = dict(utils.DEFAULT_VARIABLES)
-    variables.update({'RP_API_KEY': api_key, 'RP_UUID': 'rp_uuid'}.items())
+    variables.update({"RP_API_KEY": api_key, "RP_UUID": "rp_uuid"}.items())
 
     with warnings.catch_warnings(record=True) as w:
-        result = utils.run_robot_tests(['examples/simple.robot'],
-                                       variables=variables)
-        assert int(result) == 0, 'Exit code should be 0 (no errors)'
+        result = utils.run_robot_tests(["examples/simple.robot"], variables=variables)
+        assert int(result) == 0, "Exit code should be 0 (no errors)"
 
         assert mock_client_init.call_count == 1
 
         constructor_args = mock_client_init.call_args_list[0][1]
-        assert constructor_args['api_key'] == api_key
+        assert constructor_args["api_key"] == api_key
         assert len(filter_agent_calls(w)) == 0
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
 def test_rp_api_key_empty(mock_client_init):
-    api_key = ''
+    api_key = ""
     variables = dict(utils.DEFAULT_VARIABLES)
-    variables.update({'RP_API_KEY': api_key}.items())
+    variables.update({"RP_API_KEY": api_key}.items())
 
     with warnings.catch_warnings(record=True) as w:
-        result = utils.run_robot_tests(['examples/simple.robot'],
-                                       variables=variables)
-        assert int(result) == 0, 'Exit code should be 0 (no errors)'
+        result = utils.run_robot_tests(["examples/simple.robot"], variables=variables)
+        assert int(result) == 0, "Exit code should be 0 (no errors)"
 
         assert mock_client_init.call_count == 0
         assert len(filter_agent_calls(w)) == 2
@@ -168,43 +154,39 @@ def test_rp_api_key_empty(mock_client_init):
 def test_launch_uuid_print(mock_client_init):
     print_uuid = True
     variables = utils.DEFAULT_VARIABLES.copy()
-    variables.update({'RP_LAUNCH_UUID_PRINT': str(print_uuid)}.items())
+    variables.update({"RP_LAUNCH_UUID_PRINT": str(print_uuid)}.items())
 
-    result = utils.run_robot_tests(['examples/simple.robot'],
-                                   variables=variables)
+    result = utils.run_robot_tests(["examples/simple.robot"], variables=variables)
 
-    assert int(result) == 0, 'Exit code should be 0 (no errors)'
+    assert int(result) == 0, "Exit code should be 0 (no errors)"
     assert mock_client_init.call_count == 1
-    assert mock_client_init.call_args_list[0][1]['launch_uuid_print'] == print_uuid
-    assert mock_client_init.call_args_list[0][1]['print_output'] is None
+    assert mock_client_init.call_args_list[0][1]["launch_uuid_print"] == print_uuid
+    assert mock_client_init.call_args_list[0][1]["print_output"] is None
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
 def test_launch_uuid_print_stderr(mock_client_init):
     print_uuid = True
     variables = utils.DEFAULT_VARIABLES.copy()
-    variables.update(
-        {'RP_LAUNCH_UUID_PRINT': str(print_uuid), 'RP_LAUNCH_UUID_PRINT_OUTPUT': 'stderr'}.items())
+    variables.update({"RP_LAUNCH_UUID_PRINT": str(print_uuid), "RP_LAUNCH_UUID_PRINT_OUTPUT": "stderr"}.items())
 
-    result = utils.run_robot_tests(['examples/simple.robot'], variables=variables)
+    result = utils.run_robot_tests(["examples/simple.robot"], variables=variables)
 
-    assert int(result) == 0, 'Exit code should be 0 (no errors)'
+    assert int(result) == 0, "Exit code should be 0 (no errors)"
     assert mock_client_init.call_count == 1
-    assert mock_client_init.call_args_list[0][1]['launch_uuid_print'] == print_uuid
-    assert mock_client_init.call_args_list[0][1]['print_output'] is OutputType.STDERR
+    assert mock_client_init.call_args_list[0][1]["launch_uuid_print"] == print_uuid
+    assert mock_client_init.call_args_list[0][1]["print_output"] is OutputType.STDERR
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
 def test_launch_uuid_print_invalid_output(mock_client_init):
     print_uuid = True
     variables = utils.DEFAULT_VARIABLES.copy()
-    variables.update({'RP_LAUNCH_UUID_PRINT': str(print_uuid),
-                      'RP_LAUNCH_UUID_PRINT_OUTPUT': 'something'}.items())
+    variables.update({"RP_LAUNCH_UUID_PRINT": str(print_uuid), "RP_LAUNCH_UUID_PRINT_OUTPUT": "something"}.items())
 
-    result = utils.run_robot_tests(['examples/simple.robot'],
-                                   variables=variables)
+    result = utils.run_robot_tests(["examples/simple.robot"], variables=variables)
 
-    assert int(result) == 0, 'Exit code should be 0 (no errors)'
+    assert int(result) == 0, "Exit code should be 0 (no errors)"
     assert mock_client_init.call_count == 0
 
 
@@ -212,29 +194,28 @@ def test_launch_uuid_print_invalid_output(mock_client_init):
 def test_no_launch_uuid_print(mock_client_init):
     variables = utils.DEFAULT_VARIABLES.copy()
 
-    result = utils.run_robot_tests(['examples/simple.robot'], variables=variables)
+    result = utils.run_robot_tests(["examples/simple.robot"], variables=variables)
 
-    assert int(result) == 0, 'Exit code should be 0 (no errors)'
+    assert int(result) == 0, "Exit code should be 0 (no errors)"
     assert mock_client_init.call_count == 1
-    assert mock_client_init.call_args_list[0][1]['launch_uuid_print'] is False
-    assert mock_client_init.call_args_list[0][1]['print_output'] is None
+    assert mock_client_init.call_args_list[0][1]["launch_uuid_print"] is False
+    assert mock_client_init.call_args_list[0][1]["print_output"] is None
 
 
 @pytest.mark.parametrize(
-    'variable_value, expected_type',
-    [('SYNC', RPClient), ('ASYNC_THREAD', ThreadedRPClient),
-     ('ASYNC_BATCHED', BatchedRPClient), (None, RPClient)]
+    "variable_value, expected_type",
+    [("SYNC", RPClient), ("ASYNC_THREAD", ThreadedRPClient), ("ASYNC_BATCHED", BatchedRPClient), (None, RPClient)],
 )
-@mock.patch('reportportal_client.aio.client.Client')
+@mock.patch("reportportal_client.aio.client.Client")
 @mock.patch(REPORT_PORTAL_SERVICE)
 def test_client_types(mock_client_init, mock_async_client_init, variable_value, expected_type):
     variables = utils.DEFAULT_VARIABLES.copy()
     if variable_value:
-        variables['RP_CLIENT_TYPE'] = variable_value
+        variables["RP_CLIENT_TYPE"] = variable_value
 
-    result = utils.run_robot_tests(['examples/simple.robot'], variables=variables)
+    result = utils.run_robot_tests(["examples/simple.robot"], variables=variables)
 
-    assert int(result) == 0, 'Exit code should be 0 (no errors)'
+    assert int(result) == 0, "Exit code should be 0 (no errors)"
     if expected_type is RPClient:
         assert mock_async_client_init.call_count == 0
         assert mock_client_init.call_count == 1
@@ -244,25 +225,19 @@ def test_client_types(mock_client_init, mock_async_client_init, variable_value, 
 
 
 @pytest.mark.parametrize(
-    'connect_value, read_value, expected_result',
-    [
-        ('5', '15', (5.0, 15.0)),
-        ('5.5', '15.5', (5.5, 15.5)),
-        (None, None, None),
-        (None, '5', 5),
-        ('5', None, 5)
-    ]
+    "connect_value, read_value, expected_result",
+    [("5", "15", (5.0, 15.0)), ("5.5", "15.5", (5.5, 15.5)), (None, None, None), (None, "5", 5), ("5", None, 5)],
 )
 @mock.patch(REPORT_PORTAL_SERVICE)
 def test_client_timeouts(mock_client_init, connect_value, read_value, expected_result):
     variables = utils.DEFAULT_VARIABLES.copy()
     if connect_value:
-        variables['RP_CONNECT_TIMEOUT'] = connect_value
+        variables["RP_CONNECT_TIMEOUT"] = connect_value
     if read_value:
-        variables['RP_READ_TIMEOUT'] = read_value
+        variables["RP_READ_TIMEOUT"] = read_value
 
-    result = utils.run_robot_tests(['examples/simple.robot'], variables=variables)
+    result = utils.run_robot_tests(["examples/simple.robot"], variables=variables)
 
-    assert int(result) == 0, 'Exit code should be 0 (no errors)'
+    assert int(result) == 0, "Exit code should be 0 (no errors)"
     assert mock_client_init.call_count == 1
-    assert mock_client_init.call_args_list[0][1]['http_timeout'] == expected_result
+    assert mock_client_init.call_args_list[0][1]["http_timeout"] == expected_result

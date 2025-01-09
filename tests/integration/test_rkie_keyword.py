@@ -23,7 +23,7 @@ def test_before_after_suite_with_steps(mock_client_init):
     mock_client = mock_client_init.return_value
     mock_client.start_test_item.side_effect = utils.item_id_gen
 
-    result = utils.run_robot_tests(['examples/rkie_keyword.robot'])
+    result = utils.run_robot_tests(["examples/rkie_keyword.robot"])
     assert result == 0
 
     launch_start = mock_client.start_launch.call_args_list
@@ -34,6 +34,5 @@ def test_before_after_suite_with_steps(mock_client_init):
     item_finish_calls = mock_client.finish_test_item.call_args_list
     assert len(item_start_calls) == len(item_finish_calls) == 13
 
-    statuses = [finish[1]['status'] for finish in item_finish_calls]
-    assert statuses == ['PASSED'] * 2 + ['FAILED'] * 3 + ['PASSED'] * 3 + [
-        'SKIPPED'] * 2 + ['PASSED'] * 3
+    statuses = [finish[1]["status"] for finish in item_finish_calls]
+    assert statuses == ["PASSED"] * 2 + ["FAILED"] * 3 + ["PASSED"] * 3 + ["SKIPPED"] * 2 + ["PASSED"] * 3

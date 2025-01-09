@@ -17,7 +17,7 @@ from unittest import mock
 from tests import REPORT_PORTAL_SERVICE
 from tests.helpers import utils
 
-SIMPLE_TEST = 'examples/suite_doc_with_urls.robot'
+SIMPLE_TEST = "examples/suite_doc_with_urls.robot"
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
@@ -35,5 +35,6 @@ def test_suite_doc_with_urls(mock_client_init):
     assert len(item_start_calls) == len(item_finish_calls) == 3
 
     test_suite = item_start_calls[0]
-    assert test_suite[1]['description'] == ('This is a test suite with URLs: [Google](https://www.google.com ) and '
-                                            '<https://www.google.com>')
+    assert test_suite[1]["description"] == (
+        "This is a test suite with URLs: [Google](https://www.google.com ) and " "<https://www.google.com>"
+    )

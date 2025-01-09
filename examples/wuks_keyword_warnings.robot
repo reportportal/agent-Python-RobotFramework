@@ -13,5 +13,6 @@ Fail on first try
     ${counter}                      Evaluate            ${countval} + 1
     Set Suite Variable              ${countval}         ${counter}
     IF                              ${countval} < 3
+                                    Log                 To less executions warning  WARN
                                     Fail                To less executions
     END
