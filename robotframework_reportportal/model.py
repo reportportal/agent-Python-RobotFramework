@@ -363,7 +363,8 @@ class KeywordNameMatch(KeywordEqual):
 
     def __init__(self, pattern: Optional[str]) -> None:
         """Initialize the matcher with the pattern."""
-        super().__init__(lambda kw: match_pattern(pattern, kw.name))
+        re_pattern = translate_glob_to_regex(pattern)
+        super().__init__(lambda kw: match_pattern(re_pattern, kw.name))
 
 
 class KeywordTypeEqual(KeywordEqual):
