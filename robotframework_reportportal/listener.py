@@ -18,15 +18,20 @@ import logging
 import os
 import re
 import uuid
-from abc import ABC, abstractmethod
 from functools import wraps
 from mimetypes import guess_type
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 from warnings import warn
 
 from reportportal_client.helpers import LifoQueue, guess_content_type_from_bytes, is_binary
 
-from robotframework_reportportal.helpers import _unescape, match_pattern, translate_glob_to_regex
+from robotframework_reportportal.helpers import (
+    KeywordMatch,
+    KeywordNameMatch,
+    KeywordTagMatch,
+    KeywordTypeEqual,
+    _unescape,
+)
 from robotframework_reportportal.model import Entity, Keyword, Launch, LogMessage, Suite, Test
 from robotframework_reportportal.service import RobotService
 from robotframework_reportportal.static import MAIN_SUITE_ID, PABOT_WITHOUT_LAUNCH_ID_MSG
@@ -49,6 +54,10 @@ RKIE_KEYWORD_NAME = "BuiltIn.Run Keyword And Ignore Error"
 FOR_KEYWORD_TYPE = "FOR"
 WHILE_KEYWORD_TYPE = "WHILE"
 
+WUKS_KEYWORD_MATCH = KeywordNameMatch(WUKS_KEYWORD_NAME)
+FOR_KEYWORD_MATCH = KeywordTypeEqual(FOR_KEYWORD_TYPE)
+WHILE_KEYWORD_NAME = KeywordTypeEqual(WHILE_KEYWORD_TYPE)
+
 
 def check_rp_enabled(func):
     """Verify is RP is enabled in config."""
@@ -63,65 +72,6 @@ def check_rp_enabled(func):
     return wrap
 
 
-class _KeywordMatch(ABC):
-    @abstractmethod
-    def match(self, kw: Keyword) -> bool: ...
-
-
-class _KeywordFieldEqual(_KeywordMatch):
-    expected_value: Optional[str]
-    extract_func: Callable[[Keyword], str]
-
-    def __init__(self, expected_value: Optional[str], extract_func: Callable[[Keyword], str] = None) -> None:
-        self.expected_value = expected_value
-        self.extract_func = extract_func
-
-    def match(self, kw: Keyword) -> bool:
-        return self.extract_func(kw) == self.expected_value
-
-
-class _KeywordPatternMatch(_KeywordMatch):
-    pattern: Optional[re.Pattern]
-    extract_func: Optional[Callable[[Keyword], str]]
-
-    def __init__(self, pattern: Optional[str], extract_func: Callable[[Keyword], str] = None):
-        self.pattern = translate_glob_to_regex(pattern)
-        self.extract_func = extract_func
-
-    def match(self, kw: Keyword) -> bool:
-        return match_pattern(self.pattern, self.extract_func(kw))
-
-
-class _KeywordNameMatch(_KeywordPatternMatch):
-    def __init__(self, pattern: Optional[str]) -> None:
-        super().__init__(pattern, lambda kw: kw.name)
-
-
-class _KeywordTypeEqual(_KeywordFieldEqual):
-    def __init__(self, expected_value: Optional[str]) -> None:
-        super().__init__(expected_value, lambda kw: kw.keyword_type)
-
-
-class _KeywordTagMatch(_KeywordMatch):
-    pattern: Optional[re.Pattern]
-
-    def __init__(self, pattern: Optional[str]) -> None:
-        self.pattern = translate_glob_to_regex(pattern)
-
-    def match(self, kw: Keyword) -> bool:
-        return next((True for t in kw.tags if match_pattern(self.pattern, t)), False)
-
-
-class _KeywordStatusEqual(_KeywordFieldEqual):
-    def __init__(self, status: str) -> None:
-        super().__init__(status, lambda kw: kw.status)
-
-
-WUKS_KEYWORD_MATCH = _KeywordNameMatch(WUKS_KEYWORD_NAME)
-FOR_KEYWORD_MATCH = _KeywordTypeEqual(FOR_KEYWORD_TYPE)
-WHILE_KEYWORD_NAME = _KeywordTypeEqual(WHILE_KEYWORD_TYPE)
-
-
 # noinspection PyPep8Naming
 class listener:
     """Robot Framework listener interface for reporting to ReportPortal."""
@@ -129,7 +79,7 @@ class listener:
     _items: LifoQueue[Union[Keyword, Launch, Suite, Test]]
     _service: Optional[RobotService]
     _variables: Optional[Variables]
-    _remove_keyword_filters: List[_KeywordMatch] = []
+    _remove_keyword_filters: List[KeywordMatch] = []
     _remove_all_keyword_content: bool = False
     _remove_data_passed_tests: bool = False
     ROBOT_LISTENER_API_VERSION = 2
@@ -360,9 +310,9 @@ class listener:
                         pattern_type, pattern = pattern_str.split(":", 1)
                         pattern_type = pattern_type.strip().upper()
                         if "NAME" == pattern_type.upper():
-                            self._remove_keyword_filters.append(_KeywordNameMatch(pattern.strip()))
+                            self._remove_keyword_filters.append(KeywordNameMatch(pattern.strip()))
                         elif "TAG" == pattern_type.upper():
-                            self._remove_keyword_filters.append(_KeywordTagMatch(pattern.strip()))
+                            self._remove_keyword_filters.append(KeywordTagMatch(pattern.strip()))
         except ImportError:
             warn('Unable to locate Robot Framework context. "--remove-keywords" feature will not work.', stacklevel=2)
 

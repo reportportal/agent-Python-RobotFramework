@@ -17,31 +17,10 @@
 import binascii
 import fnmatch
 import re
-from typing import Iterable, Optional, Tuple
+from abc import ABC, abstractmethod
+from typing import Callable, Iterable, Optional, Tuple
 
-
-def replace_patterns(text: str, patterns: Iterable[Tuple[re.Pattern, str]]) -> str:
-    """Replace given patterns in the text."""
-    result = text
-    for p, repl in patterns:
-        result = p.sub(repl, result)
-    return result
-
-
-BARE_LINK_PATTERN = re.compile(r"\[\s*([^]|]+)]")
-NAMED_LINK_PATTERN = re.compile(r"\[\s*([^]|]+)\|\s*([^]]+)]")
-
-ROBOT_MARKUP_REPLACEMENT_PATTERS = [
-    (BARE_LINK_PATTERN, r"<\1>"),
-    (NAMED_LINK_PATTERN, r"[\2](\1)"),
-]
-
-PATTERN_MATCHES_EMPTY_STRING: re.Pattern = re.compile("^$")
-
-
-def robot_markup_to_markdown(text: str) -> str:
-    """Convert Robot Framework's text markup to Markdown format."""
-    return replace_patterns(text, ROBOT_MARKUP_REPLACEMENT_PATTERS)
+from robotframework_reportportal.model import Keyword
 
 
 def translate_glob_to_regex(pattern: Optional[str]) -> Optional[re.Pattern]:
@@ -70,6 +49,90 @@ def match_pattern(pattern: Optional[re.Pattern], line: Optional[str]) -> bool:
         return False
 
     return pattern.fullmatch(line) is not None
+
+
+class KeywordMatch(ABC):
+    """Base class for keyword matchers."""
+
+    @abstractmethod
+    def match(self, kw: Keyword) -> bool:
+        """Check if the keyword matches the criteria."""
+
+
+class KeywordEqual(KeywordMatch):
+    """Match keyword based on a predicate."""
+
+    predicate: Callable[[Keyword], bool]
+
+    def __init__(self, predicate: Callable[[Keyword], bool] = None) -> None:
+        """Initialize the matcher with the predicate."""
+        self.predicate = predicate
+
+    def match(self, kw: Keyword) -> bool:
+        """Check if the keyword matches the criteria."""
+        return self.predicate(kw)
+
+
+class KeywordNameMatch(KeywordEqual):
+    """Match keyword based on the name pattern."""
+
+    def __init__(self, pattern: Optional[str]) -> None:
+        """Initialize the matcher with the pattern."""
+        super().__init__(lambda kw: match_pattern(pattern, kw.name))
+
+
+class KeywordTypeEqual(KeywordEqual):
+    """Match keyword based on the type."""
+
+    def __init__(self, expected_value: Optional[str]) -> None:
+        """Initialize the matcher with the expected value."""
+        super().__init__(lambda kw: kw.keyword_type == expected_value)
+
+
+class KeywordTagMatch(KeywordMatch):
+    """Match keyword based on the tag pattern."""
+
+    pattern: Optional[re.Pattern]
+
+    def __init__(self, pattern: Optional[str]) -> None:
+        """Initialize the matcher with the pattern."""
+        self.pattern = translate_glob_to_regex(pattern)
+
+    def match(self, kw: Keyword) -> bool:
+        """Check if the keyword matches the criteria."""
+        return next((True for t in kw.tags if match_pattern(self.pattern, t)), False)
+
+
+class KeywordStatusEqual(KeywordEqual):
+    """Match keyword based on the status."""
+
+    def __init__(self, status: str) -> None:
+        """Initialize the matcher with the status."""
+        super().__init__(lambda kw: kw.status == status)
+
+
+def replace_patterns(text: str, patterns: Iterable[Tuple[re.Pattern, str]]) -> str:
+    """Replace given patterns in the text."""
+    result = text
+    for p, repl in patterns:
+        result = p.sub(repl, result)
+    return result
+
+
+BARE_LINK_PATTERN = re.compile(r"\[\s*([^]|]+)]")
+NAMED_LINK_PATTERN = re.compile(r"\[\s*([^]|]+)\|\s*([^]]+)]")
+
+ROBOT_MARKUP_REPLACEMENT_PATTERS = [
+    (BARE_LINK_PATTERN, r"<\1>"),
+    (NAMED_LINK_PATTERN, r"[\2](\1)"),
+]
+
+PATTERN_MATCHES_EMPTY_STRING: re.Pattern = re.compile("^$")
+
+
+def robot_markup_to_markdown(text: str) -> str:
+    """Convert Robot Framework's text markup to Markdown format."""
+    return replace_patterns(text, ROBOT_MARKUP_REPLACEMENT_PATTERS)
 
 
 def _unescape(binary_string: str, stop_at: int = -1):
