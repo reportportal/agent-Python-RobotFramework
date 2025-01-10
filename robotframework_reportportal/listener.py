@@ -282,7 +282,7 @@ class listener:
             self._variables = Variables()
         return self._variables
 
-    def _process_keyword_skip(self):
+    def _process_keyword_remove(self):
         if not self.variables.remove_keywords:
             return
 
@@ -327,7 +327,7 @@ class listener:
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
-        self._process_keyword_skip()
+        self._process_keyword_remove()
 
         launch = Launch(self.variables.launch_name, attributes, self.variables.launch_attributes)
         launch.doc = self.variables.launch_doc or launch.doc
