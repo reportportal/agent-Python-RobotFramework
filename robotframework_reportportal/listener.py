@@ -129,7 +129,7 @@ class listener:
     _items: LifoQueue[Union[Keyword, Launch, Suite, Test]]
     _service: Optional[RobotService]
     _variables: Optional[Variables]
-    _keyword_filters: List[_KeywordMatch] = []
+    _remove_keyword_filters: List[_KeywordMatch] = []
     _remove_all_keyword_content: bool = False
     _remove_data_passed_tests: bool = False
     ROBOT_LISTENER_API_VERSION = 2
@@ -332,7 +332,7 @@ class listener:
             return
 
         try:
-            self._keyword_filters = []
+            self._remove_keyword_filters = []
 
             # noinspection PyUnresolvedReferences
             from robot.running.context import EXECUTION_CONTEXTS
@@ -350,19 +350,19 @@ class listener:
                         break
                     if pattern_str_upper in {"FOR", "WHILE", "WUKS"}:
                         if pattern_str_upper == "WUKS":
-                            self._keyword_filters.append(WUKS_KEYWORD_MATCH)
+                            self._remove_keyword_filters.append(WUKS_KEYWORD_MATCH)
                         elif pattern_str_upper == "FOR":
-                            self._keyword_filters.append(FOR_KEYWORD_MATCH)
+                            self._remove_keyword_filters.append(FOR_KEYWORD_MATCH)
                         else:
-                            self._keyword_filters.append(WHILE_KEYWORD_NAME)
+                            self._remove_keyword_filters.append(WHILE_KEYWORD_NAME)
                         continue
                     if ":" in pattern_str:
                         pattern_type, pattern = pattern_str.split(":", 1)
                         pattern_type = pattern_type.strip().upper()
                         if "NAME" == pattern_type.upper():
-                            self._keyword_filters.append(_KeywordNameMatch(pattern.strip()))
+                            self._remove_keyword_filters.append(_KeywordNameMatch(pattern.strip()))
                         elif "TAG" == pattern_type.upper():
-                            self._keyword_filters.append(_KeywordTagMatch(pattern.strip()))
+                            self._remove_keyword_filters.append(_KeywordTagMatch(pattern.strip()))
         except ImportError:
             warn('Unable to locate Robot Framework context. "--remove-keywords" feature will not work.', stacklevel=2)
 
@@ -492,22 +492,22 @@ class listener:
         """
         kwd = Keyword(name, attributes, self.current_item)
         parent = self.current_item
-        skip_kwd = parent.remove_data
+        remove_kwd = parent.remove_data
         skip_data = self._remove_all_keyword_content or self._remove_data_passed_tests
-        kwd.remove_data = skip_kwd or skip_data
+        kwd.remove_data = remove_kwd or skip_data
 
         if kwd.remove_data:
             kwd.matched_filter = getattr(parent, "matched_filter", None)
             kwd.skip_origin = getattr(parent, "skip_origin", None)
         else:
-            for m in self._keyword_filters:
+            for m in self._remove_keyword_filters:
                 if m.match(kwd):
                     kwd.remove_data = True
                     kwd.matched_filter = m
                     kwd.skip_origin = kwd
                     break
 
-        if skip_kwd:
+        if remove_kwd:
             kwd.rp_item_id = str(uuid.uuid4())
             parent.skipped_keywords.append(kwd)
             kwd.posted = False
