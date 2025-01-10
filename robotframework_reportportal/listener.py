@@ -25,14 +25,19 @@ from warnings import warn
 
 from reportportal_client.helpers import LifoQueue, guess_content_type_from_bytes, is_binary
 
-from robotframework_reportportal.helpers import (
+from robotframework_reportportal.helpers import _unescape
+from robotframework_reportportal.model import (
+    Entity,
+    Keyword,
     KeywordMatch,
     KeywordNameMatch,
     KeywordTagMatch,
     KeywordTypeEqual,
-    _unescape,
+    Launch,
+    LogMessage,
+    Suite,
+    Test,
 )
-from robotframework_reportportal.model import Entity, Keyword, Launch, LogMessage, Suite, Test
 from robotframework_reportportal.service import RobotService
 from robotframework_reportportal.static import MAIN_SUITE_ID, PABOT_WITHOUT_LAUNCH_ID_MSG
 from robotframework_reportportal.variables import Variables

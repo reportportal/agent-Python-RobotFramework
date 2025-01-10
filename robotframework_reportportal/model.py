@@ -15,11 +15,13 @@
 """This module contains models representing Robot Framework test items."""
 
 import os
-from typing import Any, Dict, List, Optional, Union
+import re
+from abc import ABC, abstractmethod
+from typing import Any, Callable, Dict, List, Optional, Union
 
 from reportportal_client.helpers import gen_attributes
 
-from robotframework_reportportal.helpers import robot_markup_to_markdown
+from robotframework_reportportal.helpers import match_pattern, robot_markup_to_markdown, translate_glob_to_regex
 
 TEST_CASE_ID_SIGN = "test_case_id:"
 
@@ -332,3 +334,63 @@ class Test(Entity):
         self.message = attributes.get("message")
         self.status = attributes.get("status")
         return self
+
+
+class KeywordMatch(ABC):
+    """Base class for keyword matchers."""
+
+    @abstractmethod
+    def match(self, kw: Keyword) -> bool:
+        """Check if the keyword matches the criteria."""
+
+
+class KeywordEqual(KeywordMatch):
+    """Match keyword based on a predicate."""
+
+    predicate: Callable[[Keyword], bool]
+
+    def __init__(self, predicate: Callable[[Keyword], bool] = None) -> None:
+        """Initialize the matcher with the predicate."""
+        self.predicate = predicate
+
+    def match(self, kw: Keyword) -> bool:
+        """Check if the keyword matches the criteria."""
+        return self.predicate(kw)
+
+
+class KeywordNameMatch(KeywordEqual):
+    """Match keyword based on the name pattern."""
+
+    def __init__(self, pattern: Optional[str]) -> None:
+        """Initialize the matcher with the pattern."""
+        super().__init__(lambda kw: match_pattern(pattern, kw.name))
+
+
+class KeywordTypeEqual(KeywordEqual):
+    """Match keyword based on the type."""
+
+    def __init__(self, expected_value: Optional[str]) -> None:
+        """Initialize the matcher with the expected value."""
+        super().__init__(lambda kw: kw.keyword_type == expected_value)
+
+
+class KeywordTagMatch(KeywordMatch):
+    """Match keyword based on the tag pattern."""
+
+    pattern: Optional[re.Pattern]
+
+    def __init__(self, pattern: Optional[str]) -> None:
+        """Initialize the matcher with the pattern."""
+        self.pattern = translate_glob_to_regex(pattern)
+
+    def match(self, kw: Keyword) -> bool:
+        """Check if the keyword matches the criteria."""
+        return next((True for t in kw.tags if match_pattern(self.pattern, t)), False)
+
+
+class KeywordStatusEqual(KeywordEqual):
+    """Match keyword based on the status."""
+
+    def __init__(self, status: str) -> None:
+        """Initialize the matcher with the status."""
+        super().__init__(lambda kw: kw.status == status)
