@@ -42,6 +42,21 @@ from robotframework_reportportal.service import RobotService
 from robotframework_reportportal.static import MAIN_SUITE_ID, PABOT_WITHOUT_LAUNCH_ID_MSG
 from robotframework_reportportal.variables import Variables
 
+
+class __DummyContext:
+    current = None
+
+
+try:
+    from robot.running.context import EXECUTION_CONTEXTS
+except ImportError:
+    warn(
+        'Unable to locate Robot Framework context. "--remove-keywords" and "--flatten-keywords" feature'
+        " will not work.",
+        stacklevel=2,
+    )
+    EXECUTION_CONTEXTS = __DummyContext()
+
 logger = logging.getLogger(__name__)
 VARIABLE_PATTERN = re.compile(r"^\s*\${[^}]*}\s*=\s*")
 IMAGE_PATTERN = re.compile(
@@ -61,7 +76,7 @@ WHILE_KEYWORD_TYPE = "WHILE"
 
 WUKS_KEYWORD_MATCH = KeywordNameMatch(WUKS_KEYWORD_NAME)
 FOR_KEYWORD_MATCH = KeywordTypeEqual(FOR_KEYWORD_TYPE)
-WHILE_KEYWORD_NAME = KeywordTypeEqual(WHILE_KEYWORD_TYPE)
+WHILE_KEYWORD_MATCH = KeywordTypeEqual(WHILE_KEYWORD_TYPE)
 
 
 def check_rp_enabled(func):
@@ -286,40 +301,33 @@ class listener:
         if not self.variables.remove_keywords:
             return
 
-        try:
-            self._remove_keyword_filters = []
-
-            # noinspection PyUnresolvedReferences
-            from robot.running.context import EXECUTION_CONTEXTS
-
-            current_context = EXECUTION_CONTEXTS.current
-            if current_context:
-                # noinspection PyProtectedMember
-                for pattern_str in set(current_context.output._settings.remove_keywords):
-                    pattern_str_upper = pattern_str.upper()
-                    if "ALL" == pattern_str_upper:
-                        self._remove_all_keyword_content = True
-                        break
-                    if "PASSED" == pattern_str_upper:
-                        self._remove_data_passed_tests = True
-                        break
-                    if pattern_str_upper in {"FOR", "WHILE", "WUKS"}:
-                        if pattern_str_upper == "WUKS":
-                            self._remove_keyword_filters.append(WUKS_KEYWORD_MATCH)
-                        elif pattern_str_upper == "FOR":
-                            self._remove_keyword_filters.append(FOR_KEYWORD_MATCH)
-                        else:
-                            self._remove_keyword_filters.append(WHILE_KEYWORD_NAME)
-                        continue
-                    if ":" in pattern_str:
-                        pattern_type, pattern = pattern_str.split(":", 1)
-                        pattern_type = pattern_type.strip().upper()
-                        if "NAME" == pattern_type.upper():
-                            self._remove_keyword_filters.append(KeywordNameMatch(pattern.strip()))
-                        elif "TAG" == pattern_type.upper():
-                            self._remove_keyword_filters.append(KeywordTagMatch(pattern.strip()))
-        except ImportError:
-            warn('Unable to locate Robot Framework context. "--remove-keywords" feature will not work.', stacklevel=2)
+        self._remove_keyword_filters = []
+        current_context = EXECUTION_CONTEXTS.current
+        if current_context:
+            # noinspection PyProtectedMember
+            for pattern_str in set(current_context.output._settings.remove_keywords):
+                pattern_str_upper = pattern_str.upper()
+                if "ALL" == pattern_str_upper:
+                    self._remove_all_keyword_content = True
+                    break
+                if "PASSED" == pattern_str_upper:
+                    self._remove_data_passed_tests = True
+                    break
+                if pattern_str_upper in {"FOR", "WHILE", "WUKS"}:
+                    if pattern_str_upper == "WUKS":
+                        self._remove_keyword_filters.append(WUKS_KEYWORD_MATCH)
+                    elif pattern_str_upper == "FOR":
+                        self._remove_keyword_filters.append(FOR_KEYWORD_MATCH)
+                    else:
+                        self._remove_keyword_filters.append(WHILE_KEYWORD_MATCH)
+                    continue
+                if ":" in pattern_str:
+                    pattern_type, pattern = pattern_str.split(":", 1)
+                    pattern_type = pattern_type.strip().upper()
+                    if "NAME" == pattern_type.upper():
+                        self._remove_keyword_filters.append(KeywordNameMatch(pattern.strip()))
+                    elif "TAG" == pattern_type.upper():
+                        self._remove_keyword_filters.append(KeywordTagMatch(pattern.strip()))
 
     def start_launch(self, attributes: Dict[str, Any], ts: Optional[Any] = None) -> None:
         """Start a new launch at the ReportPortal.
@@ -508,7 +516,7 @@ class listener:
                 self._do_end_keyword(last_iteration, ts)
 
         elif (
-            (kwd.matched_filter is FOR_KEYWORD_MATCH) or (kwd.matched_filter is WHILE_KEYWORD_NAME)
+            (kwd.matched_filter is FOR_KEYWORD_MATCH) or (kwd.matched_filter is WHILE_KEYWORD_MATCH)
         ) and kwd.skip_origin is kwd:
             skipped_keywords = kwd.skipped_keywords
             skipped_keywords_num = len(skipped_keywords)
