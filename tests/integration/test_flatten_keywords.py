@@ -12,8 +12,10 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-import pytest
 from unittest import mock
+
+import pytest
+
 from tests import REPORT_PORTAL_SERVICE
 from tests.helpers import utils
 from tests.helpers.utils import DEFAULT_VARIABLES
