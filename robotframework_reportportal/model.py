@@ -31,6 +31,9 @@ class Entity:
 
     type: str
     remove_data: bool
+    flattened: bool
+    remove_filter: Optional[Any]
+    remove_origin: Optional[Any]
     rp_item_id: Optional[str]
     parent: Optional["Entity"]
 
@@ -44,6 +47,9 @@ class Entity:
         self.parent = parent
         self.rp_item_id = None
         self.remove_data = False
+        self.flattened = False
+        self.remove_filter = None
+        self.remove_origin = None
 
     @property
     def rp_parent_item_id(self):
@@ -90,9 +96,6 @@ class Keyword(Entity):
     skipped_logs: List[LogMessage]
     skipped_keywords: List["Keyword"]
     posted: bool
-    remove_data: bool
-    matched_filter: Optional[Any]
-    skip_origin: Optional[Any]
 
     def __init__(self, name: str, robot_attributes: Dict[str, Any], parent: Entity):
         """Initialize required attributes.
@@ -118,8 +121,6 @@ class Keyword(Entity):
         self.skipped_keywords = []
         self.skipped_logs = []
         self.posted = True
-        self.matched_filter = None
-        self.skip_origin = None
 
     def get_name(self) -> str:
         """Get name of the keyword suitable for ReportPortal."""

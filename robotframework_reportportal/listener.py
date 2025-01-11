@@ -92,7 +92,21 @@ def check_rp_enabled(func):
     return wrap
 
 
-# noinspection PyPep8Naming
+def process_keyword_names_and_tags(matcher_list: List[KeywordMatch], pattern_str: str) -> None:
+    """Pick name or pattern string, parse it and add to the matcher list.
+
+    :param matcher_list: List of keyword matchers to add to
+    :param pattern_str:  Pattern string passed to `--remove-keywords` or `--flatten-keywords` argument
+    """
+    if ":" in pattern_str:
+        pattern_type, pattern = pattern_str.split(":", 1)
+        pattern_type = pattern_type.strip().upper()
+        if "NAME" == pattern_type.upper():
+            matcher_list.append(KeywordNameMatch(pattern.strip()))
+        elif "TAG" == pattern_type.upper():
+            matcher_list.append(KeywordTagMatch(pattern.strip()))
+
+
 class listener:
     """Robot Framework listener interface for reporting to ReportPortal."""
 
@@ -100,6 +114,7 @@ class listener:
     _service: Optional[RobotService]
     _variables: Optional[Variables]
     _remove_keyword_filters: List[KeywordMatch] = []
+    _flatten_keyword_filters: List[KeywordMatch] = []
     _remove_all_keyword_content: bool = False
     _remove_data_passed_tests: bool = False
     ROBOT_LISTENER_API_VERSION = 2
@@ -321,13 +336,28 @@ class listener:
                     else:
                         self._remove_keyword_filters.append(WHILE_KEYWORD_MATCH)
                     continue
-                if ":" in pattern_str:
-                    pattern_type, pattern = pattern_str.split(":", 1)
-                    pattern_type = pattern_type.strip().upper()
-                    if "NAME" == pattern_type.upper():
-                        self._remove_keyword_filters.append(KeywordNameMatch(pattern.strip()))
-                    elif "TAG" == pattern_type.upper():
-                        self._remove_keyword_filters.append(KeywordTagMatch(pattern.strip()))
+                process_keyword_names_and_tags(self._remove_keyword_filters, pattern_str)
+
+    def _process_keyword_flatten(self):
+        if not self.variables.flatten_keywords:
+            return
+
+        self._flatten_keyword_filters = []
+        current_context = EXECUTION_CONTEXTS.current
+        if current_context:
+            # noinspection PyProtectedMember
+            for pattern_str in set(current_context.output._settings.flatten_keywords):
+                pattern_str_upper = pattern_str.upper()
+                if pattern_str_upper in {"FOR", "WHILE", "ITERATION", "FORITEM"}:
+                    if pattern_str_upper == "FOR":
+                        self._flatten_keyword_filters.append(FOR_KEYWORD_MATCH)
+                    elif pattern_str_upper == "WHILE":
+                        self._flatten_keyword_filters.append(WHILE_KEYWORD_MATCH)
+                    else:
+                        self._flatten_keyword_filters.append(FOR_KEYWORD_MATCH)
+                        self._flatten_keyword_filters.append(WHILE_KEYWORD_MATCH)
+                    continue
+                process_keyword_names_and_tags(self._flatten_keyword_filters, pattern_str)
 
     def start_launch(self, attributes: Dict[str, Any], ts: Optional[Any] = None) -> None:
         """Start a new launch at the ReportPortal.
@@ -336,6 +366,7 @@ class listener:
         :param ts:         Timestamp(used by the ResultVisitor)
         """
         self._process_keyword_remove()
+        self._process_keyword_flatten()
 
         launch = Launch(self.variables.launch_name, attributes, self.variables.launch_attributes)
         launch.doc = self.variables.launch_doc or launch.doc
@@ -410,6 +441,9 @@ class listener:
         test.rp_item_id = self.service.start_test(test=test, ts=ts)
         self._add_current_item(test)
 
+    def _log_keyword_content_removed(self, item_id: str, timestamp: str) -> None:
+        self._log_data_removed(item_id, timestamp, REMOVED_KEYWORD_CONTENT_LOG)
+
     @check_rp_enabled
     def end_test(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
         """Finish started test case at the ReportPortal.
@@ -437,13 +471,19 @@ class listener:
         msg.timestamp = timestamp
         self.__post_log_message(msg)
 
-    def _log_keyword_content_removed(self, item_id: str, timestamp: str) -> None:
-        self._log_data_removed(item_id, timestamp, REMOVED_KEYWORD_CONTENT_LOG)
-
     def _do_start_keyword(self, keyword: Keyword, ts: Optional[str] = None) -> None:
         logger.debug(f"ReportPortal - Start Keyword: {keyword.robot_attributes}")
         keyword.rp_item_id = self.service.start_keyword(keyword=keyword, ts=ts)
         keyword.posted = True
+
+    def _should_remove(self, keyword: Keyword) -> Optional[KeywordMatch]:
+        for matcher in self._remove_keyword_filters:
+            if matcher.match(keyword):
+                return matcher
+        return None
+
+    def _should_flatten(self, keyword: Keyword) -> bool:
+        return any(matcher.match(keyword) for matcher in self._flatten_keyword_filters)
 
     @check_rp_enabled
     def start_keyword(self, name: str, attributes: Dict, ts: Optional[Any] = None) -> None:
@@ -453,22 +493,21 @@ class listener:
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
-        kwd = Keyword(name, attributes, self.current_item)
         parent = self.current_item
+        kwd = Keyword(name, attributes, parent)
         remove_kwd = parent.remove_data
         skip_data = self._remove_all_keyword_content or self._remove_data_passed_tests
         kwd.remove_data = remove_kwd or skip_data
 
         if kwd.remove_data:
-            kwd.matched_filter = getattr(parent, "matched_filter", None)
-            kwd.skip_origin = getattr(parent, "skip_origin", None)
+            kwd.remove_filter = parent.remove_filter
+            kwd.remove_origin = parent.remove_origin
         else:
-            for m in self._remove_keyword_filters:
-                if m.match(kwd):
-                    kwd.remove_data = True
-                    kwd.matched_filter = m
-                    kwd.skip_origin = kwd
-                    break
+            m = self._should_remove(kwd)
+            if m:
+                kwd.remove_data = True
+                kwd.remove_filter = m
+                kwd.remove_origin = kwd
 
         if remove_kwd:
             kwd.rp_item_id = str(uuid.uuid4())
@@ -477,7 +516,7 @@ class listener:
         else:
             self._do_start_keyword(kwd, ts)
             if skip_data:
-                kwd.skip_origin = kwd
+                kwd.remove_origin = kwd
             if self._remove_data_passed_tests:
                 parent.skipped_keywords.append(kwd)
 
@@ -497,7 +536,7 @@ class listener:
         """
         kwd = self.current_item.update(attributes)
 
-        if kwd.matched_filter is WUKS_KEYWORD_MATCH and kwd.skip_origin is kwd:
+        if kwd.remove_filter is WUKS_KEYWORD_MATCH and kwd.remove_origin is kwd:
             skipped_keywords = kwd.skipped_keywords
             skipped_keywords_num = len(skipped_keywords)
             if skipped_keywords_num > 2:
@@ -516,8 +555,8 @@ class listener:
                 self._do_end_keyword(last_iteration, ts)
 
         elif (
-            (kwd.matched_filter is FOR_KEYWORD_MATCH) or (kwd.matched_filter is WHILE_KEYWORD_MATCH)
-        ) and kwd.skip_origin is kwd:
+            (kwd.remove_filter is FOR_KEYWORD_MATCH) or (kwd.remove_filter is WHILE_KEYWORD_MATCH)
+        ) and kwd.remove_origin is kwd:
             skipped_keywords = kwd.skipped_keywords
             skipped_keywords_num = len(skipped_keywords)
             if skipped_keywords_num > 1:
@@ -529,7 +568,7 @@ class listener:
             last_iteration = kwd.skipped_keywords[-1]
             self._post_skipped_keywords(last_iteration)
             self._do_end_keyword(last_iteration, ts)
-        elif kwd.posted and kwd.remove_data and kwd.skip_origin is kwd:
+        elif kwd.posted and kwd.remove_data and kwd.remove_origin is kwd:
             if (self._remove_all_keyword_content or not self._remove_data_passed_tests) and (
                 kwd.skipped_keywords or kwd.skipped_logs
             ):
