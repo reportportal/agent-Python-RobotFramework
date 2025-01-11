@@ -67,6 +67,7 @@ IMAGE_PATTERN = re.compile(
 DEFAULT_BINARY_FILE_TYPE = "application/octet-stream"
 TRUNCATION_SIGN = "...'"
 REMOVED_KEYWORD_CONTENT_LOG = "Content removed using the --remove-keywords option."
+FLATTENED_KEYWORD_CONTENT_LOG = "Content flattened."
 REMOVED_WUKS_KEYWORD_LOG = "{number} failing items removed using the --remove-keywords option."
 REMOVED_FOR_WHILE_KEYWORD_LOG = "{number} passing items removed using the --remove-keywords option."
 WUKS_KEYWORD_NAME = "BuiltIn.Wait Until Keyword Succeeds"
@@ -441,6 +442,13 @@ class listener:
         test.rp_item_id = self.service.start_test(test=test, ts=ts)
         self._add_current_item(test)
 
+    def _log_data_removed(self, item_id: str, timestamp: str, message: str) -> None:
+        msg = LogMessage(message)
+        msg.level = "DEBUG"
+        msg.item_id = item_id
+        msg.timestamp = timestamp
+        self.__post_log_message(msg)
+
     def _log_keyword_content_removed(self, item_id: str, timestamp: str) -> None:
         self._log_data_removed(item_id, timestamp, REMOVED_KEYWORD_CONTENT_LOG)
 
@@ -464,13 +472,6 @@ class listener:
         self._remove_current_item()
         self.service.finish_test(test=test, ts=ts)
 
-    def _log_data_removed(self, item_id: str, timestamp: str, message: str) -> None:
-        msg = LogMessage(message)
-        msg.level = "DEBUG"
-        msg.item_id = item_id
-        msg.timestamp = timestamp
-        self.__post_log_message(msg)
-
     def _do_start_keyword(self, keyword: Keyword, ts: Optional[str] = None) -> None:
         logger.debug(f"ReportPortal - Start Keyword: {keyword.robot_attributes}")
         keyword.rp_item_id = self.service.start_keyword(keyword=keyword, ts=ts)
@@ -483,7 +484,12 @@ class listener:
         return None
 
     def _should_flatten(self, keyword: Keyword) -> bool:
+        if not isinstance(keyword, Keyword):
+            return False
         return any(matcher.match(keyword) for matcher in self._flatten_keyword_filters)
+
+    def _log_keyword_content_flattened(self, item_id: str, timestamp: str) -> None:
+        self._log_data_removed(item_id, timestamp, FLATTENED_KEYWORD_CONTENT_LOG)
 
     @check_rp_enabled
     def start_keyword(self, name: str, attributes: Dict, ts: Optional[Any] = None) -> None:
@@ -514,7 +520,13 @@ class listener:
             parent.skipped_keywords.append(kwd)
             kwd.posted = False
         else:
-            self._do_start_keyword(kwd, ts)
+            if parent.flattened or self._should_flatten(parent):
+                kwd.rp_item_id = parent.rp_item_id
+                kwd.flattened = True
+            else:
+                self._do_start_keyword(kwd, ts)
+                if not kwd.flattened and self._should_flatten(kwd):
+                    self._log_keyword_content_flattened(kwd.rp_item_id, kwd.start_time)
             if skip_data:
                 kwd.remove_origin = kwd
             if self._remove_data_passed_tests:
@@ -575,7 +587,7 @@ class listener:
                 self._log_keyword_content_removed(kwd.rp_item_id, kwd.start_time)
 
         self._remove_current_item()
-        if not kwd.posted:
+        if not kwd.posted or kwd.flattened:
             return
         self._do_end_keyword(kwd, ts)
 
