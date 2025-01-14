@@ -95,6 +95,8 @@ NOT REQUIRED:
       Also, you can specify a full path to your certificate as the value.
 --variable RP_REMOVE_KEYWORDS:"True"
     - Default value is "False", remove  keywords from reporting, passed with '--remove-keywords' Robot's argument.
+--variable RP_FLATTEN_KEYWORDS:"True"
+    - Default value is "False", flatten keywords on reporting, passed with '--flatten-keywords' Robot's argument.
 ```
 
 ### Logging
