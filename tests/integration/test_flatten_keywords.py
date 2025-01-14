@@ -69,6 +69,24 @@ from tests.helpers.utils import DEFAULT_VARIABLES
             2,
             "Content flattened.",
         ),
+        (
+            "examples/for_keyword.robot",
+            "ITERATION",
+            0,
+            ["PASSED"] * 3,
+            4,
+            0,
+            "Content flattened.",
+        ),
+        (
+            "examples/while_keyword.robot",
+            "ITERATION",
+            0,
+            ["PASSED"] * 4,
+            9,
+            2,
+            "Content flattened.",
+        ),
     ],
 )
 @mock.patch(REPORT_PORTAL_SERVICE)
