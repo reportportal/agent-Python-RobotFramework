@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [5.6.1]
 ### Added
 - `RP_FLATTEN_KEYWORDS` configuration variable, by @HardNorth
 - `--flatten-keywords` argument support, by @HardNorth
