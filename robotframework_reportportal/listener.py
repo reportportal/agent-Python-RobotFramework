@@ -355,8 +355,7 @@ class listener:
                     elif pattern_str_upper == "WHILE":
                         self._flatten_keyword_filters.append(WHILE_KEYWORD_MATCH)
                     else:
-                        self._flatten_keyword_filters.append(FOR_KEYWORD_MATCH)
-                        self._flatten_keyword_filters.append(WHILE_KEYWORD_MATCH)
+                        self._flatten_keyword_filters.extend([FOR_KEYWORD_MATCH, WHILE_KEYWORD_MATCH])
                     continue
                 process_keyword_names_and_tags(self._flatten_keyword_filters, pattern_str)
 
