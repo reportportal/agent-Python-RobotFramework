@@ -68,6 +68,7 @@ class Variables:
     client_type: ClientType
     http_timeout: Optional[Union[Tuple[float, float], float]]
     remove_keywords: bool
+    flatten_keywords: bool
 
     def __init__(self) -> None:
         """Initialize instance attributes."""
@@ -112,6 +113,7 @@ class Variables:
             self.http_timeout = connect_timeout or read_timeout
 
         self.remove_keywords = to_bool(get_variable("RP_REMOVE_KEYWORDS", default="False"))
+        self.flatten_keywords = to_bool(get_variable("RP_FLATTEN_KEYWORDS", default="False"))
 
         self.api_key = get_variable("RP_API_KEY")
         if not self.api_key:

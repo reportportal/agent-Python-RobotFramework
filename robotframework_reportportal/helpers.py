@@ -20,30 +20,6 @@ import re
 from typing import Iterable, Optional, Tuple
 
 
-def replace_patterns(text: str, patterns: Iterable[Tuple[re.Pattern, str]]) -> str:
-    """Replace given patterns in the text."""
-    result = text
-    for p, repl in patterns:
-        result = p.sub(repl, result)
-    return result
-
-
-BARE_LINK_PATTERN = re.compile(r"\[\s*([^]|]+)]")
-NAMED_LINK_PATTERN = re.compile(r"\[\s*([^]|]+)\|\s*([^]]+)]")
-
-ROBOT_MARKUP_REPLACEMENT_PATTERS = [
-    (BARE_LINK_PATTERN, r"<\1>"),
-    (NAMED_LINK_PATTERN, r"[\2](\1)"),
-]
-
-PATTERN_MATCHES_EMPTY_STRING: re.Pattern = re.compile("^$")
-
-
-def robot_markup_to_markdown(text: str) -> str:
-    """Convert Robot Framework's text markup to Markdown format."""
-    return replace_patterns(text, ROBOT_MARKUP_REPLACEMENT_PATTERS)
-
-
 def translate_glob_to_regex(pattern: Optional[str]) -> Optional[re.Pattern]:
     """Translate glob string pattern to regex Pattern.
 
@@ -70,6 +46,30 @@ def match_pattern(pattern: Optional[re.Pattern], line: Optional[str]) -> bool:
         return False
 
     return pattern.fullmatch(line) is not None
+
+
+def replace_patterns(text: str, patterns: Iterable[Tuple[re.Pattern, str]]) -> str:
+    """Replace given patterns in the text."""
+    result = text
+    for p, repl in patterns:
+        result = p.sub(repl, result)
+    return result
+
+
+BARE_LINK_PATTERN = re.compile(r"\[\s*([^]|]+)]")
+NAMED_LINK_PATTERN = re.compile(r"\[\s*([^]|]+)\|\s*([^]]+)]")
+
+ROBOT_MARKUP_REPLACEMENT_PATTERS = [
+    (BARE_LINK_PATTERN, r"<\1>"),
+    (NAMED_LINK_PATTERN, r"[\2](\1)"),
+]
+
+PATTERN_MATCHES_EMPTY_STRING: re.Pattern = re.compile("^$")
+
+
+def robot_markup_to_markdown(text: str) -> str:
+    """Convert Robot Framework's text markup to Markdown format."""
+    return replace_patterns(text, ROBOT_MARKUP_REPLACEMENT_PATTERS)
 
 
 def _unescape(binary_string: str, stop_at: int = -1):

@@ -1,6 +1,11 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- `RP_FLATTEN_KEYWORDS` configuration variable, by @HardNorth
+- `--flatten-keywords` argument support, by @HardNorth
+
+## [5.6.0]
 ### Changed
 - Client version updated on [5.6.0](https://github.com/reportportal/client-Python/releases/tag/5.6.0), by @HardNorth
 - Test end message now posts to the Test description, by @HardNorth

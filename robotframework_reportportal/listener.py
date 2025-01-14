@@ -18,19 +18,44 @@ import logging
 import os
 import re
 import uuid
-from abc import ABC, abstractmethod
 from functools import wraps
 from mimetypes import guess_type
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 from warnings import warn
 
 from reportportal_client.helpers import LifoQueue, guess_content_type_from_bytes, is_binary
 
-from robotframework_reportportal.helpers import _unescape, match_pattern, translate_glob_to_regex
-from robotframework_reportportal.model import Entity, Keyword, Launch, LogMessage, Suite, Test
+from robotframework_reportportal.helpers import _unescape
+from robotframework_reportportal.model import (
+    Entity,
+    Keyword,
+    KeywordMatch,
+    KeywordNameMatch,
+    KeywordTagMatch,
+    KeywordTypeEqual,
+    Launch,
+    LogMessage,
+    Suite,
+    Test,
+)
 from robotframework_reportportal.service import RobotService
 from robotframework_reportportal.static import MAIN_SUITE_ID, PABOT_WITHOUT_LAUNCH_ID_MSG
 from robotframework_reportportal.variables import Variables
+
+
+class __DummyContext:
+    current = None
+
+
+try:
+    from robot.running.context import EXECUTION_CONTEXTS
+except ImportError:
+    warn(
+        'Unable to locate Robot Framework context. "--remove-keywords" and "--flatten-keywords" feature'
+        " will not work.",
+        stacklevel=2,
+    )
+    EXECUTION_CONTEXTS = __DummyContext()
 
 logger = logging.getLogger(__name__)
 VARIABLE_PATTERN = re.compile(r"^\s*\${[^}]*}\s*=\s*")
@@ -42,12 +67,17 @@ IMAGE_PATTERN = re.compile(
 DEFAULT_BINARY_FILE_TYPE = "application/octet-stream"
 TRUNCATION_SIGN = "...'"
 REMOVED_KEYWORD_CONTENT_LOG = "Content removed using the --remove-keywords option."
+FLATTENED_KEYWORD_CONTENT_LOG = "Content flattened."
 REMOVED_WUKS_KEYWORD_LOG = "{number} failing items removed using the --remove-keywords option."
 REMOVED_FOR_WHILE_KEYWORD_LOG = "{number} passing items removed using the --remove-keywords option."
 WUKS_KEYWORD_NAME = "BuiltIn.Wait Until Keyword Succeeds"
 RKIE_KEYWORD_NAME = "BuiltIn.Run Keyword And Ignore Error"
 FOR_KEYWORD_TYPE = "FOR"
 WHILE_KEYWORD_TYPE = "WHILE"
+
+WUKS_KEYWORD_MATCH = KeywordNameMatch(WUKS_KEYWORD_NAME)
+FOR_KEYWORD_MATCH = KeywordTypeEqual(FOR_KEYWORD_TYPE)
+WHILE_KEYWORD_MATCH = KeywordTypeEqual(WHILE_KEYWORD_TYPE)
 
 
 def check_rp_enabled(func):
@@ -63,73 +93,29 @@ def check_rp_enabled(func):
     return wrap
 
 
-class _KeywordMatch(ABC):
-    @abstractmethod
-    def match(self, kw: Keyword) -> bool: ...
+def process_keyword_names_and_tags(matcher_list: List[KeywordMatch], pattern_str: str) -> None:
+    """Pick name or pattern string, parse it and add to the matcher list.
+
+    :param matcher_list: List of keyword matchers to add to
+    :param pattern_str:  Pattern string passed to `--remove-keywords` or `--flatten-keywords` argument
+    """
+    if ":" in pattern_str:
+        pattern_type, pattern = pattern_str.split(":", 1)
+        pattern_type = pattern_type.strip().upper()
+        if "NAME" == pattern_type.upper():
+            matcher_list.append(KeywordNameMatch(pattern.strip()))
+        elif "TAG" == pattern_type.upper():
+            matcher_list.append(KeywordTagMatch(pattern.strip()))
 
 
-class _KeywordFieldEqual(_KeywordMatch):
-    expected_value: Optional[str]
-    extract_func: Callable[[Keyword], str]
-
-    def __init__(self, expected_value: Optional[str], extract_func: Callable[[Keyword], str] = None) -> None:
-        self.expected_value = expected_value
-        self.extract_func = extract_func
-
-    def match(self, kw: Keyword) -> bool:
-        return self.extract_func(kw) == self.expected_value
-
-
-class _KeywordPatternMatch(_KeywordMatch):
-    pattern: Optional[re.Pattern]
-    extract_func: Optional[Callable[[Keyword], str]]
-
-    def __init__(self, pattern: Optional[str], extract_func: Callable[[Keyword], str] = None):
-        self.pattern = translate_glob_to_regex(pattern)
-        self.extract_func = extract_func
-
-    def match(self, kw: Keyword) -> bool:
-        return match_pattern(self.pattern, self.extract_func(kw))
-
-
-class _KeywordNameMatch(_KeywordPatternMatch):
-    def __init__(self, pattern: Optional[str]) -> None:
-        super().__init__(pattern, lambda kw: kw.name)
-
-
-class _KeywordTypeEqual(_KeywordFieldEqual):
-    def __init__(self, expected_value: Optional[str]) -> None:
-        super().__init__(expected_value, lambda kw: kw.keyword_type)
-
-
-class _KeywordTagMatch(_KeywordMatch):
-    pattern: Optional[re.Pattern]
-
-    def __init__(self, pattern: Optional[str]) -> None:
-        self.pattern = translate_glob_to_regex(pattern)
-
-    def match(self, kw: Keyword) -> bool:
-        return next((True for t in kw.tags if match_pattern(self.pattern, t)), False)
-
-
-class _KeywordStatusEqual(_KeywordFieldEqual):
-    def __init__(self, status: str) -> None:
-        super().__init__(status, lambda kw: kw.status)
-
-
-WUKS_KEYWORD_MATCH = _KeywordNameMatch(WUKS_KEYWORD_NAME)
-FOR_KEYWORD_MATCH = _KeywordTypeEqual(FOR_KEYWORD_TYPE)
-WHILE_KEYWORD_NAME = _KeywordTypeEqual(WHILE_KEYWORD_TYPE)
-
-
-# noinspection PyPep8Naming
 class listener:
     """Robot Framework listener interface for reporting to ReportPortal."""
 
     _items: LifoQueue[Union[Keyword, Launch, Suite, Test]]
     _service: Optional[RobotService]
     _variables: Optional[Variables]
-    _keyword_filters: List[_KeywordMatch] = []
+    _remove_keyword_filters: List[KeywordMatch] = []
+    _flatten_keyword_filters: List[KeywordMatch] = []
     _remove_all_keyword_content: bool = False
     _remove_data_passed_tests: bool = False
     ROBOT_LISTENER_API_VERSION = 2
@@ -327,44 +313,52 @@ class listener:
             self._variables = Variables()
         return self._variables
 
-    def _process_keyword_skip(self):
+    def _process_keyword_remove(self):
         if not self.variables.remove_keywords:
             return
 
-        try:
-            self._keyword_filters = []
+        self._remove_keyword_filters = []
+        current_context = EXECUTION_CONTEXTS.current
+        if current_context:
+            # noinspection PyProtectedMember
+            for pattern_str in set(current_context.output._settings.remove_keywords):
+                pattern_str_upper = pattern_str.upper()
+                if "ALL" == pattern_str_upper:
+                    self._remove_all_keyword_content = True
+                    break
+                if "PASSED" == pattern_str_upper:
+                    self._remove_data_passed_tests = True
+                    break
+                if pattern_str_upper in {"FOR", "WHILE", "WUKS"}:
+                    if pattern_str_upper == "WUKS":
+                        self._remove_keyword_filters.append(WUKS_KEYWORD_MATCH)
+                    elif pattern_str_upper == "FOR":
+                        self._remove_keyword_filters.append(FOR_KEYWORD_MATCH)
+                    else:
+                        self._remove_keyword_filters.append(WHILE_KEYWORD_MATCH)
+                    continue
+                process_keyword_names_and_tags(self._remove_keyword_filters, pattern_str)
 
-            # noinspection PyUnresolvedReferences
-            from robot.running.context import EXECUTION_CONTEXTS
+    def _process_keyword_flatten(self):
+        if not self.variables.flatten_keywords:
+            return
 
-            current_context = EXECUTION_CONTEXTS.current
-            if current_context:
-                # noinspection PyProtectedMember
-                for pattern_str in set(current_context.output._settings.remove_keywords):
-                    pattern_str_upper = pattern_str.upper()
-                    if "ALL" == pattern_str_upper:
-                        self._remove_all_keyword_content = True
-                        break
-                    if "PASSED" == pattern_str_upper:
-                        self._remove_data_passed_tests = True
-                        break
-                    if pattern_str_upper in {"FOR", "WHILE", "WUKS"}:
-                        if pattern_str_upper == "WUKS":
-                            self._keyword_filters.append(WUKS_KEYWORD_MATCH)
-                        elif pattern_str_upper == "FOR":
-                            self._keyword_filters.append(FOR_KEYWORD_MATCH)
-                        else:
-                            self._keyword_filters.append(WHILE_KEYWORD_NAME)
-                        continue
-                    if ":" in pattern_str:
-                        pattern_type, pattern = pattern_str.split(":", 1)
-                        pattern_type = pattern_type.strip().upper()
-                        if "NAME" == pattern_type.upper():
-                            self._keyword_filters.append(_KeywordNameMatch(pattern.strip()))
-                        elif "TAG" == pattern_type.upper():
-                            self._keyword_filters.append(_KeywordTagMatch(pattern.strip()))
-        except ImportError:
-            warn('Unable to locate Robot Framework context. "--remove-keywords" feature will not work.', stacklevel=2)
+        self._flatten_keyword_filters = []
+        current_context = EXECUTION_CONTEXTS.current
+        if current_context:
+            # noinspection PyProtectedMember
+            for pattern_str in set(current_context.output._settings.flatten_keywords):
+                pattern_str_upper = pattern_str.upper()
+                if pattern_str_upper in {"FOR", "WHILE", "ITERATION", "FORITEM"}:
+                    if pattern_str_upper == "FOR":
+                        self._flatten_keyword_filters.append(FOR_KEYWORD_MATCH)
+                    elif pattern_str_upper == "WHILE":
+                        self._flatten_keyword_filters.append(WHILE_KEYWORD_MATCH)
+                    else:
+                        self._flatten_keyword_filters.append(FOR_KEYWORD_MATCH)
+                        self._flatten_keyword_filters.append(WHILE_KEYWORD_MATCH)
+                    continue
+                process_keyword_names_and_tags(self._flatten_keyword_filters, pattern_str)
 
     def start_launch(self, attributes: Dict[str, Any], ts: Optional[Any] = None) -> None:
         """Start a new launch at the ReportPortal.
@@ -372,7 +366,8 @@ class listener:
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
-        self._process_keyword_skip()
+        self._process_keyword_remove()
+        self._process_keyword_flatten()
 
         launch = Launch(self.variables.launch_name, attributes, self.variables.launch_attributes)
         launch.doc = self.variables.launch_doc or launch.doc
@@ -447,6 +442,16 @@ class listener:
         test.rp_item_id = self.service.start_test(test=test, ts=ts)
         self._add_current_item(test)
 
+    def _log_data_removed(self, item_id: str, timestamp: str, message: str) -> None:
+        msg = LogMessage(message)
+        msg.level = "DEBUG"
+        msg.item_id = item_id
+        msg.timestamp = timestamp
+        self.__post_log_message(msg)
+
+    def _log_keyword_content_removed(self, item_id: str, timestamp: str) -> None:
+        self._log_data_removed(item_id, timestamp, REMOVED_KEYWORD_CONTENT_LOG)
+
     @check_rp_enabled
     def end_test(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
         """Finish started test case at the ReportPortal.
@@ -467,20 +472,24 @@ class listener:
         self._remove_current_item()
         self.service.finish_test(test=test, ts=ts)
 
-    def _log_data_removed(self, item_id: str, timestamp: str, message: str) -> None:
-        msg = LogMessage(message)
-        msg.level = "DEBUG"
-        msg.item_id = item_id
-        msg.timestamp = timestamp
-        self.__post_log_message(msg)
-
-    def _log_keyword_content_removed(self, item_id: str, timestamp: str) -> None:
-        self._log_data_removed(item_id, timestamp, REMOVED_KEYWORD_CONTENT_LOG)
-
     def _do_start_keyword(self, keyword: Keyword, ts: Optional[str] = None) -> None:
         logger.debug(f"ReportPortal - Start Keyword: {keyword.robot_attributes}")
         keyword.rp_item_id = self.service.start_keyword(keyword=keyword, ts=ts)
         keyword.posted = True
+
+    def _should_remove(self, keyword: Keyword) -> Optional[KeywordMatch]:
+        for matcher in self._remove_keyword_filters:
+            if matcher.match(keyword):
+                return matcher
+        return None
+
+    def _should_flatten(self, keyword: Keyword) -> bool:
+        if not isinstance(keyword, Keyword):
+            return False
+        return any(matcher.match(keyword) for matcher in self._flatten_keyword_filters)
+
+    def _log_keyword_content_flattened(self, item_id: str, timestamp: str) -> None:
+        self._log_data_removed(item_id, timestamp, FLATTENED_KEYWORD_CONTENT_LOG)
 
     @check_rp_enabled
     def start_keyword(self, name: str, attributes: Dict, ts: Optional[Any] = None) -> None:
@@ -490,31 +499,36 @@ class listener:
         :param attributes: Dictionary passed by the Robot Framework
         :param ts:         Timestamp(used by the ResultVisitor)
         """
-        kwd = Keyword(name, attributes, self.current_item)
         parent = self.current_item
-        skip_kwd = parent.remove_data
+        kwd = Keyword(name, attributes, parent)
+        remove_kwd = parent.remove_data
         skip_data = self._remove_all_keyword_content or self._remove_data_passed_tests
-        kwd.remove_data = skip_kwd or skip_data
+        kwd.remove_data = remove_kwd or skip_data
 
         if kwd.remove_data:
-            kwd.matched_filter = getattr(parent, "matched_filter", None)
-            kwd.skip_origin = getattr(parent, "skip_origin", None)
+            kwd.remove_filter = parent.remove_filter
+            kwd.remove_origin = parent.remove_origin
         else:
-            for m in self._keyword_filters:
-                if m.match(kwd):
-                    kwd.remove_data = True
-                    kwd.matched_filter = m
-                    kwd.skip_origin = kwd
-                    break
+            m = self._should_remove(kwd)
+            if m:
+                kwd.remove_data = True
+                kwd.remove_filter = m
+                kwd.remove_origin = kwd
 
-        if skip_kwd:
+        if remove_kwd:
             kwd.rp_item_id = str(uuid.uuid4())
             parent.skipped_keywords.append(kwd)
             kwd.posted = False
         else:
-            self._do_start_keyword(kwd, ts)
+            if parent.flattened or self._should_flatten(parent):
+                kwd.rp_item_id = parent.rp_item_id
+                kwd.flattened = True
+            else:
+                self._do_start_keyword(kwd, ts)
+                if not kwd.flattened and self._should_flatten(kwd):
+                    self._log_keyword_content_flattened(kwd.rp_item_id, kwd.start_time)
             if skip_data:
-                kwd.skip_origin = kwd
+                kwd.remove_origin = kwd
             if self._remove_data_passed_tests:
                 parent.skipped_keywords.append(kwd)
 
@@ -534,7 +548,7 @@ class listener:
         """
         kwd = self.current_item.update(attributes)
 
-        if kwd.matched_filter is WUKS_KEYWORD_MATCH and kwd.skip_origin is kwd:
+        if kwd.remove_filter is WUKS_KEYWORD_MATCH and kwd.remove_origin is kwd:
             skipped_keywords = kwd.skipped_keywords
             skipped_keywords_num = len(skipped_keywords)
             if skipped_keywords_num > 2:
@@ -553,8 +567,8 @@ class listener:
                 self._do_end_keyword(last_iteration, ts)
 
         elif (
-            (kwd.matched_filter is FOR_KEYWORD_MATCH) or (kwd.matched_filter is WHILE_KEYWORD_NAME)
-        ) and kwd.skip_origin is kwd:
+            (kwd.remove_filter is FOR_KEYWORD_MATCH) or (kwd.remove_filter is WHILE_KEYWORD_MATCH)
+        ) and kwd.remove_origin is kwd:
             skipped_keywords = kwd.skipped_keywords
             skipped_keywords_num = len(skipped_keywords)
             if skipped_keywords_num > 1:
@@ -566,14 +580,14 @@ class listener:
             last_iteration = kwd.skipped_keywords[-1]
             self._post_skipped_keywords(last_iteration)
             self._do_end_keyword(last_iteration, ts)
-        elif kwd.posted and kwd.remove_data and kwd.skip_origin is kwd:
+        elif kwd.posted and kwd.remove_data and kwd.remove_origin is kwd:
             if (self._remove_all_keyword_content or not self._remove_data_passed_tests) and (
                 kwd.skipped_keywords or kwd.skipped_logs
             ):
                 self._log_keyword_content_removed(kwd.rp_item_id, kwd.start_time)
 
         self._remove_current_item()
-        if not kwd.posted:
+        if not kwd.posted or kwd.flattened:
             return
         self._do_end_keyword(kwd, ts)
 
