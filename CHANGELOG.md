@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [5.6.2]
 ### Fixed
 - SETUP / TEARDOWN keyword removing, by @HardNorth
 
