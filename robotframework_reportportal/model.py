@@ -36,6 +36,8 @@ class Entity:
     remove_origin: Optional[Any]
     rp_item_id: Optional[str]
     parent: Optional["Entity"]
+    skipped_keywords: List["Keyword"]
+    posted: bool
 
     def __init__(self, entity_type: str, parent: Optional["Entity"]):
         """Initialize required attributes.
@@ -50,6 +52,8 @@ class Entity:
         self.flattened = False
         self.remove_filter = None
         self.remove_origin = None
+        self.skipped_keywords = []
+        self.posted = True
 
     @property
     def rp_parent_item_id(self):
@@ -94,8 +98,6 @@ class Keyword(Entity):
     tags: List[str]
     type: str = "KEYWORD"
     skipped_logs: List[LogMessage]
-    skipped_keywords: List["Keyword"]
-    posted: bool
 
     def __init__(self, name: str, robot_attributes: Dict[str, Any], parent: Entity):
         """Initialize required attributes.
@@ -118,9 +120,7 @@ class Keyword(Entity):
         self.status = robot_attributes.get("status")
         self.tags = robot_attributes["tags"]
         self.type = "KEYWORD"
-        self.skipped_keywords = []
         self.skipped_logs = []
-        self.posted = True
 
     def get_name(self) -> str:
         """Get name of the keyword suitable for ReportPortal."""
@@ -257,7 +257,6 @@ class Test(Entity):
     start_time: str
     status: str
     template: str
-    skipped_keywords: List[Keyword]
 
     def __init__(self, name: str, robot_attributes: Dict[str, Any], test_attributes: List[str], parent: Entity):
         """Initialize required attributes.
@@ -281,7 +280,6 @@ class Test(Entity):
         self.start_time = robot_attributes["starttime"]
         self.status = robot_attributes.get("status")
         self.template = robot_attributes["template"]
-        self.skipped_keywords = []
 
     @property
     def critical(self) -> bool:
