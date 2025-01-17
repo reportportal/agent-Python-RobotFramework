@@ -12,6 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
+import platform
 from unittest import mock
 
 import pytest
@@ -42,6 +43,11 @@ def test_remove_keyword_not_provided(mock_client_init):
 
     statuses = [finish[1]["status"] for finish in item_finish_calls]
     assert statuses == ["PASSED"] * 9
+
+
+def is_gha_agent() -> bool:
+    # GitHub Actions Linux runner has an issue with binary data reading
+    return platform.system() == "Linux" and platform.release() == "6.8.0-1017-azure"
 
 
 @pytest.mark.parametrize(
@@ -273,7 +279,8 @@ def test_remove_keyword_not_provided(mock_client_init):
             ["PASSED"] * 5,
             3,
             2,
-            'Binary data of type "image/jpeg" logging skipped, as it was processed as text and hence corrupted.',
+            f'Binary data of type "{"application/octet-stream" if is_gha_agent else "image/jpeg"}" logging skipped, as'
+            " it was processed as text and hence corrupted.",
         ),
         (
             "examples/rkie_keyword.robot",
@@ -301,6 +308,33 @@ def test_remove_keyword_not_provided(mock_client_init):
             6,
             2,
             "To less executions error",
+        ),
+        (
+            "examples/before_after/before_suite_with_steps.robot",
+            "PASSED",
+            0,
+            ["PASSED"] * 4,
+            2,
+            0,
+            "Content removed using the --remove-keywords option.",
+        ),
+        (
+            "examples/before_after/after_suite_with_steps.robot",
+            "PASSED",
+            0,
+            ["PASSED"] * 4,
+            2,
+            1,
+            "Content removed using the --remove-keywords option.",
+        ),
+        (
+            "examples/before_after/before_suite_with_steps_fail.robot",
+            "PASSED",
+            1,
+            ["FAILED"] * 4,
+            1,
+            0,
+            "Suite setup step",
         ),
     ],
 )
