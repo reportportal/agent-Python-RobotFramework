@@ -410,16 +410,6 @@ class listener:
         suite.rp_item_id = self.service.start_suite(suite=suite, ts=ts)
         self._add_current_item(suite)
 
-    def _log_data_removed(self, item_id: str, timestamp: str, message: str) -> None:
-        msg = LogMessage(message)
-        msg.level = "DEBUG"
-        msg.item_id = item_id
-        msg.timestamp = timestamp
-        self.__post_log_message(msg)
-
-    def _log_keyword_content_removed(self, item_id: str, timestamp: str) -> None:
-        self._log_data_removed(item_id, timestamp, REMOVED_KEYWORD_CONTENT_LOG)
-
     @check_rp_enabled
     def end_suite(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
         """Finish started test suite at the ReportPortal.
@@ -430,11 +420,6 @@ class listener:
         """
         suite = self._remove_current_item().update(attributes)
         logger.debug(f"ReportPortal - End Suite: {suite.robot_attributes}")
-        if attributes["status"] == "FAIL" and self._remove_data_passed_tests:
-            self._post_skipped_keywords(suite)
-        elif self._remove_data_passed_tests:
-            for kwd in suite.skipped_keywords:
-                self._log_keyword_content_removed(kwd.rp_item_id, kwd.start_time)
         self.service.finish_suite(suite=suite, ts=ts)
         if attributes["id"] == MAIN_SUITE_ID:
             self.finish_launch(attributes, ts)
@@ -455,6 +440,16 @@ class listener:
         logger.debug(f"ReportPortal - Start Test: {attributes}")
         test.rp_item_id = self.service.start_test(test=test, ts=ts)
         self._add_current_item(test)
+
+    def _log_data_removed(self, item_id: str, timestamp: str, message: str) -> None:
+        msg = LogMessage(message)
+        msg.level = "DEBUG"
+        msg.item_id = item_id
+        msg.timestamp = timestamp
+        self.__post_log_message(msg)
+
+    def _log_keyword_content_removed(self, item_id: str, timestamp: str) -> None:
+        self._log_data_removed(item_id, timestamp, REMOVED_KEYWORD_CONTENT_LOG)
 
     @check_rp_enabled
     def end_test(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:

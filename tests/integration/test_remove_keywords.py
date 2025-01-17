@@ -302,33 +302,6 @@ def test_remove_keyword_not_provided(mock_client_init):
             2,
             "To less executions error",
         ),
-        (
-            "examples/before_after/before_suite_with_steps.robot",
-            "PASSED",
-            0,
-            ["PASSED"] * 4,
-            2,
-            0,
-            "Content removed using the --remove-keywords option.",
-        ),
-        (
-            "examples/before_after/after_suite_with_steps.robot",
-            "PASSED",
-            0,
-            ["PASSED"] * 4,
-            2,
-            1,
-            "Content removed using the --remove-keywords option.",
-        ),
-        (
-            "examples/before_after/before_suite_with_steps_fail.robot",
-            "PASSED",
-            1,
-            ["FAILED"] * 4,
-            1,
-            0,
-            "Suite setup step",
-        ),
     ],
 )
 @mock.patch(REPORT_PORTAL_SERVICE)
