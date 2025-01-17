@@ -13,10 +13,7 @@
 #  limitations under the License.
 
 import platform
-
 from unittest import mock
-
-import pytest
 
 from tests import REPORT_PORTAL_SERVICE
 from tests.helpers import utils
@@ -36,11 +33,12 @@ def test_launch_log(mock_client_init):
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
-@pytest.mark.skipif(
-    platform.system() == "Linux" and platform.release() == "6.8.0-1017-azure",
-    reason="GitHub Actions Linux runner has an issue with binary data reading",
-)
 def test_binary_file_log(mock_client_init):
+    if platform.system() == "Linux" and platform.release() == "6.8.0-1017-azure":
+        # GitHub Actions Linux runner has an issue with binary data reading
+        data_type = "application/octet-stream"
+    else:
+        data_type = "image/jpeg"
     result = utils.run_robot_tests(["examples/binary_file_log_as_text.robot"])
     assert result == 0  # the test successfully passed
 
@@ -49,5 +47,5 @@ def test_binary_file_log(mock_client_init):
     assert len(calls) == 3
 
     messages = set(map(lambda x: x[1]["message"], calls))
-    error_msg = 'Binary data of type "image/jpeg" logging skipped, as it was processed as text and hence corrupted.'
+    error_msg = f'Binary data of type "{data_type}" logging skipped, as it was processed as text and hence corrupted.'
     assert error_msg in messages
