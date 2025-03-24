@@ -199,10 +199,6 @@ class listener:
 
         :param message: Internal message object to send
         """
-        if message.attachment:
-            logger.debug(f"ReportPortal - Log Message with Attachment: {message}")
-        else:
-            logger.debug(f"ReportPortal - Log Message: {message}")
         self.service.log(message=message)
 
     def __post_skipped_keyword(self, kwd: Keyword, clean_data_remove: bool) -> None:
