@@ -1,6 +1,10 @@
 # Changelog
 
 ## [Unreleased]
+### Removed
+- Logging in the `listener.__post_log_message` method, to avoid logging the same message recursively, by @HardNorth
+
+## [5.6.2]
 ### Fixed
 - SETUP / TEARDOWN keyword removing, by @HardNorth
 
