@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [5.6.3]
 ### Removed
 - Logging in the `listener.__post_log_message` method, to avoid logging the same message recursively, by @HardNorth
 
