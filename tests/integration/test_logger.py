@@ -34,7 +34,7 @@ def test_launch_log(mock_client_init):
 
 @mock.patch(REPORT_PORTAL_SERVICE)
 def test_binary_file_log(mock_client_init):
-    if platform.system() == "Linux" and platform.release() == "6.8.0-1017-azure":
+    if platform.system() == "Linux" and platform.release().endswith("-azure"):
         # GitHub Actions Linux runner has an issue with binary data reading
         data_type = "application/octet-stream"
     else:
