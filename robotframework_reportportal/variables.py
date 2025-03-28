@@ -69,6 +69,7 @@ class Variables:
     http_timeout: Optional[Union[Tuple[float, float], float]]
     remove_keywords: bool
     flatten_keywords: bool
+    debug_mode: bool
 
     def __init__(self) -> None:
         """Initialize instance attributes."""
@@ -134,6 +135,8 @@ class Variables:
                     category=RuntimeWarning,
                     stacklevel=2,
                 )
+
+        self.debug_mode = to_bool(get_variable("RP_DEBUG_MODE", default="False"))
 
         cond = (self.endpoint, self.launch_name, self.project, self.api_key)
         self.enabled = all(cond)

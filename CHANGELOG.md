@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- `RP_DEBUG_MODE` configuration variable, by @HardNorth
 
 ## [5.6.3]
 ### Removed
