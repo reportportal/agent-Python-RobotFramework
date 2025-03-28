@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+
+## [5.6.4]
 ### Added
 - `RP_DEBUG_MODE` configuration variable, by @HardNorth
 
