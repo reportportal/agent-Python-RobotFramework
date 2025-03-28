@@ -51,12 +51,14 @@ class RobotService:
     agent_name: str
     agent_version: str
     rp: Optional[RP]
+    debug: bool
 
     def __init__(self) -> None:
         """Initialize service attributes."""
         self.agent_name = "robotframework-reportportal"
         self.agent_version = get_package_version(self.agent_name)
         self.rp = None
+        self.debug = False
 
     def _get_launch_attributes(self, cmd_attrs: list) -> list:
         """Generate launch attributes including both system and user ones.
@@ -74,6 +76,7 @@ class RobotService:
         :param variables: ReportPortal variables
         """
         if self.rp is None:
+            self.debug = variables.debug_mode
             logger.debug(
                 f"ReportPortal - Init service: endpoint={variables.endpoint}, "
                 f"project={variables.project}, api_key={variables.api_key}"
@@ -129,7 +132,13 @@ class RobotService:
             "start_time": ts or to_epoch(launch.start_time) or timestamp(),
         }
         logger.debug("ReportPortal - Start launch: request_body={0}".format(sl_pt))
-        return self.rp.start_launch(**sl_pt)
+        try:
+            return self.rp.start_launch(**sl_pt)
+        except Exception as e:
+            if self.debug:
+                logger.error(f"Unable to start launch: {e}")
+                logger.exception(e)
+            raise e
 
     def finish_launch(self, launch: Launch, ts: Optional[str] = None) -> None:
         """Finish started launch.
@@ -139,7 +148,13 @@ class RobotService:
         """
         fl_rq = {"end_time": ts or to_epoch(launch.end_time) or timestamp(), "status": STATUS_MAPPING[launch.status]}
         logger.debug("ReportPortal - Finish launch: request_body={0}".format(fl_rq))
-        self.rp.finish_launch(**fl_rq)
+        try:
+            self.rp.finish_launch(**fl_rq)
+        except Exception as e:
+            if self.debug:
+                logger.error(f"Unable to finish launch: {e}")
+                logger.exception(e)
+            raise e
 
     def start_suite(self, suite: Suite, ts: Optional[str] = None) -> Optional[str]:
         """Call start_test method of the common client.
@@ -157,7 +172,13 @@ class RobotService:
             "start_time": ts or to_epoch(suite.start_time) or timestamp(),
         }
         logger.debug("ReportPortal - Start suite: request_body={0}".format(start_rq))
-        return self.rp.start_test_item(**start_rq)
+        try:
+            return self.rp.start_test_item(**start_rq)
+        except Exception as e:
+            if self.debug:
+                logger.error(f"Unable to start suite: {e}")
+                logger.exception(e)
+            raise e
 
     def finish_suite(self, suite: Suite, issue: Optional[str] = None, ts: Optional[str] = None) -> None:
         """Finish started suite.
@@ -173,7 +194,13 @@ class RobotService:
             "status": STATUS_MAPPING[suite.status],
         }
         logger.debug("ReportPortal - Finish suite: request_body={0}".format(fta_rq))
-        self.rp.finish_test_item(**fta_rq)
+        try:
+            self.rp.finish_test_item(**fta_rq)
+        except Exception as e:
+            if self.debug:
+                logger.error(f"Unable to finish suite: {e}")
+                logger.exception(e)
+            raise e
 
     def start_test(self, test: Test, ts: Optional[str] = None):
         """Call start_test method of the common client.
@@ -195,7 +222,13 @@ class RobotService:
             "test_case_id": test.test_case_id,
         }
         logger.debug("ReportPortal - Start test: request_body={0}".format(start_rq))
-        return self.rp.start_test_item(**start_rq)
+        try:
+            return self.rp.start_test_item(**start_rq)
+        except Exception as e:
+            if self.debug:
+                logger.error(f"Unable to start test: {e}")
+                logger.exception(e)
+            raise e
 
     def finish_test(self, test: Test, issue: Optional[str] = None, ts: Optional[str] = None):
         """Finish started test case.
@@ -224,7 +257,13 @@ class RobotService:
         if description:
             fta_rq["description"] = description
         logger.debug("ReportPortal - Finish test: request_body={0}".format(fta_rq))
-        self.rp.finish_test_item(**fta_rq)
+        try:
+            self.rp.finish_test_item(**fta_rq)
+        except Exception as e:
+            if self.debug:
+                logger.error(f"Unable to finish test: {e}")
+                logger.exception(e)
+            raise e
 
     def start_keyword(self, keyword: Keyword, ts: Optional[str] = None):
         """Call start_test method of the common client.
@@ -243,7 +282,13 @@ class RobotService:
         if keyword.rp_item_id:
             start_rq["uuid"] = keyword.rp_item_id
         logger.debug("ReportPortal - Start keyword: request_body={0}".format(start_rq))
-        return self.rp.start_test_item(**start_rq)
+        try:
+            return self.rp.start_test_item(**start_rq)
+        except Exception as e:
+            if self.debug:
+                logger.error(f"Unable to start keyword: {e}")
+                logger.exception(e)
+            raise e
 
     def finish_keyword(self, keyword: Keyword, issue: Optional[str] = None, ts: Optional[str] = None):
         """Finish started keyword item.
@@ -259,7 +304,13 @@ class RobotService:
             "status": STATUS_MAPPING[keyword.status],
         }
         logger.debug("ReportPortal - Finish keyword: request_body={0}".format(fta_rq))
-        self.rp.finish_test_item(**fta_rq)
+        try:
+            self.rp.finish_test_item(**fta_rq)
+        except Exception as e:
+            if self.debug:
+                logger.error(f"Unable to finish keyword: {e}")
+                logger.exception(e)
+            raise e
 
     def log(self, message: LogMessage, ts: Optional[str] = None):
         """Send log message to ReportPortal.
@@ -274,4 +325,10 @@ class RobotService:
             "message": message.message,
             "time": ts or to_epoch(message.timestamp) or timestamp(),
         }
-        self.rp.log(**sl_rq)
+        try:
+            self.rp.log(**sl_rq)
+        except Exception as e:
+            if self.debug:
+                logger.error(f"Unable to send log message: {e}")
+                logger.exception(e)
+            raise e
