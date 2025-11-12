@@ -94,6 +94,12 @@ class RobotService:
                 launch_uuid_print=variables.launch_uuid_print,
                 print_output=variables.launch_uuid_print_output,
                 http_timeout=variables.http_timeout,
+                oauth_uri=variables.oauth_uri,
+                oauth_username=variables.oauth_username,
+                oauth_password=variables.oauth_password,
+                oauth_client_id=variables.oauth_client_id,
+                oauth_client_secret=variables.oauth_client_secret,
+                oauth_scope=variables.oauth_scope,
             )
 
     def terminate_service(self) -> None:

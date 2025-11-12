@@ -48,7 +48,18 @@ class Variables:
     _pabot_pool_id: Optional[int]
     _pabot_used: Optional[str]
     project: Optional[str]
+
+    # API key auth parameter
     api_key: Optional[str]
+
+    # OAuth 2.0 parameters
+    oauth_uri: Optional[str]
+    oauth_username: Optional[str]
+    oauth_password: Optional[str]
+    oauth_client_id: Optional[str]
+    oauth_client_secret: Optional[str]
+    oauth_scope: Optional[str]
+
     attach_log: bool
     attach_report: bool
     attach_xunit: bool
@@ -132,7 +143,16 @@ class Variables:
         self.remove_keywords = to_bool(get_variable("RP_REMOVE_KEYWORDS", default="False"))
         self.flatten_keywords = to_bool(get_variable("RP_FLATTEN_KEYWORDS", default="False"))
 
+        # API key auth parameter
         self.api_key = get_variable("RP_API_KEY")
+
+        # OAuth 2.0 parameters
+        self.oauth_uri = get_variable("RP_OAUTH_URI")
+        self.oauth_username = get_variable("RP_OAUTH_USERNAME")
+        self.oauth_password = get_variable("RP_OAUTH_PASSWORD")
+        self.oauth_client_id = get_variable("RP_OAUTH_CLIENT_ID")
+        self.oauth_client_secret = get_variable("RP_OAUTH_CLIENT_SECRET")
+        self.oauth_scope = get_variable("RP_OAUTH_SCOPE")
 
         self.debug_mode = to_bool(get_variable("RP_DEBUG_MODE", default="False"))
 
