@@ -19,7 +19,7 @@ from unittest import mock
 import pytest
 from reportportal_client import BatchedRPClient, OutputType, RPClient, ThreadedRPClient
 
-from tests import REPORT_PORTAL_SERVICE, REQUESTS_SERVICE
+from tests import REPORT_PORTAL_SERVICE
 from tests.helpers import utils
 
 
