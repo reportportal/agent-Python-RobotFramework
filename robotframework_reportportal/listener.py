@@ -14,11 +14,11 @@
 
 """This module includes Robot Framework listener interfaces."""
 
-import warnings
 import logging
 import os
 import re
 import uuid
+import warnings
 from functools import wraps
 from mimetypes import guess_type
 from typing import Any, Dict, List, Optional, Union
