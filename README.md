@@ -38,17 +38,40 @@ The latest stable version of library is available on PyPI:
 For reporting results to ReportPortal you need to pass some variables
 to `robot` run:
 
-REQUIRED:
+**Required**:
+
+These variable should be specified in either case:
 
 ```
 --listener robotframework_reportportal.listener
---variable RP_API_KEY:"your_user_api_key"
 --variable RP_ENDPOINT:"your_reportportal_url"
 --variable RP_LAUNCH:"launch_name"
 --variable RP_PROJECT:"reportportal_project_name"
 ```
 
-NOT REQUIRED:
+And also one type of authorization is required: API Key or OAuth 2.0 Password grant:
+
+```
+--variable RP_API_KEY:"your_user_api_key"
+    - You can get it in the User Profile section on the UI.
+```
+Or:
+```
+--variable RP_OAUTH_URI:"https://reportportal.example.com/uat/sso/oauth/token"
+    - OAuth 2.0 token endpoint URL for password grant authentication. **Required** if API key is not used.
+--variable RP_OAUTH_USERNAME:"my_username"
+    - OAuth 2.0 username for password grant authentication. **Required** if OAuth 2.0 is used.
+--variable RP_OAUTH_PASSWORD:"my_password"
+    - OAuth 2.0 password for password grant authentication. **Required** if OAuth 2.0 is used.
+--variable RP_OAUTH_CLIENT_ID:"client_id"
+    - OAuth 2.0 client identifier. **Required** if OAuth 2.0 is used.
+--variable RP_OAUTH_CLIENT_SECRET:"client_id_secret"
+    - OAuth 2.0 client secret. **Optional** for OAuth 2.0 authentication.
+--variable RP_OAUTH_SCOPE:"offline_access"
+    - OAuth 2.0 access token scope. **Optional** for OAuth 2.0 authentication.
+```
+
+**Optional**:
 
 ```
 --variable RP_CLIENT_TYPE:"SYNC"
@@ -71,9 +94,8 @@ NOT REQUIRED:
     - Default value is "10.0", response read timeout for ReportPortal connection.
 --variable RP_LOG_BATCH_SIZE:"10"
     - Default value is "20", affects size of async batch log requests
---variable RP_LOG_BATCH_PAYLOAD_SIZE:"10240000"
-    - Default value is "65000000", maximum payload size of async batch log
-      requests
+--variable RP_LOG_BATCH_PAYLOAD_LIMIT:"10240000"
+    - Default value is "65000000", maximum payload size of async batch log requests
 --variable RP_RERUN:"True"
     - Default is "False". Enables rerun mode for the last launch.
 --variable RP_RERUN_OF:"xxxxx-xxxx-xxxx-lauch-uuid"

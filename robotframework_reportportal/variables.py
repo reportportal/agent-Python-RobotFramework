@@ -48,7 +48,18 @@ class Variables:
     _pabot_pool_id: Optional[int]
     _pabot_used: Optional[str]
     project: Optional[str]
+
+    # API key auth parameter
     api_key: Optional[str]
+
+    # OAuth 2.0 parameters
+    oauth_uri: Optional[str]
+    oauth_username: Optional[str]
+    oauth_password: Optional[str]
+    oauth_client_id: Optional[str]
+    oauth_client_secret: Optional[str]
+    oauth_scope: Optional[str]
+
     attach_log: bool
     attach_report: bool
     attach_xunit: bool
@@ -62,7 +73,7 @@ class Variables:
     rerun_of: Optional[str]
     test_attributes: List[str]
     skipped_issue: bool
-    log_batch_payload_size: int
+    log_batch_payload_limit: int
     launch_uuid_print: bool
     launch_uuid_print_output: Optional[OutputType]
     client_type: ClientType
@@ -92,9 +103,25 @@ class Variables:
         self.rerun_of = get_variable("RP_RERUN_OF", default=None)
         self.skipped_issue = to_bool(get_variable("RP_SKIPPED_ISSUE", default="True"))
         self.test_attributes = get_variable("RP_TEST_ATTRIBUTES", default="").split()
-        self.log_batch_payload_size = int(
-            get_variable("RP_LOG_BATCH_PAYLOAD_SIZE", default=str(MAX_LOG_BATCH_PAYLOAD_SIZE))
-        )
+
+        batch_payload_size_limit = get_variable("RP_LOG_BATCH_PAYLOAD_LIMIT", default=None)
+        batch_payload_size = get_variable("RP_LOG_BATCH_PAYLOAD_SIZE", default=None)
+        if batch_payload_size:
+            warn(
+                "Parameter `RP_LOG_BATCH_PAYLOAD_SIZE` is deprecated since 5.6.5 "
+                "and will be subject for removing in the next major version. Use `RP_LOG_BATCH_PAYLOAD_LIMIT` argument"
+                " instead.",
+                DeprecationWarning,
+                2,
+            )
+            if not batch_payload_size_limit:
+                batch_payload_size_limit = batch_payload_size
+
+        if batch_payload_size_limit:
+            self.log_batch_payload_limit = int(batch_payload_size_limit)
+        else:
+            self.log_batch_payload_limit = MAX_LOG_BATCH_PAYLOAD_SIZE
+
         self.launch_uuid_print = to_bool(get_variable("RP_LAUNCH_UUID_PRINT", default="False"))
         output_type = get_variable("RP_LAUNCH_UUID_PRINT_OUTPUT")
         self.launch_uuid_print_output = OutputType[output_type.upper()] if output_type else None
@@ -116,29 +143,20 @@ class Variables:
         self.remove_keywords = to_bool(get_variable("RP_REMOVE_KEYWORDS", default="False"))
         self.flatten_keywords = to_bool(get_variable("RP_FLATTEN_KEYWORDS", default="False"))
 
+        # API key auth parameter
         self.api_key = get_variable("RP_API_KEY")
-        if not self.api_key:
-            token = get_variable("RP_UUID")
-            if token:
-                warn(
-                    message="Argument `RP_UUID` is deprecated since version 5.3.3 and will be subject for "
-                    "removing in the next major version. Use `RP_API_KEY` argument instead.",
-                    category=DeprecationWarning,
-                    stacklevel=2,
-                )
-                self.api_key = token
-            else:
-                warn(
-                    message="Argument `RP_API_KEY` is `None` or empty string, that's not supposed to happen "
-                    "because ReportPortal is usually requires an authorization key. Please check your"
-                    " configuration.",
-                    category=RuntimeWarning,
-                    stacklevel=2,
-                )
+
+        # OAuth 2.0 parameters
+        self.oauth_uri = get_variable("RP_OAUTH_URI")
+        self.oauth_username = get_variable("RP_OAUTH_USERNAME")
+        self.oauth_password = get_variable("RP_OAUTH_PASSWORD")
+        self.oauth_client_id = get_variable("RP_OAUTH_CLIENT_ID")
+        self.oauth_client_secret = get_variable("RP_OAUTH_CLIENT_SECRET")
+        self.oauth_scope = get_variable("RP_OAUTH_SCOPE")
 
         self.debug_mode = to_bool(get_variable("RP_DEBUG_MODE", default="False"))
 
-        cond = (self.endpoint, self.launch_name, self.project, self.api_key)
+        cond = (self.endpoint, self.launch_name, self.project)
         self.enabled = all(cond)
         if not self.enabled:
             warn(

@@ -15,8 +15,8 @@ limitations under the License
 """
 
 import os
-from unittest import mock
 
+# noinspection PyPackageRequirements
 import pytest
 
 from robotframework_reportportal.listener import listener
@@ -29,8 +29,6 @@ def visitor():
     return RobotResultsVisitor()
 
 
-@mock.patch("robotframework_reportportal.variables.strtobool", mock.Mock())
-@mock.patch("robotframework_reportportal.variables.get_variable", mock.Mock())
 @pytest.fixture
 def mock_variables():
     mock_variables = Variables()
@@ -38,7 +36,7 @@ def mock_variables():
     mock_variables.launch_name = "Robot"
     mock_variables.project = "default_personal"
     mock_variables.api_key = "test_api_key"
-    mock_variables.launch_attributes = ""
+    mock_variables.launch_attributes = []
     mock_variables.launch_id = None
     mock_variables.launch_doc = None
     mock_variables.log_batch_size = 1
@@ -47,7 +45,6 @@ def mock_variables():
     mock_variables.skip_analytics = None
     mock_variables.test_attributes = []
     mock_variables.skip_analytics = True
-    mock_variables._pabot_used = False
     mock_variables.skipped_issue = True
     mock_variables.enabled = True
     return mock_variables

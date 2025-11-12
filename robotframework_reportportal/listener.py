@@ -18,6 +18,7 @@ import logging
 import os
 import re
 import uuid
+import warnings
 from functools import wraps
 from mimetypes import guess_type
 from typing import Any, Dict, List, Optional, Union
@@ -299,7 +300,14 @@ class listener:
         """Initialize instance of the RobotService."""
         if self.variables.enabled and not self._service:
             self._service = RobotService()
-            self._service.init_service(self.variables)
+            try:
+                self._service.init_service(self.variables)
+            except ValueError as e:
+                # Log warning instead of raising error, since Robot Framework catches all errors
+                warnings.warn(e.args[0], UserWarning, stacklevel=2)
+                self.variables.enabled = False
+                self._service = None
+                raise e
         return self._service
 
     @property
