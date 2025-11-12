@@ -3,6 +3,10 @@
 ## [Unreleased]
 ### Changed
 - Client version updated on [5.6.7](https://github.com/reportportal/client-Python/releases/tag/5.6.7), by @HardNorth
+### Fixed
+- Some configuration parameter names, which are different in the client, by @HardNorth
+### Removed
+- `RP_UUID` param support, as it was deprecated pretty while ago, by @HardNorth
 
 ## [5.6.4]
 ### Added

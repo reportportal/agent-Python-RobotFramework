@@ -77,10 +77,7 @@ class RobotService:
         """
         if self.rp is None:
             self.debug = variables.debug_mode
-            logger.debug(
-                f"ReportPortal - Init service: endpoint={variables.endpoint}, "
-                f"project={variables.project}, api_key={variables.api_key}"
-            )
+            logger.debug(f"ReportPortal - Init service: endpoint={variables.endpoint}, project={variables.project}")
 
             self.rp = create_client(
                 client_type=variables.client_type,
@@ -92,7 +89,7 @@ class RobotService:
                 retries=5,
                 verify_ssl=variables.verify_ssl,
                 max_pool_size=variables.pool_size,
-                log_batch_payload_size=variables.log_batch_payload_size,
+                log_batch_payload_limit=variables.log_batch_payload_limit,
                 launch_uuid=variables.launch_id,
                 launch_uuid_print=variables.launch_uuid_print,
                 print_output=variables.launch_uuid_print_output,
