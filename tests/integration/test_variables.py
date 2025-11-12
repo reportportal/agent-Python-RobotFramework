@@ -24,12 +24,31 @@ from tests.helpers import utils
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
+def test_agent_pass_batch_payload_limit_variable(mock_client_init):
+    variables = utils.DEFAULT_VARIABLES.copy()
+    payload_size = 100
+    variables["RP_LOG_BATCH_PAYLOAD_LIMIT"] = payload_size
+    with warnings.catch_warnings(record=True) as w:
+        result = utils.run_robot_tests(["examples/simple.robot"], variables=variables)
+    assert result == 0  # the test successfully passed
+    assert len(w) == 0
+
+    payload_variable = "log_batch_payload_limit"
+    assert payload_variable in mock_client_init.call_args_list[0][1]
+    assert mock_client_init.call_args_list[0][1][payload_variable] == payload_size
+
+
+@mock.patch(REPORT_PORTAL_SERVICE)
 def test_agent_pass_batch_payload_size_variable(mock_client_init):
     variables = utils.DEFAULT_VARIABLES.copy()
     payload_size = 100
     variables["RP_LOG_BATCH_PAYLOAD_SIZE"] = payload_size
-    result = utils.run_robot_tests(["examples/simple.robot"], variables=variables)
+
+    with pytest.warns(DeprecationWarning) as w:
+        result = utils.run_robot_tests(["examples/simple.robot"], variables=variables)
     assert result == 0  # the test successfully passed
+    assert len(w) == 1
+    assert "Parameter `RP_LOG_BATCH_PAYLOAD_SIZE` is deprecated" in str(w[0].message)
 
     payload_variable = "log_batch_payload_limit"
     assert payload_variable in mock_client_init.call_args_list[0][1]
@@ -56,10 +75,10 @@ def test_no_required_variable_warning(mock_client_init, variable, warn_num):
 
     with warnings.catch_warnings(record=True) as w:
         result = utils.run_robot_tests(["examples/simple.robot"], variables=variables)
-        assert result == 0  # the test successfully passed
+    assert result == 0  # the test successfully passed
 
-        assert len(w) == warn_num
-        assert w[0].category == RuntimeWarning
+    assert len(w) == warn_num
+    assert w[0].category == RuntimeWarning
 
     mock_client = mock_client_init.return_value
     assert mock_client.start_launch.call_count == 0
@@ -87,13 +106,13 @@ def test_rp_api_key(mock_client_init):
 
     with warnings.catch_warnings(record=True) as w:
         result = utils.run_robot_tests(["examples/simple.robot"], variables=variables)
-        assert int(result) == 0, "Exit code should be 0 (no errors)"
+    assert int(result) == 0, "Exit code should be 0 (no errors)"
 
-        assert mock_client_init.call_count == 1
+    assert mock_client_init.call_count == 1
 
-        constructor_args = mock_client_init.call_args_list[0][1]
-        assert constructor_args["api_key"] == api_key
-        assert len(filter_agent_calls(w)) == 0
+    constructor_args = mock_client_init.call_args_list[0][1]
+    assert constructor_args["api_key"] == api_key
+    assert len(w) == 0
 
 
 def test_rp_api_key_empty():
@@ -103,8 +122,8 @@ def test_rp_api_key_empty():
 
     with pytest.warns(Warning) as w:
         utils.run_robot_tests(["examples/simple.robot"], variables=variables)
-        assert len(w) == 1
-        assert "Authentication credentials are required." in w[0].message.args[0]
+    assert len(w) == 1
+    assert "Authentication credentials are required." in str(w[0].message)
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
