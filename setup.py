@@ -18,7 +18,7 @@ import os
 
 from setuptools import setup
 
-__version__ = "5.6.6"
+__version__ = "5.7.0"
 
 
 def read_file(fname):
@@ -48,12 +48,12 @@ setup(
     keywords=["testing", "reporting", "robot framework", "reportportal", "agent"],
     classifiers=[
         "Framework :: Robot Framework",
-        "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
     ],
     install_requires=read_file("requirements.txt").splitlines(),
     entry_points={"console_scripts": ["post_report=robotframework_reportportal.post_report:main"]},
