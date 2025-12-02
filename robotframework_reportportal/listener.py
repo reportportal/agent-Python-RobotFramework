@@ -21,7 +21,7 @@ import uuid
 import warnings
 from functools import wraps
 from mimetypes import guess_type
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Optional, Union
 from warnings import warn
 
 from reportportal_client.helpers import LifoQueue, guess_content_type_from_bytes, is_binary
@@ -94,7 +94,7 @@ def check_rp_enabled(func):
     return wrap
 
 
-def process_keyword_names_and_tags(matcher_list: List[KeywordMatch], pattern_str: str) -> None:
+def process_keyword_names_and_tags(matcher_list: list[KeywordMatch], pattern_str: str) -> None:
     """Pick name or pattern string, parse it and add to the matcher list.
 
     :param matcher_list: List of keyword matchers to add to
@@ -115,8 +115,8 @@ class listener:
     _items: LifoQueue[Union[Keyword, Launch, Suite, Test]]
     _service: Optional[RobotService]
     _variables: Optional[Variables]
-    _remove_keyword_filters: List[KeywordMatch] = []
-    _flatten_keyword_filters: List[KeywordMatch] = []
+    _remove_keyword_filters: list[KeywordMatch] = []
+    _flatten_keyword_filters: list[KeywordMatch] = []
     _remove_all_keyword_content: bool = False
     _remove_data_passed_tests: bool = False
     ROBOT_LISTENER_API_VERSION = 2
@@ -127,7 +127,7 @@ class listener:
         self._service = None
         self._variables = None
 
-    def _build_msg_struct(self, message: Dict[str, Any]) -> LogMessage:
+    def _build_msg_struct(self, message: dict[str, Any]) -> LogMessage:
         """Check if the given message comes from our custom logger or not.
 
         :param message: Message passed by the Robot Framework
@@ -271,7 +271,7 @@ class listener:
                     self.__post_log_message(message)
 
     @check_rp_enabled
-    def log_message(self, message: Dict) -> None:
+    def log_message(self, message: dict) -> None:
         """Send log message to the Report Portal.
 
         :param message: Message passed by the Robot Framework
@@ -280,7 +280,7 @@ class listener:
         self._log_message(msg)
 
     @check_rp_enabled
-    def log_message_with_image(self, msg: Dict, image: str):
+    def log_message_with_image(self, msg: dict, image: str):
         """Send log message to the ReportPortal.
 
         :param msg:   Message passed by the Robot Framework
@@ -363,7 +363,7 @@ class listener:
                     continue
                 process_keyword_names_and_tags(self._flatten_keyword_filters, pattern_str)
 
-    def start_launch(self, attributes: Dict[str, Any], ts: Optional[Any] = None) -> None:
+    def start_launch(self, attributes: dict[str, Any], ts: Optional[Any] = None) -> None:
         """Start a new launch at the ReportPortal.
 
         :param attributes: Dictionary passed by the Robot Framework
@@ -385,7 +385,7 @@ class listener:
             rerun_of=self.variables.rerun_of,
         )
 
-    def finish_launch(self, attributes: Dict[str, Any], ts: Optional[Any] = None) -> None:
+    def finish_launch(self, attributes: dict[str, Any], ts: Optional[Any] = None) -> None:
         """Finish started launch at the ReportPortal.
 
         :param attributes: Dictionary passed by the Robot Framework
@@ -396,7 +396,7 @@ class listener:
         self.service.finish_launch(launch=launch, ts=ts)
 
     @check_rp_enabled
-    def start_suite(self, name: str, attributes: Dict, ts: Optional[Any] = None) -> None:
+    def start_suite(self, name: str, attributes: dict, ts: Optional[Any] = None) -> None:
         """Start a new test suite at the ReportPortal.
 
         :param name:       Test suite name
@@ -425,7 +425,7 @@ class listener:
         self._log_data_removed(item_id, timestamp, REMOVED_KEYWORD_CONTENT_LOG)
 
     @check_rp_enabled
-    def end_suite(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
+    def end_suite(self, _: Optional[str], attributes: dict, ts: Optional[Any] = None) -> None:
         """Finish started test suite at the ReportPortal.
 
         :param _:          Test suite name
@@ -444,7 +444,7 @@ class listener:
             self.finish_launch(attributes, ts)
 
     @check_rp_enabled
-    def start_test(self, name: str, attributes: Dict, ts: Optional[Any] = None) -> None:
+    def start_test(self, name: str, attributes: dict, ts: Optional[Any] = None) -> None:
         """Start a new test case at the ReportPortal.
 
         :param name:       Test case name
@@ -461,7 +461,7 @@ class listener:
         self._add_current_item(test)
 
     @check_rp_enabled
-    def end_test(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
+    def end_test(self, _: Optional[str], attributes: dict, ts: Optional[Any] = None) -> None:
         """Finish started test case at the ReportPortal.
 
         :param _:          Test case name
@@ -500,7 +500,7 @@ class listener:
         self._log_data_removed(item_id, timestamp, FLATTENED_KEYWORD_CONTENT_LOG)
 
     @check_rp_enabled
-    def start_keyword(self, name: str, attributes: Dict, ts: Optional[Any] = None) -> None:
+    def start_keyword(self, name: str, attributes: dict, ts: Optional[Any] = None) -> None:
         """Start a new keyword(test step) at the ReportPortal.
 
         :param name:       Keyword name
@@ -547,7 +547,7 @@ class listener:
         self.service.finish_keyword(keyword=keyword, ts=ts)
 
     @check_rp_enabled
-    def end_keyword(self, _: Optional[str], attributes: Dict, ts: Optional[Any] = None) -> None:
+    def end_keyword(self, _: Optional[str], attributes: dict, ts: Optional[Any] = None) -> None:
         """Finish started keyword at the ReportPortal.
 
         :param _:          Keyword name

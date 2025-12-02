@@ -17,7 +17,8 @@
 import binascii
 import fnmatch
 import re
-from typing import Iterable, Optional, Tuple
+from collections.abc import Iterable
+from typing import Optional
 
 
 def translate_glob_to_regex(pattern: Optional[str]) -> Optional[re.Pattern]:
@@ -48,7 +49,7 @@ def match_pattern(pattern: Optional[re.Pattern], line: Optional[str]) -> bool:
     return pattern.fullmatch(line) is not None
 
 
-def replace_patterns(text: str, patterns: Iterable[Tuple[re.Pattern, str]]) -> str:
+def replace_patterns(text: str, patterns: Iterable[tuple[re.Pattern, str]]) -> str:
     """Replace given patterns in the text."""
     result = text
     for p, repl in patterns:

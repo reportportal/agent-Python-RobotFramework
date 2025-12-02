@@ -17,7 +17,8 @@
 import os
 import re
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, List, Optional, Union
+from collections.abc import Callable
+from typing import Any, Optional, Union
 
 from reportportal_client.helpers import gen_attributes
 
@@ -36,7 +37,7 @@ class Entity:
     remove_origin: Optional[Any]
     rp_item_id: Optional[str]
     parent: Optional["Entity"]
-    skipped_keywords: List["Keyword"]
+    skipped_keywords: list["Keyword"]
     posted: bool
 
     def __init__(self, entity_type: str, parent: Optional["Entity"]):
@@ -64,7 +65,7 @@ class Entity:
 class LogMessage(str):
     """Class represents Robot Framework messages."""
 
-    attachment: Optional[Dict[str, str]]
+    attachment: Optional[dict[str, str]]
     launch_log: bool
     item_id: Optional[str]
     level: str
@@ -84,9 +85,9 @@ class LogMessage(str):
 class Keyword(Entity):
     """Class represents Robot Framework keyword."""
 
-    robot_attributes: Dict[str, Any]
-    args: List[str]
-    assign: List[str]
+    robot_attributes: dict[str, Any]
+    args: list[str]
+    assign: list[str]
     doc: str
     end_time: str
     keyword_name: str
@@ -95,11 +96,11 @@ class Keyword(Entity):
     name: str
     start_time: str
     status: str
-    tags: List[str]
+    tags: list[str]
     type: str = "KEYWORD"
-    skipped_logs: List[LogMessage]
+    skipped_logs: list[LogMessage]
 
-    def __init__(self, name: str, robot_attributes: Dict[str, Any], parent: Entity):
+    def __init__(self, name: str, robot_attributes: dict[str, Any], parent: Entity):
         """Initialize required attributes.
 
         :param name:              Name of the keyword
@@ -142,7 +143,7 @@ class Keyword(Entity):
         else:
             return "STEP"
 
-    def update(self, attributes: Dict[str, Any]) -> "Keyword":
+    def update(self, attributes: dict[str, Any]) -> "Keyword":
         """Update keyword attributes on keyword finish.
 
         :param attributes: Suite attributes passed through the listener
@@ -155,22 +156,22 @@ class Keyword(Entity):
 class Suite(Entity):
     """Class represents Robot Framework test suite."""
 
-    robot_attributes: Union[List[str], Dict[str, Any]]
+    robot_attributes: Union[list[str], dict[str, Any]]
     doc: str
     end_time: str
     longname: str
     message: str
-    metadata: Dict[str, str]
+    metadata: dict[str, str]
     name: str
     robot_id: str
     start_time: Optional[str]
     statistics: str
     status: str
-    suites: List[str]
-    tests: List[str]
+    suites: list[str]
+    tests: list[str]
     total_tests: int
 
-    def __init__(self, name: str, robot_attributes: Dict[str, Any], parent: Optional[Entity] = None):
+    def __init__(self, name: str, robot_attributes: dict[str, Any], parent: Optional[Entity] = None):
         """Initialize required attributes.
 
         :param name:       Suite name
@@ -194,7 +195,7 @@ class Suite(Entity):
         self.total_tests = robot_attributes["totaltests"]
 
     @property
-    def attributes(self) -> Optional[List[Dict[str, str]]]:
+    def attributes(self) -> Optional[list[dict[str, str]]]:
         """Get Suite attributes."""
         if self.metadata is None or not self.metadata:
             return None
@@ -206,7 +207,7 @@ class Suite(Entity):
         if self.robot_attributes.get("source") is not None:
             return os.path.relpath(self.robot_attributes["source"], os.getcwd())
 
-    def update(self, attributes: Dict[str, Any]) -> "Suite":
+    def update(self, attributes: dict[str, Any]) -> "Suite":
         """Update suite attributes on suite finish.
 
         :param attributes: Suite attributes passed through the listener
@@ -221,10 +222,10 @@ class Suite(Entity):
 class Launch(Suite):
     """Class represents Robot Framework test suite."""
 
-    launch_attributes: Optional[List[Dict[str, str]]]
+    launch_attributes: Optional[list[dict[str, str]]]
     type: str = "LAUNCH"
 
-    def __init__(self, name: str, robot_attributes: Dict[str, Any], launch_attributes: Optional[List[str]]):
+    def __init__(self, name: str, robot_attributes: dict[str, Any], launch_attributes: Optional[list[str]]):
         """Initialize required attributes.
 
         :param name:       Launch name
@@ -236,7 +237,7 @@ class Launch(Suite):
         self.type = "LAUNCH"
 
     @property
-    def attributes(self) -> Optional[List[Dict[str, str]]]:
+    def attributes(self) -> Optional[list[dict[str, str]]]:
         """Get Launch attributes."""
         return self.launch_attributes
 
@@ -245,9 +246,9 @@ class Test(Entity):
     """Class represents Robot Framework test case."""
 
     _critical: str
-    _tags: List[str]
-    robot_attributes: Dict[str, Any]
-    test_attributes: Optional[List[Dict[str, str]]]
+    _tags: list[str]
+    robot_attributes: dict[str, Any]
+    test_attributes: Optional[list[dict[str, str]]]
     doc: str
     end_time: str
     longname: str
@@ -258,7 +259,7 @@ class Test(Entity):
     status: str
     template: str
 
-    def __init__(self, name: str, robot_attributes: Dict[str, Any], test_attributes: List[str], parent: Entity):
+    def __init__(self, name: str, robot_attributes: dict[str, Any], test_attributes: list[str], parent: Entity):
         """Initialize required attributes.
 
         :param name:             Name of the test
@@ -287,12 +288,12 @@ class Test(Entity):
         return self._critical in ("yes", True)
 
     @property
-    def tags(self) -> List[str]:
+    def tags(self) -> list[str]:
         """Get list of test tags excluding test_case_id."""
         return [tag for tag in self._tags if not tag.startswith(TEST_CASE_ID_SIGN)]
 
     @property
-    def attributes(self) -> Optional[List[Dict[str, str]]]:
+    def attributes(self) -> Optional[list[dict[str, str]]]:
         """Get Test attributes."""
         return self.test_attributes + gen_attributes(self.tags)
 
@@ -323,7 +324,7 @@ class Test(Entity):
         # generate it if not
         return "{0}:{1}".format(self.source, self.name)
 
-    def update(self, attributes: Dict[str, Any]) -> "Test":
+    def update(self, attributes: dict[str, Any]) -> "Test":
         """Update test attributes on test finish.
 
         :param attributes: Suite attributes passed through the listener

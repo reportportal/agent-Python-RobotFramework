@@ -22,7 +22,7 @@ from datetime import datetime, timedelta, timezone
 if sys.version_info >= (3, 9):
     from zoneinfo import available_timezones, ZoneInfo
 
-from typing import Optional, Pattern, Tuple
+from typing import Optional
 from urllib.parse import unquote
 
 from robot.result import Keyword, Message, Result, ResultVisitor, TestCase, TestSuite
@@ -62,7 +62,7 @@ def to_timestamp(time_str: str) -> Optional[str]:
 class RobotResultsVisitor(ResultVisitor):
     """Visitor for Robot Framework result XML report."""
 
-    _link_pattern: Pattern = re.compile("src=[\"']([^\"']+)[\"']")
+    _link_pattern: re.Pattern = re.compile("src=[\"']([^\"']+)[\"']")
 
     def start_result(self, result: Result) -> bool:
         """Start result."""
@@ -203,7 +203,7 @@ class RobotResultsVisitor(ResultVisitor):
                     return False
         return True
 
-    def split_message_and_image(self, msg: str) -> Tuple[str, str]:
+    def split_message_and_image(self, msg: str) -> tuple[str, str]:
         """Split message and image."""
         m = self._link_pattern.search(msg)
         return m.group(), unquote(m.group(1))

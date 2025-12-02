@@ -14,7 +14,7 @@
 """This module contains model that stores Robot Framework variables."""
 
 from os import path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 from warnings import warn
 
 from reportportal_client import ClientType, OutputType
@@ -23,7 +23,7 @@ from reportportal_client.logs import MAX_LOG_BATCH_PAYLOAD_SIZE
 from robot.libraries.BuiltIn import BuiltIn, RobotNotRunningError
 
 # This is a storage for the result visitor
-_variables: Dict[str, Any] = {}
+_variables: dict[str, Any] = {}
 
 
 def get_variable(name: str, default: Optional[str] = None) -> Optional[str]:
@@ -63,7 +63,7 @@ class Variables:
     attach_log: bool
     attach_report: bool
     attach_xunit: bool
-    launch_attributes: List[str]
+    launch_attributes: list[str]
     launch_id: Optional[str]
     launch_doc: Optional[str]
     log_batch_size: Optional[int]
@@ -71,13 +71,13 @@ class Variables:
     pool_size: Optional[int]
     rerun: bool
     rerun_of: Optional[str]
-    test_attributes: List[str]
+    test_attributes: list[str]
     skipped_issue: bool
     log_batch_payload_limit: int
     launch_uuid_print: bool
     launch_uuid_print_output: Optional[OutputType]
     client_type: ClientType
-    http_timeout: Optional[Union[Tuple[float, float], float]]
+    http_timeout: Optional[Union[tuple[float, float], float]]
     remove_keywords: bool
     flatten_keywords: bool
     debug_mode: bool

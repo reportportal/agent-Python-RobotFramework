@@ -35,7 +35,7 @@ class MyLibrary(object):
             },
         )
 """
-from typing import Dict, Optional
+from typing import Optional
 
 from robot.api import logger
 
@@ -46,7 +46,7 @@ def write(
     msg: str,
     level: str = "INFO",
     html: bool = False,
-    attachment: Optional[Dict[str, str]] = None,
+    attachment: Optional[dict[str, str]] = None,
     launch_log: bool = False,
 ) -> None:
     """Write the message to the log file using the given level.
@@ -73,12 +73,12 @@ def write(
     logger.write(log_message, level, html)
 
 
-def trace(msg: str, html: bool = False, attachment: Optional[Dict[str, str]] = None, launch_log: bool = False) -> None:
+def trace(msg: str, html: bool = False, attachment: Optional[dict[str, str]] = None, launch_log: bool = False) -> None:
     """Write the message to the log file using the ``TRACE`` level."""
     write(msg, "TRACE", html, attachment, launch_log)
 
 
-def debug(msg: str, html: bool = False, attachment: Optional[Dict[str, str]] = None, launch_log: bool = False) -> None:
+def debug(msg: str, html: bool = False, attachment: Optional[dict[str, str]] = None, launch_log: bool = False) -> None:
     """Write the message to the log file using the ``DEBUG`` level."""
     write(msg, "DEBUG", html, attachment, launch_log)
 
@@ -87,7 +87,7 @@ def info(
     msg: str,
     html: bool = False,
     also_console: bool = False,
-    attachment: Optional[Dict[str, str]] = None,
+    attachment: Optional[dict[str, str]] = None,
     launch_log: bool = False,
 ):
     """Write the message to the log file using the ``INFO`` level.
@@ -99,12 +99,12 @@ def info(
         console(msg)
 
 
-def warn(msg: str, html: bool = False, attachment: Optional[Dict[str, str]] = None, launch_log: bool = False) -> None:
+def warn(msg: str, html: bool = False, attachment: Optional[dict[str, str]] = None, launch_log: bool = False) -> None:
     """Write the message to the log file using the ``WARN`` level."""
     write(msg, "WARN", html, attachment, launch_log)
 
 
-def error(msg: str, html: bool = False, attachment: Optional[Dict[str, str]] = None, launch_log: bool = False) -> None:
+def error(msg: str, html: bool = False, attachment: Optional[dict[str, str]] = None, launch_log: bool = False) -> None:
     """Write the message to the log file using the ``ERROR`` level."""
     write(msg, "ERROR", html, attachment, launch_log)
 
