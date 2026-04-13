@@ -1,4 +1,8 @@
 # Changelog
+### Changed
+- Client version updated to [5.7.4](https://github.com/reportportal/client-Python/releases/tag/5.7.4), by @HardNorth
+### Removed
+- `robotframework` dependency to avoid supply chain attack, by @HardNorth
 
 ## [Unreleased]
 ### Added
