@@ -7,6 +7,8 @@
 - `robotframework` dependency to avoid supply chain attack, by @HardNorth
 
 ## [Unreleased]
+
+## [5.7.0]
 ### Added
 - Official `Python 3.14` support, by @HardNorth
 ### Changed
