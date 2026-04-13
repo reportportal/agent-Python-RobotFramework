@@ -137,7 +137,7 @@ def test_launch_uuid_print(mock_client_init):
     assert int(result) == 0, "Exit code should be 0 (no errors)"
     assert mock_client_init.call_count == 1
     assert mock_client_init.call_args_list[0][1]["launch_uuid_print"] == print_uuid
-    assert mock_client_init.call_args_list[0][1]["print_output"] is None
+    assert mock_client_init.call_args_list[0][1]["print_output"] is OutputType.STDOUT
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
@@ -175,7 +175,7 @@ def test_no_launch_uuid_print(mock_client_init):
     assert int(result) == 0, "Exit code should be 0 (no errors)"
     assert mock_client_init.call_count == 1
     assert mock_client_init.call_args_list[0][1]["launch_uuid_print"] is False
-    assert mock_client_init.call_args_list[0][1]["print_output"] is None
+    assert mock_client_init.call_args_list[0][1]["print_output"] is OutputType.STDOUT
 
 
 @pytest.mark.parametrize(

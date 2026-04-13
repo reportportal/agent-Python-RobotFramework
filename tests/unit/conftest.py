@@ -37,7 +37,7 @@ def mock_variables():
     mock_variables.project = "default_personal"
     mock_variables.api_key = "test_api_key"
     mock_variables.launch_attributes = []
-    mock_variables.launch_id = None
+    mock_variables.launch_uuid = None
     mock_variables.launch_doc = None
     mock_variables.log_batch_size = 1
     mock_variables.mode = None

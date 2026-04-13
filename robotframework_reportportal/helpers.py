@@ -17,7 +17,13 @@
 import binascii
 import fnmatch
 import re
-from typing import Iterable, Optional, Tuple
+import sys
+from datetime import datetime, timedelta, timezone
+
+if sys.version_info >= (3, 9):
+    from zoneinfo import available_timezones, ZoneInfo
+from collections.abc import Iterable
+from typing import Optional
 
 
 def translate_glob_to_regex(pattern: Optional[str]) -> Optional[re.Pattern]:
@@ -48,7 +54,7 @@ def match_pattern(pattern: Optional[re.Pattern], line: Optional[str]) -> bool:
     return pattern.fullmatch(line) is not None
 
 
-def replace_patterns(text: str, patterns: Iterable[Tuple[re.Pattern, str]]) -> str:
+def replace_patterns(text: str, patterns: Iterable[tuple[re.Pattern, str]]) -> str:
     """Replace given patterns in the text."""
     result = text
     for p, repl in patterns:
@@ -105,3 +111,30 @@ def _unescape(binary_string: str, stop_at: int = -1):
         for bb in binascii.unhexlify("".join(join_list)):
             result.append(bb)
     return result
+
+
+if sys.version_info >= (3, 9):
+    AVAILABLE_TIMEZONES: set[str] = available_timezones()
+else:
+    AVAILABLE_TIMEZONES = set()
+
+LOCAL_TIMEZONE = datetime.now(timezone.utc).astimezone().tzinfo
+
+
+def to_timestamp(time_str: Optional[str], tz_offset: Optional[str]) -> Optional[datetime]:
+    """Convert time string to timestamp with given timezone offset."""
+    if not time_str:
+        return None
+
+    dt = datetime.strptime(time_str, "%Y%m%d %H:%M:%S.%f")
+    if tz_offset:
+        if tz_offset in AVAILABLE_TIMEZONES:
+            tz = ZoneInfo(tz_offset)
+            dt = dt.replace(tzinfo=tz)
+        else:
+            hours, minutes = map(int, tz_offset.split(":"))
+            offset = timedelta(hours=hours, minutes=minutes)
+            dt = dt.replace(tzinfo=timezone(offset))
+    else:
+        dt = dt.replace(tzinfo=LOCAL_TIMEZONE)  # make zone-aware
+    return dt.astimezone(tz=timezone.utc)  # unify Timezones to ease debugging

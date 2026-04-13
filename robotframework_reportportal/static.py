@@ -14,9 +14,7 @@
 
 """This module includes static variables of the agent."""
 
-from typing import Dict
-
-LOG_LEVEL_MAPPING: Dict[str, str] = {
+LOG_LEVEL_MAPPING: dict[str, str] = {
     "INFO": "INFO",
     "FAIL": "ERROR",
     "TRACE": "TRACE",
@@ -31,7 +29,7 @@ PABOT_WITHOUT_LAUNCH_ID_MSG: str = (
     "Pabot library is used but RP_LAUNCH_UUID was not provided. Please, "
     "initialize listener with the RP_LAUNCH_UUID argument."
 )
-STATUS_MAPPING: Dict[str, str] = {
+STATUS_MAPPING: dict[str, str] = {
     "PASS": "PASSED",
     "FAIL": "FAILED",
     "NOT RUN": "SKIPPED",
