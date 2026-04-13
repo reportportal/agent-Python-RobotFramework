@@ -1,6 +1,7 @@
 # Dev dependencies
-pytest
-pytest-cov
-robotframework-datadriver
-black
-isort
+robotframework==7.4.2
+pytest==9.0.3
+pytest-cov==7.1.0
+robotframework-datadriver==1.11.2
+black==26.3.1
+isort==8.0.1
