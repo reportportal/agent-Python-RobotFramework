@@ -15,11 +15,12 @@
 """This module is a Robot service for reporting results to ReportPortal."""
 
 import logging
+from datetime import datetime, timezone
 from typing import Optional
 
 from dateutil.parser import parse
 from reportportal_client import RP, create_client
-from reportportal_client.helpers import dict_to_payload, get_launch_sys_attrs, get_package_version, timestamp
+from reportportal_client.helpers import dict_to_payload, get_launch_sys_attrs, get_package_version
 
 from robotframework_reportportal.model import Keyword, Launch, LogMessage, Suite, Test
 from robotframework_reportportal.static import LOG_LEVEL_MAPPING, STATUS_MAPPING
@@ -30,7 +31,7 @@ logger = logging.getLogger(__name__)
 TOP_LEVEL_ITEMS = {"BEFORE_SUITE", "AFTER_SUITE"}
 
 
-def to_epoch(date: Optional[str]) -> Optional[str]:
+def to_epoch(date: Optional[str]) -> Optional[datetime]:
     """Convert Robot Framework timestamp to UTC timestamp."""
     if not date:
         return None
@@ -38,11 +39,7 @@ def to_epoch(date: Optional[str]) -> Optional[str]:
         parsed_date = parse(date)
     except ValueError:
         return None
-    if hasattr(parsed_date, "timestamp"):
-        epoch_time = parsed_date.timestamp()
-    else:
-        epoch_time = float(parsed_date.strftime("%s")) + parsed_date.microsecond / 1e6
-    return str(int(epoch_time * 1000))
+    return parsed_date
 
 
 class RobotService:
@@ -90,7 +87,7 @@ class RobotService:
                 verify_ssl=variables.verify_ssl,
                 max_pool_size=variables.pool_size,
                 log_batch_payload_limit=variables.log_batch_payload_limit,
-                launch_uuid=variables.launch_id,
+                launch_uuid=variables.launch_uuid,
                 launch_uuid_print=variables.launch_uuid_print,
                 print_output=variables.launch_uuid_print_output,
                 http_timeout=variables.http_timeout,
@@ -126,13 +123,13 @@ class RobotService:
         :return:         launch UUID
         """
         sl_pt = {
-            "attributes": self._get_launch_attributes(launch.attributes),
+            "attributes": self._get_launch_attributes(launch.attributes or []),
             "description": launch.doc,
             "name": launch.name,
             "mode": mode,
             "rerun": rerun,
             "rerun_of": rerun_of,
-            "start_time": ts or to_epoch(launch.start_time) or timestamp(),
+            "start_time": ts or to_epoch(launch.start_time) or datetime.now(tz=timezone.utc),
         }
         logger.debug("ReportPortal - Start launch: request_body={0}".format(sl_pt))
         try:
@@ -149,7 +146,10 @@ class RobotService:
         :param launch: Launch name
         :param ts:     End time
         """
-        fl_rq = {"end_time": ts or to_epoch(launch.end_time) or timestamp(), "status": STATUS_MAPPING[launch.status]}
+        fl_rq = {
+            "end_time": ts or to_epoch(launch.end_time) or datetime.now(tz=timezone.utc),
+            "status": STATUS_MAPPING[launch.status],
+        }
         logger.debug("ReportPortal - Finish launch: request_body={0}".format(fl_rq))
         try:
             self.rp.finish_launch(**fl_rq)
@@ -172,7 +172,7 @@ class RobotService:
             "item_type": suite.type,
             "name": suite.name,
             "parent_item_id": suite.rp_parent_item_id,
-            "start_time": ts or to_epoch(suite.start_time) or timestamp(),
+            "start_time": ts or to_epoch(suite.start_time) or datetime.now(tz=timezone.utc),
         }
         logger.debug("ReportPortal - Start suite: request_body={0}".format(start_rq))
         try:
@@ -191,7 +191,7 @@ class RobotService:
         :param ts:    End time
         """
         fta_rq = {
-            "end_time": ts or to_epoch(suite.end_time) or timestamp(),
+            "end_time": ts or to_epoch(suite.end_time) or datetime.now(tz=timezone.utc),
             "issue": issue,
             "item_id": suite.rp_item_id,
             "status": STATUS_MAPPING[suite.status],
@@ -221,7 +221,7 @@ class RobotService:
             "item_type": "STEP",
             "name": test.name,
             "parent_item_id": test.rp_parent_item_id,
-            "start_time": ts or to_epoch(test.start_time) or timestamp(),
+            "start_time": ts or to_epoch(test.start_time) or datetime.now(tz=timezone.utc),
             "test_case_id": test.test_case_id,
         }
         logger.debug("ReportPortal - Start test: request_body={0}".format(start_rq))
@@ -251,7 +251,7 @@ class RobotService:
                 description = message
         fta_rq = {
             "attributes": test.attributes,
-            "end_time": ts or to_epoch(test.end_time) or timestamp(),
+            "end_time": ts or to_epoch(test.end_time) or datetime.now(tz=timezone.utc),
             "issue": issue,
             "item_id": test.rp_item_id,
             "status": STATUS_MAPPING[test.status],
@@ -280,7 +280,7 @@ class RobotService:
             "item_type": keyword.get_type(),
             "name": keyword.get_name(),
             "parent_item_id": keyword.rp_parent_item_id,
-            "start_time": ts or to_epoch(keyword.start_time) or timestamp(),
+            "start_time": ts or to_epoch(keyword.start_time) or datetime.now(tz=timezone.utc),
         }
         if keyword.rp_item_id:
             start_rq["uuid"] = keyword.rp_item_id
@@ -301,7 +301,7 @@ class RobotService:
         :param ts:      End time
         """
         fta_rq = {
-            "end_time": ts or to_epoch(keyword.end_time) or timestamp(),
+            "end_time": ts or to_epoch(keyword.end_time) or datetime.now(tz=timezone.utc),
             "issue": issue,
             "item_id": keyword.rp_item_id,
             "status": STATUS_MAPPING[keyword.status],
@@ -326,7 +326,7 @@ class RobotService:
             "item_id": None if message.launch_log else message.item_id,
             "level": LOG_LEVEL_MAPPING.get(message.level, "INFO"),
             "message": message.message,
-            "time": ts or to_epoch(message.timestamp) or timestamp(),
+            "time": ts or to_epoch(message.timestamp) or datetime.now(tz=timezone.utc),
         }
         try:
             self.rp.log(**sl_rq)

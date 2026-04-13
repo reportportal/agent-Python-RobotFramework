@@ -34,7 +34,7 @@ def get_variable(name: str, default: Optional[str] = None) -> Optional[str]:
     :return:        The value of the variable, otherwise default value
     """
     try:
-        return BuiltIn().get_variable_value("${" + name + "}", default=default)
+        return str(BuiltIn().get_variable_value("${" + name + "}", default=default) or "") or default
     except RobotNotRunningError:
         return _variables.get(name, default)
 
@@ -64,7 +64,7 @@ class Variables:
     attach_report: bool
     attach_xunit: bool
     launch_attributes: list[str]
-    launch_id: Optional[str]
+    launch_uuid: Optional[str]
     launch_doc: Optional[str]
     log_batch_size: Optional[int]
     mode: Optional[str]
@@ -75,7 +75,7 @@ class Variables:
     skipped_issue: bool
     log_batch_payload_limit: int
     launch_uuid_print: bool
-    launch_uuid_print_output: Optional[OutputType]
+    launch_uuid_print_output: OutputType
     client_type: ClientType
     http_timeout: Optional[Union[tuple[float, float], float]]
     remove_keywords: bool
@@ -94,7 +94,7 @@ class Variables:
         self.attach_report = to_bool(get_variable("RP_ATTACH_REPORT", default="False"))
         self.attach_xunit = to_bool(get_variable("RP_ATTACH_XUNIT", default="False"))
         self.launch_attributes = get_variable("RP_LAUNCH_ATTRIBUTES", default="").split()
-        self.launch_id = get_variable("RP_LAUNCH_UUID")
+        self.launch_uuid = get_variable("RP_LAUNCH_UUID")
         self.launch_doc = get_variable("RP_LAUNCH_DOC")
         self.log_batch_size = int(get_variable("RP_LOG_BATCH_SIZE", default="20"))
         self.mode = get_variable("RP_MODE")
@@ -124,7 +124,7 @@ class Variables:
 
         self.launch_uuid_print = to_bool(get_variable("RP_LAUNCH_UUID_PRINT", default="False"))
         output_type = get_variable("RP_LAUNCH_UUID_PRINT_OUTPUT")
-        self.launch_uuid_print_output = OutputType[output_type.upper()] if output_type else None
+        self.launch_uuid_print_output = OutputType[output_type.upper()] if output_type else OutputType.STDOUT
         client_type = get_variable("RP_CLIENT_TYPE")
         self.client_type = ClientType[client_type.upper()] if client_type else ClientType.SYNC
         connect_timeout = get_variable("RP_CONNECT_TIMEOUT")

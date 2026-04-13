@@ -40,7 +40,7 @@ else:
     AVAILABLE_TIMEZONES = set()
 
 
-def to_timestamp(time_str: str) -> Optional[str]:
+def to_timestamp(time_str: str) -> Optional[datetime]:
     """Convert time string to timestamp with given timezone offset."""
     if not time_str:
         return None
@@ -56,7 +56,7 @@ def to_timestamp(time_str: str) -> Optional[str]:
             hours, minutes = map(int, timezone_offset_str.split(":"))
             offset = timedelta(hours=hours, minutes=minutes)
             dt = dt.replace(tzinfo=timezone(offset))
-    return str(int(dt.timestamp() * 1000))
+    return dt
 
 
 class RobotResultsVisitor(ResultVisitor):
