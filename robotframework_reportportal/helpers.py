@@ -136,5 +136,5 @@ def to_timestamp(time_str: Optional[str], tz_offset: Optional[str]) -> Optional[
             offset = timedelta(hours=hours, minutes=minutes)
             dt = dt.replace(tzinfo=timezone(offset))
     else:
-        dt = dt.replace(tzinfo=LOCAL_TIMEZONE)
-    return dt
+        dt = dt.replace(tzinfo=LOCAL_TIMEZONE)  # make zone-aware
+    return dt.astimezone(tz=timezone.utc)  # unify Timezones to ease debugging

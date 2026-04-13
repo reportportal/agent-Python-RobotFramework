@@ -138,6 +138,8 @@ class listener:
             msg = LogMessage(message["message"])
             msg.level = message["level"]
         current_item = self.current_item
+        if "timestamp" in message:
+            msg.timestamp = message["timestamp"]
         if current_item:
             msg.item_id = current_item.rp_item_id
 
