@@ -81,6 +81,7 @@ class Variables:
     remove_keywords: bool
     flatten_keywords: bool
     debug_mode: bool
+    timezone_offset: Optional[str]
 
     def __init__(self) -> None:
         """Initialize instance attributes."""
@@ -155,6 +156,8 @@ class Variables:
         self.oauth_scope = get_variable("RP_OAUTH_SCOPE")
 
         self.debug_mode = to_bool(get_variable("RP_DEBUG_MODE", default="False"))
+
+        self.timezone_offset = get_variable("RP_TIMEZONE_OFFSET")
 
         cond = (self.endpoint, self.launch_name, self.project)
         self.enabled = all(cond)

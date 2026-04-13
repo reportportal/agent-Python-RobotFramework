@@ -17,6 +17,11 @@
 import binascii
 import fnmatch
 import re
+import sys
+from datetime import datetime, timedelta, timezone
+
+if sys.version_info >= (3, 9):
+    from zoneinfo import available_timezones, ZoneInfo
 from collections.abc import Iterable
 from typing import Optional
 
@@ -106,3 +111,30 @@ def _unescape(binary_string: str, stop_at: int = -1):
         for bb in binascii.unhexlify("".join(join_list)):
             result.append(bb)
     return result
+
+
+if sys.version_info >= (3, 9):
+    AVAILABLE_TIMEZONES: set[str] = available_timezones()
+else:
+    AVAILABLE_TIMEZONES = set()
+
+LOCAL_TIMEZONE = datetime.now(timezone.utc).astimezone().tzinfo
+
+
+def to_timestamp(time_str: Optional[str], tz_offset: Optional[str]) -> Optional[datetime]:
+    """Convert time string to timestamp with given timezone offset."""
+    if not time_str:
+        return None
+
+    dt = datetime.strptime(time_str, "%Y%m%d %H:%M:%S.%f")
+    if tz_offset:
+        if tz_offset in AVAILABLE_TIMEZONES:
+            tz = ZoneInfo(tz_offset)
+            dt = dt.replace(tzinfo=tz)
+        else:
+            hours, minutes = map(int, tz_offset.split(":"))
+            offset = timedelta(hours=hours, minutes=minutes)
+            dt = dt.replace(tzinfo=timezone(offset))
+    else:
+        dt = dt.replace(tzinfo=LOCAL_TIMEZONE)
+    return dt

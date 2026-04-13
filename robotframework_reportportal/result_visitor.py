@@ -16,53 +16,26 @@
 
 import re
 import string
-import sys
-from datetime import datetime, timedelta, timezone
-
-if sys.version_info >= (3, 9):
-    from zoneinfo import available_timezones, ZoneInfo
-
 from typing import Optional
 from urllib.parse import unquote
 
 from robot.result import Keyword, Message, Result, ResultVisitor, TestCase, TestSuite
 
 from robotframework_reportportal import listener
+from robotframework_reportportal.helpers import to_timestamp
 from robotframework_reportportal.time_visitor import corrections
 
 # noinspection PyUnresolvedReferences
 from robotframework_reportportal.variables import _variables
 
+LINK_PATTERN: re.Pattern = re.compile("src=[\"']([^\"']+)[\"']")
+TIMEZONE_OFFSET_STR: Optional[str] = _variables.get("RP_TIME_ZONE_OFFSET", None)
+
 listener = listener.listener()
-if sys.version_info >= (3, 9):
-    AVAILABLE_TIMEZONES: set[str] = available_timezones()
-else:
-    AVAILABLE_TIMEZONES = set()
-
-
-def to_timestamp(time_str: str) -> Optional[datetime]:
-    """Convert time string to timestamp with given timezone offset."""
-    if not time_str:
-        return None
-
-    timezone_offset_str: Optional[str] = _variables.get("RP_TIME_ZONE_OFFSET", None)
-    dt = datetime.strptime(time_str, "%Y%m%d %H:%M:%S.%f")
-
-    if timezone_offset_str:
-        if timezone_offset_str in AVAILABLE_TIMEZONES:
-            tz = ZoneInfo(timezone_offset_str)
-            dt = dt.replace(tzinfo=tz)
-        else:
-            hours, minutes = map(int, timezone_offset_str.split(":"))
-            offset = timedelta(hours=hours, minutes=minutes)
-            dt = dt.replace(tzinfo=timezone(offset))
-    return dt
 
 
 class RobotResultsVisitor(ResultVisitor):
     """Visitor for Robot Framework result XML report."""
-
-    _link_pattern: re.Pattern = re.compile("src=[\"']([^\"']+)[\"']")
 
     def start_result(self, result: Result) -> bool:
         """Start result."""
@@ -74,7 +47,9 @@ class RobotResultsVisitor(ResultVisitor):
 
     def start_suite(self, suite: TestSuite) -> bool:
         """Start suite."""
-        ts = to_timestamp(suite.starttime if suite.id not in corrections else corrections[suite.id][0])
+        ts = to_timestamp(
+            suite.starttime if suite.id not in corrections else corrections[suite.id][0], TIMEZONE_OFFSET_STR
+        )
         attrs = {
             "id": suite.id,
             "longname": suite.longname,
@@ -91,7 +66,9 @@ class RobotResultsVisitor(ResultVisitor):
 
     def end_suite(self, suite: TestSuite) -> None:
         """End suite."""
-        ts = to_timestamp(suite.endtime if suite.id not in corrections else corrections[suite.id][1])
+        ts = to_timestamp(
+            suite.endtime if suite.id not in corrections else corrections[suite.id][1], TIMEZONE_OFFSET_STR
+        )
         attrs = {
             "id": suite.id,
             "longname": suite.longname,
@@ -111,7 +88,9 @@ class RobotResultsVisitor(ResultVisitor):
 
     def start_test(self, test: TestCase) -> bool:
         """Start test."""
-        ts = to_timestamp(test.starttime if test.id not in corrections else corrections[test.id][0])
+        ts = to_timestamp(
+            test.starttime if test.id not in corrections else corrections[test.id][0], TIMEZONE_OFFSET_STR
+        )
         attrs = {
             "id": test.id,
             "longname": test.longname,
@@ -131,7 +110,7 @@ class RobotResultsVisitor(ResultVisitor):
 
     def end_test(self, test: TestCase) -> None:
         """End test."""
-        ts = to_timestamp(test.endtime if test.id not in corrections else corrections[test.id][1])
+        ts = to_timestamp(test.endtime if test.id not in corrections else corrections[test.id][1], TIMEZONE_OFFSET_STR)
         attrs = {
             "id": test.id,
             "longname": test.longname,
@@ -153,7 +132,7 @@ class RobotResultsVisitor(ResultVisitor):
 
     def start_keyword(self, kw: Keyword) -> bool:
         """Start keyword."""
-        ts = to_timestamp(kw.starttime if kw.id not in corrections else corrections[kw.id][0])
+        ts = to_timestamp(kw.starttime if kw.id not in corrections else corrections[kw.id][0], TIMEZONE_OFFSET_STR)
         attrs = {
             "type": string.capwords(kw.type),
             "kwname": kw.kwname,
@@ -169,7 +148,7 @@ class RobotResultsVisitor(ResultVisitor):
 
     def end_keyword(self, kw: Keyword) -> None:
         """End keyword."""
-        ts = to_timestamp(kw.endtime if kw.id not in corrections else corrections[kw.id][1])
+        ts = to_timestamp(kw.endtime if kw.id not in corrections else corrections[kw.id][1], TIMEZONE_OFFSET_STR)
         attrs = {
             "type": string.capwords(kw.type),
             "kwname": kw.kwname,
@@ -205,5 +184,5 @@ class RobotResultsVisitor(ResultVisitor):
 
     def split_message_and_image(self, msg: str) -> tuple[str, str]:
         """Split message and image."""
-        m = self._link_pattern.search(msg)
+        m = LINK_PATTERN.search(msg)
         return m.group(), unquote(m.group(1))
