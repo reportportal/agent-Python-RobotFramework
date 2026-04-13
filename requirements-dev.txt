@@ -1,6 +1,6 @@
 # Dev dependencies
 robotframework==7.4.2
-pytest==9.0.3
+pytest==8.4.2
 pytest-cov==7.1.0
 robotframework-datadriver==1.11.2
 black==26.3.1
