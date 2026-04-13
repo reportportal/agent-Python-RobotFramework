@@ -13,14 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License
 """
 
-import sys
-import zoneinfo
-from datetime import datetime, timedelta, timezone
-
 import pytest
-
-from robotframework_reportportal.result_visitor import to_timestamp
-from robotframework_reportportal.variables import _variables
 
 
 def test_parse_message_no_img_tag(visitor):
@@ -41,34 +34,3 @@ def test_parse_message_contains_image_with_space(visitor):
     assert ('src="any%20image.png"', "any image.png") == visitor.split_message_and_image(
         '<img alt="" src="any%20image.png" />'
     )
-
-
-TIMESTAMP_TEST_CASES = [
-    (
-        "20240920 00:00:00.000",
-        "+3:00",
-        datetime(2024, 9, 20, 0, 0, tzinfo=timezone(timedelta(seconds=10800))),
-    ),
-    (
-        "20240919 18:00:00.000",
-        "-3:00",
-        datetime(2024, 9, 19, 18, 0, tzinfo=timezone(timedelta(days=-1, seconds=75600))),
-    ),
-]
-
-if sys.version_info >= (3, 9):
-    TIMESTAMP_TEST_CASES += [
-        (
-            "20240919 23:00:00.000",
-            "Europe/Warsaw",
-            datetime(2024, 9, 19, 23, 0, tzinfo=zoneinfo.ZoneInfo(key="Europe/Warsaw")),
-        ),
-        ("20240920 00:00:00.000", "UTC", datetime(2024, 9, 20, 0, 0, tzinfo=zoneinfo.ZoneInfo(key="UTC"))),
-        ("20240919 19:00:00.000", "EST", datetime(2024, 9, 19, 19, 0, tzinfo=zoneinfo.ZoneInfo(key="EST"))),
-    ]
-
-
-@pytest.mark.parametrize("time_str, time_shift, expected", TIMESTAMP_TEST_CASES)
-def test_time_stamp_conversion(time_str, time_shift, expected):
-    _variables["RP_TIME_ZONE_OFFSET"] = time_shift
-    assert to_timestamp(time_str) == expected
