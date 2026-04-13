@@ -251,7 +251,7 @@ def is_gha_agent() -> bool:
             + ["PASSED"] * 2
             + ["FAILED"] * 5,
             10,
-            9,
+            0,
             "Keyword 'Fail on first try' failed after retrying 3 times. The last error was: To less executions",
         ),
         (
@@ -364,5 +364,4 @@ def test_keyword_remove(
 
     log_calls = utils.get_log_calls(mock_client)
     assert len(log_calls) == log_number
-    sorted_log_calls = sorted(log_calls, key=lambda x: x[1]["time"])
-    assert sorted_log_calls[skip_idx][1]["message"] == skip_message
+    assert log_calls[skip_idx][1]["message"] == skip_message

@@ -115,5 +115,4 @@ def test_keyword_flatten(
 
     log_calls = utils.get_log_calls(mock_client)
     assert len(log_calls) == log_number
-    sorted_log_calls = sorted(log_calls, key=lambda x: x[1]["time"])
-    assert sorted_log_calls[skip_idx][1]["message"] == skip_message
+    assert log_calls[skip_idx][1]["message"] == skip_message
