@@ -1,2 +1,2 @@
 # Basic dependencies
-reportportal-client==5.7.4
+reportportal-client==5.7.6
