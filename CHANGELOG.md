@@ -1,18 +1,16 @@
 # Changelog
-### Added
-- Microseconds precision for timestamps, by @HardNorth
-### Changed
-- Client version updated to [5.7.4](https://github.com/reportportal/client-Python/releases/tag/5.7.4), by @HardNorth
-### Removed
-- `robotframework` dependency to avoid supply chain attack, by @HardNorth
-
 ## [Unreleased]
+### Changed
+- Client version updated to [5.7.6](https://github.com/reportportal/client-Python/releases/tag/5.7.6), by @HardNorth
+
+## [5.7.0]
 ### Added
 - Official `Python 3.14` support, by @HardNorth
 ### Changed
-- Client version updated on [5.7.0](https://github.com/reportportal/client-Python/releases/tag/5.7.0), by @HardNorth
+- Client version updated to [5.7.4](https://github.com/reportportal/client-Python/releases/tag/5.7.4), by @HardNorth
 ### Removed
 - `Python 3.8` support, by @HardNorth
+- `robotframework` dependency to avoid supply chain attack, by @HardNorth
 
 ## [5.6.5]
 ### Added
