@@ -23,7 +23,7 @@ from datetime import datetime, timedelta, timezone
 if sys.version_info >= (3, 9):
     from zoneinfo import available_timezones, ZoneInfo
 from collections.abc import Iterable
-from typing import Optional
+from typing import Optional, Union
 
 
 def translate_glob_to_regex(pattern: Optional[str]) -> Optional[re.Pattern]:
@@ -121,7 +121,7 @@ else:
 LOCAL_TIMEZONE = datetime.now(timezone.utc).astimezone().tzinfo
 
 
-def to_timestamp(time_str, tz_offset: Optional[str]) -> Optional[datetime]:
+def to_timestamp(time_str: Union[str, datetime, None], tz_offset: Optional[str]) -> Optional[datetime]:
     """Convert time string or datetime to timestamp with given timezone offset."""
     if not time_str:
         return None
