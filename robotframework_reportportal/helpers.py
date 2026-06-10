@@ -23,7 +23,7 @@ from datetime import datetime, timedelta, timezone
 if sys.version_info >= (3, 9):
     from zoneinfo import available_timezones, ZoneInfo
 from collections.abc import Iterable
-from typing import Optional
+from typing import Optional, Union
 
 
 def translate_glob_to_regex(pattern: Optional[str]) -> Optional[re.Pattern]:
@@ -121,20 +121,24 @@ else:
 LOCAL_TIMEZONE = datetime.now(timezone.utc).astimezone().tzinfo
 
 
-def to_timestamp(time_str: Optional[str], tz_offset: Optional[str]) -> Optional[datetime]:
-    """Convert time string to timestamp with given timezone offset."""
+def to_timestamp(time_str: Union[str, datetime, None], tz_offset: Optional[str]) -> Optional[datetime]:
+    """Convert time string or datetime to timestamp with given timezone offset."""
     if not time_str:
         return None
 
-    dt = datetime.strptime(time_str, "%Y%m%d %H:%M:%S.%f")
-    if tz_offset:
-        if tz_offset in AVAILABLE_TIMEZONES:
-            tz = ZoneInfo(tz_offset)
-            dt = dt.replace(tzinfo=tz)
-        else:
-            hours, minutes = map(int, tz_offset.split(":"))
-            offset = timedelta(hours=hours, minutes=minutes)
-            dt = dt.replace(tzinfo=timezone(offset))
+    if isinstance(time_str, datetime):
+        dt = time_str
     else:
-        dt = dt.replace(tzinfo=LOCAL_TIMEZONE)  # make zone-aware
+        dt = datetime.strptime(time_str, "%Y%m%d %H:%M:%S.%f")
+    if dt.tzinfo is None:
+        if tz_offset:
+            if tz_offset in AVAILABLE_TIMEZONES:
+                tz = ZoneInfo(tz_offset)
+                dt = dt.replace(tzinfo=tz)
+            else:
+                hours, minutes = map(int, tz_offset.split(":"))
+                offset = timedelta(hours=hours, minutes=minutes)
+                dt = dt.replace(tzinfo=timezone(offset))
+        else:
+            dt = dt.replace(tzinfo=LOCAL_TIMEZONE)  # make zone-aware
     return dt.astimezone(tz=timezone.utc)  # unify Timezones to ease debugging
