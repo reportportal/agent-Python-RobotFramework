@@ -1,5 +1,7 @@
 # Changelog
 ## [Unreleased]
+### Fixed
+- Inconsistent `code_ref` and `test_case_id` on Windows: source paths now always use `/`, by @jannek76
 
 ## [5.7.1]
 ### Changed
