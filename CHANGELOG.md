@@ -1,5 +1,7 @@
 # Changelog
 ## [Unreleased]
+
+## [5.7.2]
 ### Fixed
 - Inconsistent `code_ref` and `test_case_id` on Windows: source paths now always use `/`, by @jannek76
 - Timestamp conversion for newer version of Robot Framework (which provides `datetime` instead of `str`), by @MarvKler
