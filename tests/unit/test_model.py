@@ -16,7 +16,8 @@ from unittest import mock
 
 import pytest
 
-from robotframework_reportportal.model import Keyword
+from robotframework_reportportal.model import Keyword, Suite
+from robotframework_reportportal.model import Test as RobotTest
 
 
 @pytest.mark.parametrize(
@@ -35,3 +36,15 @@ def test_keyword_get_type(kwd_attributes, self_type, parent_type, expected):
     kwd = Keyword(name="Test keyword", robot_attributes=kwd_attributes, parent=parent)
     kwd.keyword_type = self_type
     assert kwd.get_type() == expected
+
+
+@mock.patch("robotframework_reportportal.model.os.path.relpath", return_value="robot\\test.robot")
+@mock.patch("robotframework_reportportal.model.os.sep", "\\")
+def test_source_uses_forward_slashes_on_windows(_, suite_attributes, test_attributes):
+    """Test that Windows source paths are normalized to forward slashes."""
+    suite = Suite(name="Suite", robot_attributes=suite_attributes)
+    test = RobotTest(name="Test", robot_attributes=test_attributes, test_attributes=[], parent=suite)
+    assert suite.source == "robot/test.robot"
+    assert test.source == "robot/test.robot"
+    assert test.code_ref == "robot/test.robot:Test"
+    assert test.test_case_id == "robot/test.robot:Test"

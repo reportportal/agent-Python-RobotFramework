@@ -1,5 +1,12 @@
 # Changelog
 ## [Unreleased]
+### Fixed
+- Inconsistent `code_ref` and `test_case_id` on Windows: source paths now always use `/`, by @jannek76
+- Timestamp conversion for newer version of Robot Framework (which provides `datetime` instead of `str`), by @MarvKler
+### Changed
+- Client version updated to [5.7.10](https://github.com/reportportal/client-Python/releases/tag/5.7.10), by @jannek76
+
+## [5.7.1]
 ### Changed
 - Client version updated to [5.7.6](https://github.com/reportportal/client-Python/releases/tag/5.7.6), by @HardNorth
 
