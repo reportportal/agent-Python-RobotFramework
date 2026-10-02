@@ -205,7 +205,7 @@ class Suite(Entity):
     def source(self) -> str:
         """Return the test case source file path."""
         if self.robot_attributes.get("source") is not None:
-            return os.path.relpath(self.robot_attributes["source"], os.getcwd())
+            return os.path.relpath(self.robot_attributes["source"], os.getcwd()).replace(os.sep, "/")
 
     def update(self, attributes: dict[str, Any]) -> "Suite":
         """Update suite attributes on suite finish.
@@ -301,7 +301,7 @@ class Test(Entity):
     def source(self) -> str:
         """Return the test case source file path."""
         if self.robot_attributes["source"] is not None:
-            return os.path.relpath(self.robot_attributes["source"], os.getcwd())
+            return os.path.relpath(self.robot_attributes["source"], os.getcwd()).replace(os.sep, "/")
 
     @property
     def code_ref(self) -> str:

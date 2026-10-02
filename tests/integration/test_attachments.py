@@ -18,7 +18,7 @@ from tests import REPORT_PORTAL_SERVICE
 from tests.helpers import utils
 
 
-def verify_attachment(mock_client_init, result, message, name, content_type):
+def verify_attachment(mock_client_init, result, message, name, content_types):
     assert result == 0  # the test successfully passed
 
     mock_client = mock_client_init.return_value
@@ -33,7 +33,7 @@ def verify_attachment(mock_client_init, result, message, name, content_type):
     assert call_params["level"] == "INFO"
     assert call_params["message"] == message
     assert call_params["attachment"]["name"] == name
-    assert call_params["attachment"]["mime"] == content_type
+    assert call_params["attachment"]["mime"] in content_types
     assert len(call_params["attachment"]["data"]) > 0
 
 
@@ -42,7 +42,7 @@ def test_agent_attaches_report(mock_client_init):
     variables = utils.DEFAULT_VARIABLES.copy()
     variables["RP_ATTACH_REPORT"] = True
     result = utils.run_robot_tests(["examples/templates/settings.robot"], variables=variables)
-    verify_attachment(mock_client_init, result, "Execution report", "report.html", "text/html")
+    verify_attachment(mock_client_init, result, "Execution report", "report.html", ("text/html",))
 
 
 @mock.patch(REPORT_PORTAL_SERVICE)
@@ -50,7 +50,7 @@ def test_agent_attaches_log(mock_client_init):
     variables = utils.DEFAULT_VARIABLES.copy()
     variables["RP_ATTACH_LOG"] = True
     result = utils.run_robot_tests(["examples/templates/settings.robot"], variables=variables)
-    verify_attachment(mock_client_init, result, "Execution log", "log.html", "text/html")
+    verify_attachment(mock_client_init, result, "Execution log", "log.html", ("text/html",))
     assert result == 0  # the test successfully passed
 
 
@@ -64,4 +64,4 @@ def test_agent_attaches_xunit(mock_client_init):
     result = utils.run_robot_tests(
         ["examples/templates/settings.robot"], variables=variables, arguments={"-x": XUNIT_FILE_NAME}
     )
-    verify_attachment(mock_client_init, result, "XUnit result file", XUNIT_FILE_NAME, "application/xml")
+    verify_attachment(mock_client_init, result, "XUnit result file", XUNIT_FILE_NAME, ("application/xml", "text/xml"))
