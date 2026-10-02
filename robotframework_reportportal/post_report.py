@@ -93,8 +93,9 @@ def main():
 
     try:
         process(*values)
-    except TypeError:
-        print(__doc__)
+    except TypeError as e:
+        print(f"TypeError: {e}")
+        print("INFO: Visit the help (--help) for further details about available CLI arguments!")
         sys.exit(1)
     sys.exit(0)
 
