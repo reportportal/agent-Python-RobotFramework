@@ -54,6 +54,7 @@ setup(
         "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: 3.13",
         "Programming Language :: Python :: 3.14",
+        "Programming Language :: Python :: 3.15",
     ],
     install_requires=read_file("requirements.txt").splitlines(),
     entry_points={"console_scripts": ["post_report=robotframework_reportportal.post_report:main"]},
